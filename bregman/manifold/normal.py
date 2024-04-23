@@ -102,23 +102,42 @@ class Gaussian1DManifold(Manifold):
     def __init__(self):
         F_gen = Gaussian1DPrimalGenerator()
         G_gen = Gaussian1DDualGenerator()
+        bregman = Bregman(F_gen, G_gen)
 
-        self.bregman = Bregman(F_gen, G_gen)
+        super().__init__(bregman, 2)
 
-    def coord_to_natural(self, x: np.ndarray) -> np.ndarray:
-        mu = x[0]
-        var = x[1]
+    def _coord_to_natural(self, lamb: np.ndarray) -> np.ndarray:
+        mu = lamb[0]
+        var = lamb[1]
 
         theta1 = mu / var
         theta2 = 0.5 / var
 
         return np.array([theta1, theta2])
 
-    def coord_to_moment(self, x: np.ndarray) -> np.ndarray:
-        mu = x[0]
-        var = x[1]
+    def _coord_to_moment(self, lamb: np.ndarray) -> np.ndarray:
+        mu = lamb[0]
+        var = lamb[1]
 
         eta1 = mu
         eta2 = -var - np.power(mu, 2)
 
         return np.array([eta1, eta2])
+
+    def _natural_to_coord(self, theta: np.ndarray) -> np.ndarray:
+        theta1 = theta[0]
+        theta2 = theta[1]
+
+        mu = 0.5 * theta1 / theta2
+        var = 0.5 / theta2
+
+        return np.array([mu, var])
+
+    def _moment_to_coord(self, eta: np.ndarray) -> np.ndarray:
+        eta1 = eta[0]
+        eta2 = eta[1]
+
+        mu = eta1
+        var = -eta2 - np.power(eta1, 2)
+
+        return np.array([mu, var])
