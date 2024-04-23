@@ -44,6 +44,8 @@ class Geodesic(BregObject):
 class Manifold(ABC):
 
     def __init__(self, bregman: Bregman, dimension: int) -> None:
+        super().__init__()
+
         self.bregman = bregman
         self.dimension = dimension
 
