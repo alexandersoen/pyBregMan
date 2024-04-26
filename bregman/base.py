@@ -1,20 +1,21 @@
 from dataclasses import dataclass
-from enum import Enum, auto
+from typing import Callable
 
 import numpy as np
 
+CoordChange = Callable[[np.ndarray], np.ndarray]
 
-class CoordType(Enum):
-    LAMBDA = auto()
-    NATURAL = auto()
-    MOMENT = auto()
+
+@dataclass(frozen=True)
+class Coordinates:
+    coords_name: str
 
 
 @dataclass
 class BregObject:
-    ctype: CoordType
+    coords: Coordinates
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Point(BregObject):
-    coord: np.ndarray
+    data: np.ndarray

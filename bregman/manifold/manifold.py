@@ -1,25 +1,28 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
 import numpy as np
 
-from bregman.base import BregObject, CoordType, Point
+from bregman.base import BregObject, Coordinates, Point
 from bregman.generator.generator import Bregman, Generator
-from bregman.manifold.coords import CoordTransformer
+from bregman.manifold.coordinate import Atlas
+
+NATURAL_COORDS = Coordinates("natural")
+MOMENT_COORDS = Coordinates("moment")
 
 
 class Geodesic(BregObject):
 
     def __init__(
         self,
-        ctype: CoordType,
+        coord: Coordinates,
         F: Generator,
         source: Point,
         dest: Point,
     ) -> None:
 
-        assert source.ctype == dest.ctype == ctype
+        assert source.coords == dest.coords == coord
 
-        super().__init__(ctype)
+        super().__init__(coord)
 
         self.F = F
         self.source = source
@@ -29,90 +32,74 @@ class Geodesic(BregObject):
         # As flat in its own coordinate
         assert 0 <= t <= 1
         return Point(
-            ctype=self.ctype,
-            coord=(1 - t) * self.source.coord + t * self.dest.coord,
+            coords=self.coords,
+            data=(1 - t) * self.source.data + t * self.dest.data,
         )
 
     def __call__(self, t: float) -> Point:
         return self.path(t)
 
-    def tangent(self, t: float) -> np.ndarray:
-        delta = self.dest.coord - self.source.coord
-        return delta / np.linalg.norm(delta)
 
+class BregmanManifold(ABC):
 
-class Manifold(ABC):
-
-    def __init__(self, bregman: Bregman, dimension: int) -> None:
+    def __init__(
+        self,
+        natural_generator: Generator,
+        expected_generator: Generator,
+        dimension: int,
+    ) -> None:
         super().__init__()
 
-        self.bregman = bregman
+        self.bregman = Bregman(natural_generator, expected_generator)
         self.dimension = dimension
 
-        self.coord_transformer = CoordTransformer(
-            self._coord_to_natural,
-            self._coord_to_moment,
-            self._natural_to_moment,
-            self._moment_to_natural,
-            self._natural_to_coord,
-            self._moment_to_coord,
+        self.atlas = Atlas(dimension)
+        self.atlas.add_coords(NATURAL_COORDS)
+        self.atlas.add_coords(MOMENT_COORDS)
+        self.atlas.add_transition(
+            NATURAL_COORDS, MOMENT_COORDS, self._natural_to_moment
+        )
+        self.atlas.add_transition(
+            MOMENT_COORDS, NATURAL_COORDS, self._moment_to_natural
         )
 
-    @abstractmethod
-    def _coord_to_natural(self, lamb: np.ndarray) -> np.ndarray:
-        pass
+    def convert_coord(self, target_coords: Coordinates, point: Point) -> Point:
+        return self.atlas(target_coords, point)
 
-    @abstractmethod
-    def _coord_to_moment(self, lamb: np.ndarray) -> np.ndarray:
-        pass
+    def natural_geodesic(
+        self,
+        point_1: Point,
+        point_2: Point,
+    ) -> Geodesic:
+        theta_1 = self.convert_coord(
+            NATURAL_COORDS,
+            point_1,
+        )
+        theta_2 = self.convert_coord(
+            NATURAL_COORDS,
+            point_2,
+        )
+        return Geodesic(
+            NATURAL_COORDS, self.bregman.F_generator, theta_1, theta_2
+        )
+
+    def moment_geodesic(
+        self,
+        point_1: Point,
+        point_2: Point,
+    ) -> Geodesic:
+        eta_1 = self.convert_coord(
+            MOMENT_COORDS,
+            point_1,
+        )
+        eta_2 = self.convert_coord(
+            MOMENT_COORDS,
+            point_2,
+        )
+        return Geodesic(MOMENT_COORDS, self.bregman.G_generator, eta_1, eta_2)
 
     def _natural_to_moment(self, theta: np.ndarray) -> np.ndarray:
         return self.bregman.F_generator.grad(theta)
 
     def _moment_to_natural(self, eta: np.ndarray) -> np.ndarray:
         return self.bregman.G_generator.grad(eta)
-
-    @abstractmethod
-    def _natural_to_coord(self, theta: np.ndarray) -> np.ndarray:
-        pass
-
-    @abstractmethod
-    def _moment_to_coord(self, eta: np.ndarray) -> np.ndarray:
-        pass
-
-    def transform_coord(self, ctype: CoordType, p: Point) -> Point:
-        return self.coord_transformer(ctype, p)
-
-    def primal_geodesic(
-        self,
-        point_1: Point,
-        point_2: Point,
-    ) -> Geodesic:
-        theta_1 = self.transform_coord(
-            CoordType.NATURAL,
-            point_1,
-        )
-        theta_2 = self.transform_coord(
-            CoordType.NATURAL,
-            point_2,
-        )
-        return Geodesic(
-            CoordType.NATURAL, self.bregman.F_generator, theta_1, theta_2
-        )
-
-    def dual_geodesic(
-        self,
-        point_1: Point,
-        point_2: Point,
-    ) -> Geodesic:
-        eta_1 = self.transform_coord(
-            CoordType.MOMENT,
-            point_1,
-        )
-        eta_2 = self.transform_coord(
-            CoordType.MOMENT,
-            point_2,
-        )
-        return Geodesic(
-            CoordType.MOMENT, self.bregman.G_generator, eta_1, eta_2
-        )

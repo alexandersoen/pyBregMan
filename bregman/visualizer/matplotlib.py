@@ -6,8 +6,8 @@ from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from bregman.base import CoordType, Point
-from bregman.manifold.manifold import Geodesic, Manifold
+from bregman.base import Coordinates, Point
+from bregman.manifold.manifold import BregmanManifold, Geodesic
 from bregman.visualizer.visualizer import Visualizer
 
 
@@ -15,7 +15,7 @@ class MatplotlibVisualizer(Visualizer):
 
     def __init__(
         self,
-        manifold: Manifold,
+        manifold: BregmanManifold,
         plot_dims: tuple[int, int],
         resolution: int = 120,
         frames: int = 120,
@@ -38,14 +38,12 @@ class MatplotlibVisualizer(Visualizer):
 
         self.update_func_list: list[Callable[[int], Any]] = []
 
-    def plot_point(self, ctype: CoordType, point: Point, **kwargs) -> None:
-        point = self.manifold.transform_coord(ctype, point)
-        self.ax.scatter(
-            point.coord[self.dim1], point.coord[self.dim2], **kwargs
-        )
+    def plot_point(self, coords: Coordinates, point: Point, **kwargs) -> None:
+        point = self.manifold.convert_coord(coords, point)
+        self.ax.scatter(point.data[self.dim1], point.data[self.dim2], **kwargs)
 
     def plot_geodesic(
-        self, ctype: CoordType, geodesic: Geodesic, **kwargs
+        self, coords: Coordinates, geodesic: Geodesic, **kwargs
     ) -> None:
         geo_vis_kwargs = {
             "ls": "--",
@@ -54,10 +52,10 @@ class MatplotlibVisualizer(Visualizer):
         geo_vis_kwargs.update(kwargs)
 
         geodesic_points = [
-            self.manifold.transform_coord(ctype, geodesic(self.delta * t))
+            self.manifold.convert_coord(coords, geodesic(self.delta * t))
             for t in range(self.resolution)
         ]
-        geodesic_data = np.vstack([p.coord for p in geodesic_points])
+        geodesic_data = np.vstack([p.data for p in geodesic_points])
 
         self.ax.plot(
             geodesic_data[:, self.dim1],
@@ -66,13 +64,13 @@ class MatplotlibVisualizer(Visualizer):
         )
 
     def animate_geodesic(
-        self, ctype: CoordType, geodesic: Geodesic, **kwargs
+        self, coords: Coordinates, geodesic: Geodesic, **kwargs
     ) -> None:
         geodesic_points = [
-            self.manifold.transform_coord(ctype, geodesic(self.delta * t))
+            self.manifold.convert_coord(coords, geodesic(self.delta * t))
             for t in range(self.frames)
         ]
-        geodesic_data = np.vstack([p.coord for p in geodesic_points])
+        geodesic_data = np.vstack([p.data for p in geodesic_points])
 
         geodesic_pt = self.ax.scatter(
             geodesic_data[0, self.dim1], geodesic_data[0, self.dim2], **kwargs
@@ -86,9 +84,9 @@ class MatplotlibVisualizer(Visualizer):
 
         self.update_func_list.append(update)
 
-    def visualize(self, ctype: CoordType) -> None:
+    def visualize(self, coords: Coordinates) -> None:
         self.update_func_list = []
-        super().visualize(ctype)
+        super().visualize(coords)
 
         def update_all(frame: int):
             res = []

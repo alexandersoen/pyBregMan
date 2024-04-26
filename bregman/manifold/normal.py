@@ -1,7 +1,7 @@
 import numpy as np
 
-from bregman.generator.generator import Bregman, Generator
-from bregman.manifold.manifold import Manifold
+from bregman.generator.generator import Generator
+from bregman.manifold.application import ApplicationManifold
 
 
 class Gaussian1DPrimalGenerator(Generator):
@@ -97,16 +97,17 @@ class Gaussian1DDualGenerator(Generator):
         return np.array([eta1, eta2])
 
 
-class Gaussian1DManifold(Manifold):
+class Gaussian1DManifold(ApplicationManifold):
 
     def __init__(self):
         F_gen = Gaussian1DPrimalGenerator()
         G_gen = Gaussian1DDualGenerator()
-        bregman = Bregman(F_gen, G_gen)
 
-        super().__init__(bregman, 2)
+        super().__init__(
+            natural_generator=F_gen, expected_generator=G_gen, dimension=2
+        )
 
-    def _coord_to_natural(self, lamb: np.ndarray) -> np.ndarray:
+    def _ordinary_to_natural(self, lamb: np.ndarray) -> np.ndarray:
         mu = lamb[0]
         var = lamb[1]
 
@@ -115,7 +116,7 @@ class Gaussian1DManifold(Manifold):
 
         return np.array([theta1, theta2])
 
-    def _coord_to_moment(self, lamb: np.ndarray) -> np.ndarray:
+    def _ordinary_to_moment(self, lamb: np.ndarray) -> np.ndarray:
         mu = lamb[0]
         var = lamb[1]
 
@@ -124,7 +125,7 @@ class Gaussian1DManifold(Manifold):
 
         return np.array([eta1, eta2])
 
-    def _natural_to_coord(self, theta: np.ndarray) -> np.ndarray:
+    def _natural_to_ordinary(self, theta: np.ndarray) -> np.ndarray:
         theta1 = theta[0]
         theta2 = theta[1]
 
@@ -133,7 +134,7 @@ class Gaussian1DManifold(Manifold):
 
         return np.array([mu, var])
 
-    def _moment_to_coord(self, eta: np.ndarray) -> np.ndarray:
+    def _moment_to_ordinary(self, eta: np.ndarray) -> np.ndarray:
         eta1 = eta[0]
         eta2 = eta[1]
 
