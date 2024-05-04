@@ -1,9 +1,13 @@
 from abc import ABC, abstractmethod
 
+import autograd
 import numpy as np
 
 
 class Generator(ABC):
+
+    def __init__(self):
+        super().__init__()
 
     @abstractmethod
     def F(self, x: np.ndarray) -> np.ndarray:
@@ -17,12 +21,20 @@ class Generator(ABC):
     def hess(self, x: np.ndarray) -> np.ndarray:
         pass
 
-    @abstractmethod
-    def grad_inv(self, x: np.ndarray) -> np.ndarray:
-        pass
-
     def __call__(self, x: np.ndarray) -> np.ndarray:
         return self.F(x)
+
+
+class AutoDiffGenerator(Generator, ABC):
+
+    def __init__(self):
+        super().__init__()
+
+    def grad(self, x: np.ndarray) -> np.ndarray:
+        return autograd.grad(self.F, x)
+
+    def hess(self, x: np.ndarray) -> np.ndarray:
+        return autograd.hessian(self.F, x)
 
 
 class Bregman:

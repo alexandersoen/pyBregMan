@@ -1,17 +1,20 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
 
 import numpy as np
 
-from bregman.base import Coordinates
+from bregman.base import Coordinates, Display, Point
 from bregman.generator.generator import Generator
 from bregman.manifold.manifold import (MOMENT_COORDS, NATURAL_COORDS,
                                        BregmanManifold)
 
 ORDINARY_COORDS = Coordinates("ordinary")
 
+MyDisplay = TypeVar("MyDisplay", bound=Display)
 
-# TODO Need a better name
-class ApplicationManifold(BregmanManifold):
+
+class ApplicationManifold(BregmanManifold, Generic[MyDisplay], ABC):
+    """Abstract manifold type which has a third coordinate system (ordinary)"""
 
     def __init__(
         self,
@@ -50,4 +53,12 @@ class ApplicationManifold(BregmanManifold):
 
     @abstractmethod
     def _moment_to_ordinary(self, eta: np.ndarray) -> np.ndarray:
+        pass
+
+    @abstractmethod
+    def point_to_display(self, point: Point) -> MyDisplay:
+        pass
+
+    @abstractmethod
+    def display_to_point(self, display: MyDisplay) -> Point:
         pass
