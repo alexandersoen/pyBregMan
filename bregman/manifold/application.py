@@ -1,64 +1,68 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
+from typing import Callable, Generic, TypeVar
 
 import numpy as np
 
-from bregman.base import Coordinates, Display, Point
+from bregman.base import LAMBDA_COORDS, DisplayPoint, Point
 from bregman.generator.generator import Generator
-from bregman.manifold.manifold import (MOMENT_COORDS, NATURAL_COORDS,
-                                       BregmanManifold)
+from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, BregmanManifold
 
-ORDINARY_COORDS = Coordinates("ordinary")
-
-MyDisplay = TypeVar("MyDisplay", bound=Display)
+MyDisplayPoint = TypeVar("MyDisplayPoint", bound=DisplayPoint)
 
 
-class ApplicationManifold(BregmanManifold, Generic[MyDisplay], ABC):
+class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
     """Abstract manifold type which has a third coordinate system (ordinary)"""
 
     def __init__(
         self,
         natural_generator: Generator,
         expected_generator: Generator,
+        display_factory: Callable[[Point], MyDisplayPoint],
         dimension: int,
     ) -> None:
         super().__init__(natural_generator, expected_generator, dimension)
 
-        self.atlas.add_coords(ORDINARY_COORDS)
+        self.display_factory = display_factory
+
+        self.atlas.add_coords(LAMBDA_COORDS)
 
         self.atlas.add_transition(
-            ORDINARY_COORDS, NATURAL_COORDS, self._ordinary_to_natural
+            LAMBDA_COORDS, THETA_COORDS, self._lambda_to_theta
         )
         self.atlas.add_transition(
-            ORDINARY_COORDS, MOMENT_COORDS, self._ordinary_to_moment
+            LAMBDA_COORDS, ETA_COORDS, self._lambda_to_eta
         )
         self.atlas.add_transition(
-            NATURAL_COORDS, ORDINARY_COORDS, self._natural_to_ordinary
+            THETA_COORDS, LAMBDA_COORDS, self._theta_to_lambda
         )
         self.atlas.add_transition(
-            MOMENT_COORDS, ORDINARY_COORDS, self._moment_to_ordinary
+            ETA_COORDS, LAMBDA_COORDS, self._eta_to_lambda
         )
 
+    def convert_to_display(self, point: Point) -> MyDisplayPoint:
+        point = self.convert_coord(LAMBDA_COORDS, point)
+        dpoint = self.display_factory(point)
+        return dpoint
+
     @abstractmethod
-    def _ordinary_to_natural(self, lamb: np.ndarray) -> np.ndarray:
+    def _lambda_to_theta(self, lamb: np.ndarray) -> np.ndarray:
         pass
 
     @abstractmethod
-    def _ordinary_to_moment(self, lamb: np.ndarray) -> np.ndarray:
+    def _lambda_to_eta(self, lamb: np.ndarray) -> np.ndarray:
         pass
 
     @abstractmethod
-    def _natural_to_ordinary(self, theta: np.ndarray) -> np.ndarray:
+    def _theta_to_lambda(self, theta: np.ndarray) -> np.ndarray:
         pass
 
     @abstractmethod
-    def _moment_to_ordinary(self, eta: np.ndarray) -> np.ndarray:
+    def _eta_to_lambda(self, eta: np.ndarray) -> np.ndarray:
         pass
 
-    @abstractmethod
-    def point_to_display(self, point: Point) -> MyDisplay:
-        pass
 
-    @abstractmethod
-    def display_to_point(self, display: MyDisplay) -> Point:
-        pass
+def point_convert_wrapper(constructor):
+    def factory(p: Point) -> MyDisplayPoint:
+        return constructor(coords=p.coords, data=p.data)
+
+    return factory

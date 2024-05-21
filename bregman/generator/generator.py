@@ -6,8 +6,7 @@ import numpy as np
 
 class Generator(ABC):
 
-    def __init__(self):
-        super().__init__()
+    dimension: int
 
     @abstractmethod
     def F(self, x: np.ndarray) -> np.ndarray:
@@ -21,38 +20,38 @@ class Generator(ABC):
     def hess(self, x: np.ndarray) -> np.ndarray:
         pass
 
+    def divergence(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
+        return self.F(x) - self.F(y) - np.inner(self.grad(y), x - y)
+
     def __call__(self, x: np.ndarray) -> np.ndarray:
         return self.F(x)
 
 
 class AutoDiffGenerator(Generator, ABC):
 
-    def __init__(self):
-        super().__init__()
+    def _pre_autodiff(self, x: np.ndarray) -> np.ndarray:
+        return x
+
+    @abstractmethod
+    def _F(self, x: np.ndarray) -> np.ndarray:
+        pass
+
+    def F(self, x: np.ndarray) -> np.ndarray:
+        y = self._pre_autodiff(x)
+        return self._F(y)
+
+    def _post_grad(self, x: np.ndarray) -> np.ndarray:
+        return x
 
     def grad(self, x: np.ndarray) -> np.ndarray:
-        return autograd.grad(self.F, x)
+        y = self._pre_autodiff(x)
+        z = autograd.grad(self._F)(y)
+        return self._post_grad(z)
+
+    def _post_hess(self, x: np.ndarray) -> np.ndarray:
+        return x
 
     def hess(self, x: np.ndarray) -> np.ndarray:
-        return autograd.hessian(self.F, x)
-
-
-class Bregman:
-
-    def __init__(self, F_generator: Generator, G_generator: Generator) -> None:
-        self.F_generator = F_generator
-        self.G_generator = G_generator
-
-    def F_divergence(self, theta_1, theta_2):
-        return (
-            self.F_generator(theta_1)
-            - self.F_generator(theta_2)
-            - np.inner(self.F_generator.grad(theta_2), theta_1 - theta_2)
-        )
-
-    def G_divergence(self, eta_1, eta_2):
-        return (
-            self.G_generator(eta_1)
-            - self.G_generator(eta_2)
-            - np.inner(self.G_generator.grad(eta_2), eta_1 - eta_2)
-        )
+        y = self._pre_autodiff(x)
+        z = autograd.hessian(self._F)(y)
+        return self._post_hess(z)

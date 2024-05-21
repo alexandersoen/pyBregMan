@@ -2,19 +2,23 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from bregman.base import Display, Point
+from bregman.base import DisplayPoint, Point
 from bregman.generator.generator import AutoDiffGenerator
-from bregman.manifold.application import ORDINARY_COORDS
+from bregman.manifold.application import LAMBDA_COORDS, point_convert_wrapper
 from bregman.manifold.distribution.distribution import DistributionManifold
 from bregman.object.distribution import Distribution
 
 
-@dataclass
-class Gaussian1DDisplay(Display):
-    mu: float
-    var: float
+class Gaussian1DPoint(DisplayPoint):
+    @property
+    def mu(self):
+        return self.data[0]
 
-    def __repr__(self):
+    @property
+    def var(self):
+        return self.data[1]
+
+    def display(self):
         return f"$\\mu = {self.mu}; \\sigma^2 = {self.var}$"
 
 
@@ -34,7 +38,7 @@ class Gaussian1DDistribution(Distribution):
 
 class Gaussian1DPrimalGenerator(AutoDiffGenerator):
 
-    def F(self, x: np.ndarray) -> np.ndarray:
+    def _F(self, x: np.ndarray) -> np.ndarray:
         theta1 = x[0]
         theta2 = x[1]
 
@@ -47,7 +51,7 @@ class Gaussian1DPrimalGenerator(AutoDiffGenerator):
 
 class Gaussian1DDualGenerator(AutoDiffGenerator):
 
-    def F(self, x: np.ndarray) -> np.ndarray:
+    def _F(self, x: np.ndarray) -> np.ndarray:
         eta1 = x[0]
         eta2 = x[1]
 
@@ -60,7 +64,7 @@ class Gaussian1DDualGenerator(AutoDiffGenerator):
 
 
 class Gaussian1DManifold(
-    DistributionManifold[Gaussian1DDisplay, Gaussian1DDistribution]
+    DistributionManifold[Gaussian1DPoint, Gaussian1DDistribution]
 ):
 
     def __init__(self):
@@ -68,31 +72,27 @@ class Gaussian1DManifold(
         G_gen = Gaussian1DDualGenerator()
 
         super().__init__(
-            natural_generator=F_gen, expected_generator=G_gen, dimension=2
+            natural_generator=F_gen,
+            expected_generator=G_gen,
+            display_factory=point_convert_wrapper(Gaussian1DPoint),
+            dimension=2,
         )
 
     def point_to_distribution(self, point: Point) -> Gaussian1DDistribution:
-        mu, var = self.convert_coord(ORDINARY_COORDS, point).data
+        mu, var = self.convert_coord(LAMBDA_COORDS, point).data
         return Gaussian1DDistribution(mu, var)
 
     def distribution_to_point(
         self, distribution: Gaussian1DDistribution
-    ) -> Point:
-        return Point(
-            coords=ORDINARY_COORDS,
-            data=np.array([distribution.mu, distribution.var]),
+    ) -> Gaussian1DPoint:
+        return self.convert_to_display(
+            Point(
+                coords=LAMBDA_COORDS,
+                data=np.array([distribution.mu, distribution.var]),
+            )
         )
 
-    def point_to_display(self, point: Point) -> Gaussian1DDisplay:
-        mu, var = self.convert_coord(ORDINARY_COORDS, point).data
-        return Gaussian1DDisplay(mu, var)
-
-    def display_to_point(self, display: Gaussian1DDisplay) -> Point:
-        return Point(
-            coords=ORDINARY_COORDS, data=np.array([display.mu, display.var])
-        )
-
-    def _ordinary_to_natural(self, lamb: np.ndarray) -> np.ndarray:
+    def _lambda_to_theta(self, lamb: np.ndarray) -> np.ndarray:
         mu = lamb[0]
         var = lamb[1]
 
@@ -101,7 +101,7 @@ class Gaussian1DManifold(
 
         return np.array([theta1, theta2])
 
-    def _ordinary_to_moment(self, lamb: np.ndarray) -> np.ndarray:
+    def _lambda_to_eta(self, lamb: np.ndarray) -> np.ndarray:
         mu = lamb[0]
         var = lamb[1]
 
@@ -110,7 +110,7 @@ class Gaussian1DManifold(
 
         return np.array([eta1, eta2])
 
-    def _natural_to_ordinary(self, theta: np.ndarray) -> np.ndarray:
+    def _theta_to_lambda(self, theta: np.ndarray) -> np.ndarray:
         theta1 = theta[0]
         theta2 = theta[1]
 
@@ -119,7 +119,7 @@ class Gaussian1DManifold(
 
         return np.array([mu, var])
 
-    def _moment_to_ordinary(self, eta: np.ndarray) -> np.ndarray:
+    def _eta_to_lambda(self, eta: np.ndarray) -> np.ndarray:
         eta1 = eta[0]
         eta2 = eta[1]
 

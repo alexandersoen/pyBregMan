@@ -8,7 +8,6 @@ from bregman.object.distribution import Distribution
 class ExponentialFamily(Distribution, ABC):
     """Currently assuming base measure is unit."""
 
-    dimension: int
     theta: np.ndarray  # theta parameters
 
     @abstractmethod

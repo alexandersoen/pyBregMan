@@ -1,4 +1,5 @@
 numpy
 matplotlib
 ipython
-autograd
+scipy
+autograd[scipy]

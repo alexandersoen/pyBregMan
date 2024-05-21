@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-from bregman.base import Display, Point
+from bregman.base import DisplayPoint, Point
 from bregman.manifold.application import ApplicationManifold
 from bregman.object.distribution import Distribution
 
@@ -15,18 +15,22 @@ class IncompatibleDistribution(Exception):
 
 
 MyDistribution = TypeVar("MyDistribution", bound=Distribution)
-MyDisplay = TypeVar("MyDisplay", bound=Display)
+MyDisplayPoint = TypeVar("MyDisplayPoint", bound=DisplayPoint)
 
 
 class DistributionManifold(
-    ApplicationManifold[MyDisplay], Generic[MyDisplay, MyDistribution], ABC
+    ApplicationManifold[MyDisplayPoint],
+    Generic[MyDisplayPoint, MyDistribution],
+    ABC,
 ):
     """Manifold which is based on distributions"""
 
     @abstractmethod
-    def point_to_distribution(self, point: Point) -> MyDistribution:
+    def point_to_distribution(self, point: MyDisplayPoint) -> MyDistribution:
         pass
 
     @abstractmethod
-    def distribution_to_point(self, distribution: MyDistribution) -> Point:
+    def distribution_to_point(
+        self, distribution: MyDistribution
+    ) -> MyDisplayPoint:
         pass
