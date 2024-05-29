@@ -11,14 +11,20 @@ class ExponentialFamily(Distribution, ABC):
     theta: np.ndarray  # theta parameters
 
     @abstractmethod
-    def sufficient_statistic(self, x: np.ndarray) -> np.ndarray:
+    def t(self, x: np.ndarray) -> np.ndarray:
+        r"""t(x) sufficient statistics function."""
         pass
 
     @abstractmethod
-    def normalizer(self, x: np.ndarray) -> np.ndarray:
-        r"""F(x) = \log \int \exp(\theta^\T t(x)) dx"""
+    def k(self, x: np.ndarray) -> np.ndarray:
+        r"""k(x) carrier measure."""
+        pass
+
+    @abstractmethod
+    def F(self, x: np.ndarray) -> np.ndarray:
+        r"""F(x) = \log \int \exp(\theta^\T t(x)) dx normalizer"""
         pass
 
     def pdf(self, x: np.ndarray) -> np.ndarray:
-        inner = np.dot(self.theta, self.sufficient_statistic(x))
-        return np.exp(inner - self.normalizer)
+        inner = np.dot(self.theta, self.t(x))
+        return np.exp(inner - self.F(x) + self.k(x))
