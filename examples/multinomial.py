@@ -42,6 +42,8 @@ if __name__ == "__main__":
     primal_geo = manifold.theta_geodesic(coord1, coord2)
     dual_geo = manifold.eta_geodesic(coord1, coord2)
 
+    primal_pt = manifold.theta_parallel_transport(coord1, coord2)
+
     # Define visualizer
     visualizer = MatplotlibVisualizer(manifold, VISUALIZE_INDEX)
 
@@ -54,5 +56,6 @@ if __name__ == "__main__":
     # Add animations
     visualizer.animate_object(primal_geo, c="blue")
     visualizer.animate_object(dual_geo, c="red")
+    visualizer.animate_object(primal_pt, c="black")
 
     visualizer.visualize(DISPLAY_TYPE)

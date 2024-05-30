@@ -8,6 +8,7 @@ from matplotlib.figure import Figure
 
 from bregman.base import Coordinates, Point
 from bregman.manifold.manifold import BregmanManifold, Geodesic
+from bregman.manifold.parallel_transport import ParallelTansport
 from bregman.visualizer.visualizer import Visualizer
 
 
@@ -81,6 +82,43 @@ class MatplotlibVisualizer(Visualizer):
                 geodesic_data[frame, [self.dim1, self.dim2]]
             )
             return geodesic_pt
+
+        self.update_func_list.append(update)
+
+    def animate_parallel_transport(
+        self,
+        coords: Coordinates,
+        parallel_transport: ParallelTansport,
+        **kwargs
+    ) -> None:
+        pt_vectors = [
+            parallel_transport(self.delta * t) for t in range(self.frames)
+        ]
+        p1_data = np.vstack(
+            [
+                self.manifold.convert_coord(coords, v[0]).data
+                for v in pt_vectors
+            ]
+        )
+        p2_data = np.vstack(
+            [
+                self.manifold.convert_coord(coords, v[1]).data
+                for v in pt_vectors
+            ]
+        )
+
+        (pt_line,) = self.ax.plot(
+            [p1_data[0, self.dim1], p2_data[0, self.dim1]],
+            [p1_data[0, self.dim2], p2_data[0, self.dim2]],
+            **kwargs
+        )
+
+        def update(frame: int):
+            pt_line.set_data(
+                [p1_data[frame, self.dim1], p2_data[frame, self.dim1]],
+                [p1_data[frame, self.dim2], p2_data[frame, self.dim2]],
+            )
+            return pt_line
 
         self.update_func_list.append(update)
 

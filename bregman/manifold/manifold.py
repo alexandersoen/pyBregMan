@@ -4,9 +4,11 @@ import numpy as np
 
 from bregman.base import Coordinates, Point
 from bregman.generator.generator import Generator
-from bregman.manifold.connection import FlatConnection
+from bregman.manifold.connection import Connection, FlatConnection
 from bregman.manifold.coordinate import Atlas
 from bregman.manifold.geodesic import Geodesic
+from bregman.manifold.parallel_transport import (DualFlatParallelTransport,
+                                                 ParallelTansport)
 
 THETA_COORDS = Coordinates("theta")
 ETA_COORDS = Coordinates("eta")
@@ -39,6 +41,10 @@ class BregmanManifold(ABC):
         self.atlas.add_transition(THETA_COORDS, ETA_COORDS, self._theta_to_eta)
         self.atlas.add_transition(ETA_COORDS, THETA_COORDS, self._eta_to_theta)
 
+    @property
+    def fisher_rao_connection(self) -> Connection:
+        return NotImplemented()
+
     def convert_coord(self, target_coords: Coordinates, point: Point) -> Point:
         return self.atlas(target_coords, point)
 
@@ -61,6 +67,32 @@ class BregmanManifold(ABC):
         eta_1 = self.convert_coord(ETA_COORDS, point_1)
         eta_2 = self.convert_coord(ETA_COORDS, point_2)
         return self.eta_connection.geodesic(eta_1, eta_2)
+
+    def theta_parallel_transport(
+        self, point_1: Point, point_2: Point
+    ) -> DualFlatParallelTransport:
+        theta_1 = self.convert_coord(THETA_COORDS, point_1)
+        theta_2 = self.convert_coord(THETA_COORDS, point_2)
+        return DualFlatParallelTransport(
+            THETA_COORDS,
+            theta_1,
+            theta_2,
+            self.theta_connection,
+            self.eta_connection,
+        )
+
+    def eta_parallel_transport(
+        self, point_1: Point, point_2: Point
+    ) -> DualFlatParallelTransport:
+        eta_1 = self.convert_coord(ETA_COORDS, point_1)
+        eta_2 = self.convert_coord(ETA_COORDS, point_2)
+        return DualFlatParallelTransport(
+            ETA_COORDS,
+            eta_1,
+            eta_2,
+            self.eta_connection,
+            self.theta_connection,
+        )
 
     def _theta_to_eta(self, theta: np.ndarray) -> np.ndarray:
         return self.theta_generator.grad(theta)

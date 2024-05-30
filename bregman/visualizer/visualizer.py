@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from bregman.base import BregObject, Coordinates, Point
 from bregman.manifold.manifold import BregmanManifold, Geodesic
+from bregman.manifold.parallel_transport import ParallelTansport
 
 
 class NoPlottingRoutine(Exception):
@@ -38,9 +39,27 @@ class Visualizer(ABC):
     ) -> None:
         pass
 
+    #    @abstractmethod
+    #    def plot_parallel_transport(
+    #        self,
+    #        coords: Coordinates,
+    #        parallel_transport: ParallelTansport,
+    #        **kwargs,
+    #    ) -> None:
+    #        pass
+
     @abstractmethod
     def animate_geodesic(
         self, coords: Coordinates, geodesic: Geodesic, **kwargs
+    ) -> None:
+        pass
+
+    @abstractmethod
+    def animate_parallel_transport(
+        self,
+        coords: Coordinates,
+        parallel_transport: ParallelTansport,
+        **kwargs,
     ) -> None:
         pass
 
@@ -51,6 +70,8 @@ class Visualizer(ABC):
                     self.plot_point(coords, obj, **kwarg)
                 case Geodesic():
                     self.plot_geodesic(coords, obj, **kwarg)
+                #                case ParallelTansport():
+                #                    self.plot_parallel_transport(coords, obj, **kwarg)
                 case _:
                     raise NoPlottingRoutine
 
@@ -58,5 +79,7 @@ class Visualizer(ABC):
             match obj:
                 case Geodesic():
                     self.animate_geodesic(coords, obj, **kwarg)
+                case ParallelTansport():
+                    self.animate_parallel_transport(coords, obj, **kwarg)
                 case _:
                     raise NoAnimationRoutine
