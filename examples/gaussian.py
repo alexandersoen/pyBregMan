@@ -10,6 +10,8 @@ from bregman.visualizer.matplotlib import MatplotlibVisualizer
 if __name__ == "__main__":
 
     DISPLAY_TYPE = LAMBDA_COORDS
+    # DISPLAY_TYPE = ETA_COORDS
+    # DISPLAY_TYPE = THETA_COORDS
     VISUALIZE_INDEX = (2, 5)
 
     num_frames = 120
@@ -17,7 +19,7 @@ if __name__ == "__main__":
     # Define manifold + objects
     manifold = GaussianManifold(2)
 
-    coord1 = Point(LAMBDA_COORDS, np.array([0, 0, 1, 0, 0, 1]))
+    coord1 = Point(LAMBDA_COORDS, np.array([0, 0, 1, 0, 0, 5]))
     coord2 = Point(LAMBDA_COORDS, np.array([0, 0, 2, 0, 0, 2]))
 
     print(
@@ -29,6 +31,10 @@ if __name__ == "__main__":
         manifold.eta_generator.grad(
             manifold.convert_coord(ETA_COORDS, coord1).data
         )
+    )
+
+    print(
+        "Chernoff Information:", manifold.chernoff_information(coord1, coord2)
     )
 
     primal_geo = manifold.theta_geodesic(coord1, coord2)

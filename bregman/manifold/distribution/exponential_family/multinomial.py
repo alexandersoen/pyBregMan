@@ -8,7 +8,7 @@ from bregman.generator.generator import AutoDiffGenerator
 from bregman.manifold.application import LAMBDA_COORDS, point_convert_wrapper
 from bregman.manifold.distribution.distribution import DistributionManifold
 from bregman.manifold.distribution.exponential_family.exp_family import \
-    ExponentialFamily
+    ExponentialFamilyDistribution
 from bregman.manifold.manifold import THETA_COORDS
 
 
@@ -21,7 +21,7 @@ class MultinomialPoint(DisplayPoint):
         return str(self.data)
 
 
-class MultinomialDistribution(ExponentialFamily):
+class MultinomialDistribution(ExponentialFamilyDistribution):
 
     def __init__(self, theta: np.ndarray, n: int) -> None:
         self.theta = theta

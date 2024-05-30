@@ -6,7 +6,9 @@ import numpy as np
 from bregman.base import DisplayPoint, Point, Shape
 from bregman.generator.generator import AutoDiffGenerator
 from bregman.manifold.application import LAMBDA_COORDS, point_convert_wrapper
-from bregman.manifold.distribution.distribution import DistributionManifold
+from bregman.manifold.distribution.exponential_family.exp_family import (
+    ExponentialFamilyDistribution, ExponentialFamilyManifold)
+from bregman.manifold.manifold import THETA_COORDS
 from bregman.object.distribution import Distribution
 
 
@@ -30,29 +32,31 @@ class GaussianPoint(DisplayPoint):
         return f"$\\mu$ = {self.mu}; $\\Sigma$ = {self.Sigma}"
 
 
-class GaussianDistribution(Distribution):
+class GaussianDistribution(ExponentialFamilyDistribution):
 
-    def __init__(
-        self, mu: np.ndarray, sigma: np.ndarray, dimension: int
-    ) -> None:
+    def __init__(self, theta: np.ndarray, dimension: int) -> None:
         super().__init__()
 
-        self.mu = mu
-        self.sigma = sigma
+        self.theta = theta
 
         self.dimension: Shape = (dimension,)
 
-    def pdf(self, x: np.ndarray) -> np.ndarray:
-        const = np.power(2 * np.pi, self.dimension[0] / 2) * np.sqrt(
-            np.linalg.det(self.sigma)
-        )
-        mean_diff = x - self.mu
+    def t(self, x: np.ndarray) -> np.ndarray:
+        r"""t(x) sufficient statistics function."""
+        return np.concatenate([x, -np.outer(x, x).flatten()])
 
-        return (
-            np.exp(
-                -0.5 * (mean_diff.T @ np.linalg.inv(self.sigma) @ mean_diff)
-            )
-            / const
+    def k(self, x: np.ndarray) -> np.ndarray:
+        r"""k(x) carrier measure."""
+        return np.array(0.0)
+
+    def F(self, x: np.ndarray) -> np.ndarray:
+        r"""F(x) = \log \int \exp(\theta^\T t(x)) dx normalizer"""
+        theta_mu, theta_sigma = _flatten_to_mu_Sigma(self.dimension[0], x)
+
+        return 0.5 * (
+            0.5 * theta_mu.T @ np.linalg.inv(theta_sigma) @ theta_mu
+            - np.log(np.linalg.det(theta_sigma))
+            + self.dimension * np.log(np.pi)
         )
 
 
@@ -91,7 +95,7 @@ class GaussianDualGenerator(AutoDiffGenerator):
 
 
 class GaussianManifold(
-    DistributionManifold[GaussianPoint, GaussianDistribution]
+    ExponentialFamilyManifold[GaussianPoint, GaussianDistribution]
 ):
 
     def __init__(self, input_dimension: int):
@@ -108,10 +112,9 @@ class GaussianManifold(
         )
 
     def point_to_distribution(self, point: Point) -> GaussianDistribution:
-        ordinary_point = self.convert_to_display(point)
-        return GaussianDistribution(
-            ordinary_point.mu, ordinary_point.Sigma, self.input_dimension
-        )
+        theta = self.convert_coord(THETA_COORDS, point)
+
+        return GaussianDistribution(theta, self.input_dimension)
 
     def distribution_to_point(
         self, distribution: GaussianDistribution
