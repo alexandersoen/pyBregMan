@@ -6,7 +6,7 @@ import numpy as np
 from bregman.base import Point
 from bregman.manifold.application import MyDisplayPoint
 from bregman.manifold.distribution.distribution import DistributionManifold
-from bregman.manifold.manifold import THETA_COORDS
+from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS
 from bregman.object.distribution import Distribution
 
 
@@ -45,6 +45,84 @@ class ExponentialFamilyManifold(
     Generic[MyDisplayPoint, MyExpFamDistribution],
     ABC,
 ):
+    def theta_barycenter(
+        self, points: list[Point], weights: list[float]
+    ) -> Point:
+        assert len(points) == len(weights)
+
+        nweights = [w / sum(weights) for w in weights]
+        thetas_data = [
+            self.convert_coord(THETA_COORDS, p).data for p in points
+        ]
+        theta_avg = np.sum(
+            np.stack([w * t for w, t in zip(nweights, thetas_data)]), axis=0
+        )
+        return Point(THETA_COORDS, theta_avg)
+
+    def eta_barycenter(
+        self, points: list[Point], weights: list[float]
+    ) -> Point:
+        assert len(points) == len(weights)
+
+        nweights = [w / sum(weights) for w in weights]
+        etas_data = [self.convert_coord(ETA_COORDS, p).data for p in points]
+        eta_avg = np.sum(
+            np.stack([w * t for w, t in zip(nweights, etas_data)]), axis=0
+        )
+        return Point(ETA_COORDS, eta_avg)
+
+    def skew_burbea_rao_barycenter(
+        self,
+        points: list[Point],
+        alphas: list[float],
+        weights: list[float],
+        eps: float = 1e-8,
+    ) -> Point:
+        """
+        https://arxiv.org/pdf/1004.5049
+        """
+        assert len(points) == len(alphas) == len(weights)
+
+        nweights = [w / sum(weights) for w in weights]
+        alpha_mid = sum(w * a for w, a in zip(nweights, alphas))
+        thetas_data = [
+            self.convert_coord(THETA_COORDS, p).data for p in points
+        ]
+
+        def get_energy(p: np.ndarray) -> float:
+            weighted_term = sum(
+                w * self.theta_generator(a * p + (1 - a) * t)
+                for w, a, t in zip(nweights, alphas, thetas_data)
+            )
+            return float(alpha_mid * self.theta_generator(p) - weighted_term)
+
+        diff = float("inf")
+        barycenter = np.sum(
+            np.stack([w * t for w, t in zip(nweights, thetas_data)]), axis=0
+        )
+        cur_energy = get_energy(barycenter)
+        while diff > eps:
+            aw_grads = np.stack(
+                [
+                    a
+                    * w
+                    * self.theta_generator.grad(a * barycenter + (1 - a) * t)
+                    for w, a, t in zip(nweights, alphas, thetas_data)
+                ]
+            )
+            avg_grad = np.sum(aw_grads, axis=0)
+
+            # Update
+            barycenter = self.eta_generator.grad(avg_grad / alpha_mid)
+
+            new_energy = get_energy(barycenter)
+            diff = abs(new_energy - cur_energy)
+            cur_energy = new_energy
+
+        # Convert to point
+        barycenter_point = Point(THETA_COORDS, barycenter)
+        return barycenter_point
+
     def bhattacharyya_distance(
         self, point_1: Point, point_2: Point, alpha: float
     ) -> np.ndarray:

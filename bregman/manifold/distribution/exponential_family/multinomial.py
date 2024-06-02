@@ -6,9 +6,8 @@ import numpy as np
 from bregman.base import DisplayPoint, Point
 from bregman.generator.generator import AutoDiffGenerator
 from bregman.manifold.application import LAMBDA_COORDS, point_convert_wrapper
-from bregman.manifold.distribution.distribution import DistributionManifold
-from bregman.manifold.distribution.exponential_family.exp_family import \
-    ExponentialFamilyDistribution
+from bregman.manifold.distribution.exponential_family.exp_family import (
+    ExponentialFamilyDistribution, ExponentialFamilyManifold)
 from bregman.manifold.manifold import THETA_COORDS
 
 
@@ -72,7 +71,7 @@ class MultinomialDualGenerator(AutoDiffGenerator):
 
 
 class MultinomialManifold(
-    DistributionManifold[MultinomialPoint, MultinomialDistribution]
+    ExponentialFamilyManifold[MultinomialPoint, MultinomialDistribution]
 ):
 
     def __init__(

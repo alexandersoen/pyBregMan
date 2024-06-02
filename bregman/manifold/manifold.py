@@ -51,12 +51,14 @@ class BregmanManifold(ABC):
     def theta_divergence(self, point_1: Point, point_2: Point) -> np.ndarray:
         theta_1 = self.convert_coord(THETA_COORDS, point_1)
         theta_2 = self.convert_coord(THETA_COORDS, point_2)
-        return self.theta_generator.divergence(theta_1.data, theta_2.data)
+        return self.theta_generator.bergman_divergence(
+            theta_1.data, theta_2.data
+        )
 
     def eta_divergence(self, point_1: Point, point_2: Point) -> np.ndarray:
         eta_1 = self.convert_coord(ETA_COORDS, point_1)
         eta_2 = self.convert_coord(ETA_COORDS, point_2)
-        return self.eta_generator.divergence(eta_1.data, eta_2.data)
+        return self.eta_generator.bergman_divergence(eta_1.data, eta_2.data)
 
     def theta_geodesic(self, point_1: Point, point_2: Point) -> Geodesic:
         theta_1 = self.convert_coord(THETA_COORDS, point_1)
