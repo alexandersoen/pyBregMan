@@ -39,7 +39,7 @@ if __name__ == "__main__":
     alphas = [0.5, 0.5, 0.5]
     weights = [1.0, 1.0, 1.0]
 
-    js_centroid = manifold.skew_burbea_rao_barycenter(points, alphas, weights)
+    js_centroid = manifold.theta_skew_burbea_rao_barycenter(points, alphas, weights)
     theta_centroid = manifold.theta_barycenter(points, weights)
     eta_centroid = manifold.eta_barycenter(points, weights)
 

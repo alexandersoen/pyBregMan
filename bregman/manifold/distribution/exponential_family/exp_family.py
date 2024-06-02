@@ -3,7 +3,7 @@ from typing import Generic, TypeVar
 
 import numpy as np
 
-from bregman.base import Point
+from bregman.base import Coordinates, Point
 from bregman.manifold.application import MyDisplayPoint
 from bregman.manifold.distribution.distribution import DistributionManifold
 from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS
@@ -71,57 +71,27 @@ class ExponentialFamilyManifold(
         )
         return Point(ETA_COORDS, eta_avg)
 
-    def skew_burbea_rao_barycenter(
+    def theta_skew_burbea_rao_barycenter(
         self,
         points: list[Point],
         alphas: list[float],
         weights: list[float],
         eps: float = 1e-8,
     ) -> Point:
-        """
-        https://arxiv.org/pdf/1004.5049
-        """
-        assert len(points) == len(alphas) == len(weights)
-
-        nweights = [w / sum(weights) for w in weights]
-        alpha_mid = sum(w * a for w, a in zip(nweights, alphas))
-        thetas_data = [
-            self.convert_coord(THETA_COORDS, p).data for p in points
-        ]
-
-        def get_energy(p: np.ndarray) -> float:
-            weighted_term = sum(
-                w * self.theta_generator(a * p + (1 - a) * t)
-                for w, a, t in zip(nweights, alphas, thetas_data)
-            )
-            return float(alpha_mid * self.theta_generator(p) - weighted_term)
-
-        diff = float("inf")
-        barycenter = np.sum(
-            np.stack([w * t for w, t in zip(nweights, thetas_data)]), axis=0
+        return self._skew_burbea_rao_barycenter(
+            points, alphas, weights, THETA_COORDS, eps
         )
-        cur_energy = get_energy(barycenter)
-        while diff > eps:
-            aw_grads = np.stack(
-                [
-                    a
-                    * w
-                    * self.theta_generator.grad(a * barycenter + (1 - a) * t)
-                    for w, a, t in zip(nweights, alphas, thetas_data)
-                ]
-            )
-            avg_grad = np.sum(aw_grads, axis=0)
 
-            # Update
-            barycenter = self.eta_generator.grad(avg_grad / alpha_mid)
-
-            new_energy = get_energy(barycenter)
-            diff = abs(new_energy - cur_energy)
-            cur_energy = new_energy
-
-        # Convert to point
-        barycenter_point = Point(THETA_COORDS, barycenter)
-        return barycenter_point
+    def eta_skew_burbea_rao_barycenter(
+        self,
+        points: list[Point],
+        alphas: list[float],
+        weights: list[float],
+        eps: float = 1e-8,
+    ) -> Point:
+        return self._skew_burbea_rao_barycenter(
+            points, alphas, weights, ETA_COORDS, eps
+        )
 
     def bhattacharyya_distance(
         self, point_1: Point, point_2: Point, alpha: float
@@ -164,3 +134,65 @@ class ExponentialFamilyManifold(
     def chernoff_information(self, point_1: Point, point_2: Point):
         alpha_star = self.chernoff_point(point_1, point_2)
         return self.bhattacharyya_distance(point_1, point_2, alpha_star)
+
+    def _skew_burbea_rao_barycenter(
+        self,
+        points: list[Point],
+        alphas: list[float],
+        weights: list[float],
+        gen_type: Coordinates,
+        eps: float = 1e-8,
+    ) -> Point:
+        """
+        https://arxiv.org/pdf/1004.5049
+        """
+        if gen_type == THETA_COORDS:
+            coord_type = THETA_COORDS
+            primal_gen = self.theta_generator
+            dual_gen = self.eta_generator
+
+        elif gen_type == ETA_COORDS:
+            coord_type = ETA_COORDS
+            primal_gen = self.eta_generator
+            dual_gen = self.theta_generator
+
+        else:
+            raise ValueError()
+
+        assert len(points) == len(alphas) == len(weights)
+
+        nweights = [w / sum(weights) for w in weights]
+        alpha_mid = sum(w * a for w, a in zip(nweights, alphas))
+        points_data = [self.convert_coord(coord_type, p).data for p in points]
+
+        def get_energy(p: np.ndarray) -> float:
+            weighted_term = sum(
+                w * primal_gen(a * p + (1 - a) * t)
+                for w, a, t in zip(nweights, alphas, points_data)
+            )
+            return float(alpha_mid * primal_gen(p) - weighted_term)
+
+        diff = float("inf")
+        barycenter = np.sum(
+            np.stack([w * t for w, t in zip(nweights, points_data)]), axis=0
+        )
+        cur_energy = get_energy(barycenter)
+        while diff > eps:
+            aw_grads = np.stack(
+                [
+                    a * w * primal_gen.grad(a * barycenter + (1 - a) * t)
+                    for w, a, t in zip(nweights, alphas, points_data)
+                ]
+            )
+            avg_grad = np.sum(aw_grads, axis=0)
+
+            # Update
+            barycenter = dual_gen.grad(avg_grad / alpha_mid)
+
+            new_energy = get_energy(barycenter)
+            diff = abs(new_energy - cur_energy)
+            cur_energy = new_energy
+
+        # Convert to point
+        barycenter_point = Point(coord_type, barycenter)
+        return barycenter_point
