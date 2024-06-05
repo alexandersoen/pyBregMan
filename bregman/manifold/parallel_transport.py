@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 
-from bregman.base import BregObject, Coordinates, Point
+from bregman.base import CoordObject, Coordinates, Point
 from bregman.manifold.connection import FlatConnection
 
 
-class ParallelTansport(BregObject, ABC):
+class ParallelTansport(CoordObject, ABC):
 
     def __init__(
         self,

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from bregman.base import BregObject, Coordinates, Point
+from bregman.base import Coordinates, CoordObject, Point
 from bregman.manifold.manifold import BregmanManifold, Geodesic
 from bregman.manifold.parallel_transport import ParallelTansport
 
@@ -13,20 +13,20 @@ class NoAnimationRoutine(Exception):
     pass
 
 
-class Visualizer(ABC):
+class CoordObjectVisualizer(ABC):
 
-    plot_list: list[tuple[BregObject, dict]] = []
-    animate_list: list[tuple[BregObject, dict]] = []
+    plot_list: list[tuple[CoordObject, dict]] = []
+    animate_list: list[tuple[CoordObject, dict]] = []
 
     def __init__(self, manifold: BregmanManifold) -> None:
         super().__init__()
 
         self.manifold = manifold
 
-    def plot_object(self, obj: BregObject, **kwargs) -> None:
+    def plot_object(self, obj: CoordObject, **kwargs) -> None:
         self.plot_list.append((obj, kwargs))
 
-    def animate_object(self, obj: BregObject, **kwargs) -> None:
+    def animate_object(self, obj: CoordObject, **kwargs) -> None:
         self.animate_list.append((obj, kwargs))
 
     @abstractmethod

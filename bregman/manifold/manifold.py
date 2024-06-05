@@ -1,17 +1,28 @@
 from abc import ABC
+from enum import Enum
 
 import numpy as np
 
-from bregman.base import Coordinates, Point
+from bregman.base import Coordinates, InputObject, Point
 from bregman.generator.generator import Generator
 from bregman.manifold.connection import Connection, FlatConnection
 from bregman.manifold.coordinate import Atlas
 from bregman.manifold.geodesic import Geodesic
-from bregman.manifold.parallel_transport import (DualFlatParallelTransport,
-                                                 ParallelTansport)
+from bregman.manifold.parallel_transport import DualFlatParallelTransport
 
 THETA_COORDS = Coordinates("theta")
 ETA_COORDS = Coordinates("eta")
+
+
+class DualCoord(Enum):
+    THETA = THETA_COORDS
+    ETA = ETA_COORDS
+
+    def dual(self):
+        if self == self.THETA:
+            return self.ETA
+        else:
+            return self.THETA
 
 
 class BregmanManifold(ABC):
@@ -48,17 +59,43 @@ class BregmanManifold(ABC):
     def convert_coord(self, target_coords: Coordinates, point: Point) -> Point:
         return self.atlas(target_coords, point)
 
-    def theta_divergence(self, point_1: Point, point_2: Point) -> np.ndarray:
-        theta_1 = self.convert_coord(THETA_COORDS, point_1)
-        theta_2 = self.convert_coord(THETA_COORDS, point_2)
-        return self.theta_generator.bergman_divergence(
-            theta_1.data, theta_2.data
+    def bregman_generator(self, coord: DualCoord) -> Generator:
+        return (
+            self.theta_generator
+            if coord == DualCoord.THETA
+            else self.eta_generator
         )
 
-    def eta_divergence(self, point_1: Point, point_2: Point) -> np.ndarray:
-        eta_1 = self.convert_coord(ETA_COORDS, point_1)
-        eta_2 = self.convert_coord(ETA_COORDS, point_2)
-        return self.eta_generator.bergman_divergence(eta_1.data, eta_2.data)
+    def bregman_connection(self, coord: DualCoord) -> FlatConnection:
+        return (
+            self.theta_connection
+            if coord == DualCoord.THETA
+            else self.eta_connection
+        )
+
+    def bregman_divergence(
+        self,
+        point_1: Point,
+        point_2: Point,
+        coord: DualCoord = DualCoord.THETA,
+    ) -> np.ndarray:
+        coord_1 = self.convert_coord(coord.value, point_1)
+        coord_2 = self.convert_coord(coord.value, point_2)
+        generator = self.bregman_generator(coord)
+
+        return generator.bergman_divergence(coord_1.data, coord_2.data)
+
+    def bregman_geodesic(
+        self,
+        point_1: Point,
+        point_2: Point,
+        coord: DualCoord = DualCoord.THETA,
+    ) -> Geodesic:
+        coord_1 = self.convert_coord(coord.value, point_1)
+        coord_2 = self.convert_coord(coord.value, point_2)
+        connection = self.bregman_connection(coord)
+
+        return connection.geodesic(coord_1, coord_2)
 
     def theta_geodesic(self, point_1: Point, point_2: Point) -> Geodesic:
         theta_1 = self.convert_coord(THETA_COORDS, point_1)
@@ -96,8 +133,132 @@ class BregmanManifold(ABC):
             self.theta_connection,
         )
 
+    """
+    Agg
+    """
+
+    def bregman_barycenter(
+        self,
+        points: list[Point],
+        weights: list[float],
+        coord: DualCoord = DualCoord.THETA,
+    ) -> Point:
+        assert len(points) == len(weights)
+
+        nweights = [w / sum(weights) for w in weights]
+        coords_data = [self.convert_coord(coord.value, p).data for p in points]
+        coord_avg = np.sum(
+            np.stack([w * t for w, t in zip(nweights, coords_data)]), axis=0
+        )
+        return Point(coord.value, coord_avg)
+
+    def skew_burbea_rao_barycenter(
+        self,
+        points: list[Point],
+        alphas: list[float],
+        weights: list[float],
+        coord: DualCoord = DualCoord.THETA,
+        eps: float = 1e-8,
+    ) -> Point:
+        """
+        https://arxiv.org/pdf/1004.5049
+        """
+        coord_type = coord.value
+        primal_gen = self.bregman_generator(coord)
+        dual_gen = self.bregman_generator(coord.dual())
+
+        assert len(points) == len(alphas) == len(weights)
+
+        nweights = [w / sum(weights) for w in weights]
+        alpha_mid = sum(w * a for w, a in zip(nweights, alphas))
+        points_data = [self.convert_coord(coord_type, p).data for p in points]
+
+        def get_energy(p: np.ndarray) -> float:
+            weighted_term = sum(
+                w * primal_gen(a * p + (1 - a) * t)
+                for w, a, t in zip(nweights, alphas, points_data)
+            )
+            return float(alpha_mid * primal_gen(p) - weighted_term)
+
+        diff = float("inf")
+        barycenter = np.sum(
+            np.stack([w * t for w, t in zip(nweights, points_data)]), axis=0
+        )
+        cur_energy = get_energy(barycenter)
+        while diff > eps:
+            aw_grads = np.stack(
+                [
+                    a * w * primal_gen.grad(a * barycenter + (1 - a) * t)
+                    for w, a, t in zip(nweights, alphas, points_data)
+                ]
+            )
+            avg_grad = np.sum(aw_grads, axis=0)
+
+            # Update
+            barycenter = dual_gen.grad(avg_grad / alpha_mid)
+
+            new_energy = get_energy(barycenter)
+            diff = abs(new_energy - cur_energy)
+            cur_energy = new_energy
+
+        # Convert to point
+        barycenter_point = Point(coord_type, barycenter)
+        return barycenter_point
+
+    def bhattacharyya_distance(
+        self, point_1: Point, point_2: Point, alpha: float
+    ) -> np.ndarray:
+        theta_1 = self.convert_coord(THETA_COORDS, point_1)
+        theta_2 = self.convert_coord(THETA_COORDS, point_2)
+
+        geodesic = self.theta_geodesic(theta_1, theta_2)
+        theta_alpha = geodesic(alpha)
+
+        F_1 = self.theta_generator(theta_1.data)
+        F_2 = self.theta_generator(theta_2.data)
+        F_alpha = self.theta_generator(theta_alpha.data)
+
+        return alpha * F_1 + (1 - alpha) * F_2 - F_alpha
+
+    def chernoff_point(
+        self, point_1: Point, point_2: Point, eps: float = 1e-8
+    ) -> float:
+        theta_1 = self.convert_coord(THETA_COORDS, point_1)
+        theta_2 = self.convert_coord(THETA_COORDS, point_2)
+
+        geodesic = self.theta_geodesic(theta_1, theta_2)
+
+        alpha_min, alpha_mid, alpha_max = 0.0, 0.5, 1.0
+        while abs(alpha_max - alpha_min) > eps:
+            alpha_mid = 0.5 * (alpha_min + alpha_max)
+
+            theta_alpha = geodesic(alpha_mid)
+
+            bd_1 = self.bregman_divergence(
+                theta_1, theta_alpha, coord=DualCoord.THETA
+            )
+            bd_2 = self.bregman_divergence(
+                theta_2, theta_alpha, coord=DualCoord.THETA
+            )
+            if bd_1 < bd_2:
+                alpha_min = alpha_mid
+            else:
+                alpha_max = alpha_mid
+
+        return 1 - 0.5 * (alpha_min + alpha_max)
+
+    def chernoff_information(self, point_1: Point, point_2: Point):
+        alpha_star = self.chernoff_point(point_1, point_2)
+        return self.bhattacharyya_distance(point_1, point_2, alpha_star)
+
     def _theta_to_eta(self, theta: np.ndarray) -> np.ndarray:
         return self.theta_generator.grad(theta)
 
     def _eta_to_theta(self, eta: np.ndarray) -> np.ndarray:
         return self.eta_generator.grad(eta)
+
+
+class BregmanBall(InputObject):
+
+    def __init__(self, prime_generator: Generator, dual_generator: Generator):
+        pass

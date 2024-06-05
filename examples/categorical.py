@@ -5,7 +5,7 @@ from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.distribution.exponential_family.categorical import \
     CategoricalManifold
 from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS
-from bregman.visualizer.matplotlib import MatplotlibVisualizer
+from bregman.visualizer.matplotlib import CoordObjectMatplotlibVisualizer
 
 if __name__ == "__main__":
 
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     primal_pt = manifold.theta_parallel_transport(coord1, coord2)
 
     # Define visualizer
-    visualizer = MatplotlibVisualizer(manifold, VISUALIZE_INDEX)
+    visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
 
     # Add objects to visualize
     visualizer.plot_object(coord1, label=manifold.convert_to_display(coord1))

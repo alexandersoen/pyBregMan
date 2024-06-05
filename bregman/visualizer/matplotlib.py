@@ -9,10 +9,10 @@ from matplotlib.figure import Figure
 from bregman.base import Coordinates, Point
 from bregman.manifold.manifold import BregmanManifold, Geodesic
 from bregman.manifold.parallel_transport import ParallelTansport
-from bregman.visualizer.visualizer import Visualizer
+from bregman.visualizer.visualizer import CoordObjectVisualizer
 
 
-class MatplotlibVisualizer(Visualizer):
+class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
 
     def __init__(
         self,

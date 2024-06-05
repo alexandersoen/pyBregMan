@@ -13,7 +13,7 @@ import numpy as np
 from bregman.base import LAMBDA_COORDS, Point
 from bregman.manifold.distribution.exponential_family.categorical import \
     CategoricalManifold
-from bregman.manifold.manifold import ETA_COORDS
+from bregman.manifold.manifold import DualCoord
 
 warnings.filterwarnings("error")
 
@@ -61,13 +61,13 @@ if __name__ == "__main__":
     barbara = Point(LAMBDA_COORDS, hist1)
     lena = Point(LAMBDA_COORDS, hist2)
 
-    js_centroid = manifold.eta_skew_burbea_rao_barycenter(
-        [barbara, lena], [0.5, 0.5], [1.0, 1.0]
+    js_centroid = manifold.skew_burbea_rao_barycenter(
+        [barbara, lena], [0.5, 0.5], [1.0, 1.0], coord=DualCoord.ETA
     )
     js_centroid = manifold.convert_coord(LAMBDA_COORDS, js_centroid)
 
-    jef_centroid = manifold.theta_skew_burbea_rao_barycenter(
-        [barbara, lena], [0.5, 0.5], [1.0, 1.0]
+    jef_centroid = manifold.skew_burbea_rao_barycenter(
+        [barbara, lena], [0.5, 0.5], [1.0, 1.0], coord=DualCoord.ETA
     )
     jef_centroid = manifold.convert_coord(LAMBDA_COORDS, jef_centroid)
 

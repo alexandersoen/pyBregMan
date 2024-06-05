@@ -2,4 +2,4 @@ numpy
 matplotlib
 ipython
 scipy
-autograd[scipy]
+autograd

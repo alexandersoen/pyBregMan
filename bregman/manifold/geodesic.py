@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from bregman.base import BregObject, Coordinates, Point
+from bregman.base import Coordinates, CoordObject, Point
 
 
-class Geodesic(BregObject, ABC):
+class Geodesic(CoordObject, ABC):
 
     def __init__(
         self,

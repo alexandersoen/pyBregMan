@@ -15,12 +15,22 @@ class Coordinates:
 
 
 @dataclass
-class BregObject:
+class CoordObject:
     coords: Coordinates
 
 
+@dataclass
+class InputObject:
+    r"""
+    Not sure what to call this. Aim is to have a typing for objects which map to an "input space $\mathcal{X}$".
+    This is separate from `CoordObject` which has an abstract(?) coordinate system eg `THETA`, `ETA`, or `LAMBDA`.
+    """
+
+    pass
+
+
 @dataclass(unsafe_hash=True)
-class Point(BregObject):
+class Point(CoordObject):
     data: np.ndarray
 
 

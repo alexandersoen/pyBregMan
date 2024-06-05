@@ -4,8 +4,8 @@ from bregman.base import Point
 from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.distribution.exponential_family.categorical import \
     CategoricalManifold
-from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS
-from bregman.visualizer.matplotlib import MatplotlibVisualizer
+from bregman.manifold.manifold import DualCoord
+from bregman.visualizer.matplotlib import CoordObjectMatplotlibVisualizer
 
 if __name__ == "__main__":
 
@@ -39,12 +39,18 @@ if __name__ == "__main__":
     alphas = [0.5, 0.5, 0.5]
     weights = [1.0, 1.0, 1.0]
 
-    js_centroid = manifold.theta_skew_burbea_rao_barycenter(points, alphas, weights)
-    theta_centroid = manifold.theta_barycenter(points, weights)
-    eta_centroid = manifold.eta_barycenter(points, weights)
+    js_centroid = manifold.skew_burbea_rao_barycenter(
+        points, alphas, weights, coord=DualCoord.THETA
+    )
+    theta_centroid = manifold.bregman_barycenter(
+        points, weights, coord=DualCoord.THETA
+    )
+    eta_centroid = manifold.bregman_barycenter(
+        points, weights, coord=DualCoord.ETA
+    )
 
     # Define visualizer
-    visualizer = MatplotlibVisualizer(manifold, VISUALIZE_INDEX)
+    visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
 
     # Add objects to visualize
     visualizer.plot_object(p1, label=manifold.convert_to_display(p1))

@@ -3,7 +3,7 @@ import numpy as np
 from bregman.base import LAMBDA_COORDS, Point
 from bregman.manifold.distribution.exponential_family.normal import \
     Gaussian1DManifold
-from bregman.visualizer.matplotlib import MatplotlibVisualizer
+from bregman.visualizer.matplotlib import CoordObjectMatplotlibVisualizer
 
 if __name__ == "__main__":
 
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     dual_geo = manifold.eta_geodesic(coord1, coord2)
 
     # Define visualizer
-    visualizer = MatplotlibVisualizer(manifold, (0, 1))
+    visualizer = CoordObjectMatplotlibVisualizer(manifold, (0, 1))
 
     # Add objects to visualize
     visualizer.plot_object(coord1, label=manifold.convert_to_display(coord1))
