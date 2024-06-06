@@ -52,7 +52,6 @@ class BregmanManifold(ABC):
         self.atlas.add_transition(THETA_COORDS, ETA_COORDS, self._theta_to_eta)
         self.atlas.add_transition(ETA_COORDS, THETA_COORDS, self._eta_to_theta)
 
-    @property
     def fisher_rao_connection(self) -> Connection:
         return NotImplemented()
 

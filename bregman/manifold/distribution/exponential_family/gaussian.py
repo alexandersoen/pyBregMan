@@ -2,14 +2,15 @@ from dataclasses import dataclass
 
 import autograd.numpy as anp
 import numpy as np
+from scipy.linalg import expm
 
-from bregman.base import DisplayPoint, Point, Shape
+from bregman.base import LAMBDA_COORDS, DisplayPoint, Point, Shape
 from bregman.generator.generator import AutoDiffGenerator
-from bregman.manifold.application import LAMBDA_COORDS, point_convert_wrapper
+from bregman.manifold.application import point_convert_wrapper
 from bregman.manifold.distribution.exponential_family.exp_family import (
     ExponentialFamilyDistribution, ExponentialFamilyManifold)
+from bregman.manifold.geodesic import Geodesic
 from bregman.manifold.manifold import THETA_COORDS
-from bregman.object.distribution import Distribution
 
 
 class GaussianPoint(DisplayPoint):
@@ -71,7 +72,7 @@ class GaussianPrimalGenerator(AutoDiffGenerator):
         theta_mu, theta_sigma = _flatten_to_mu_Sigma(self.dimension, x)
 
         return 0.5 * (
-            0.5 * theta_mu.T @ anp.linalg.inv(theta_sigma) @ theta_mu
+            0.5 * theta_mu.T @ anp.linalg.pinv(theta_sigma) @ theta_mu
             - anp.log(anp.linalg.det(theta_sigma))
             + self.dimension * anp.log(np.pi)
         )
@@ -87,10 +88,10 @@ class GaussianDualGenerator(AutoDiffGenerator):
     def _F(self, x: np.ndarray) -> np.ndarray:
         eta_mu, eta_sigma = _flatten_to_mu_Sigma(self.dimension, x)
 
-        return -0.5 * (
-            anp.log(1 + eta_mu.T @ anp.linalg.inv(eta_sigma) @ eta_mu)
-            + anp.log(anp.linalg.det(-eta_sigma))
-            + self.dimension * (1 + anp.log(2 * np.pi))
+        return (
+            -0.5 * anp.log(1 + eta_mu.T @ anp.linalg.pinv(eta_sigma) @ eta_mu)
+            - 0.5 * anp.log(anp.linalg.det(-eta_sigma))
+            - 0.5 * self.dimension * (1 + anp.log(2 * np.pi))
         )
 
 
@@ -112,7 +113,7 @@ class GaussianManifold(
         )
 
     def point_to_distribution(self, point: Point) -> GaussianDistribution:
-        theta = self.convert_coord(THETA_COORDS, point)
+        theta = self.convert_coord(THETA_COORDS, point).data
 
         return GaussianDistribution(theta, self.input_dimension)
 
@@ -120,10 +121,8 @@ class GaussianManifold(
         self, distribution: GaussianDistribution
     ) -> GaussianPoint:
         opoint = Point(
-            coords=LAMBDA_COORDS,
-            data=np.concatenate(
-                [distribution.mu, distribution.sigma.flatten()]
-            ),
+            coords=THETA_COORDS,
+            data=distribution.theta,
         )
         return self.display_factory(opoint)
 
@@ -140,7 +139,7 @@ class GaussianManifold(
         mu, Sigma = _flatten_to_mu_Sigma(self.input_dimension, lamb)
 
         eta_mu = mu
-        eta_Sigma = -Sigma - mu @ mu.T
+        eta_Sigma = -Sigma - np.outer(mu, mu)
 
         return np.concatenate([eta_mu, eta_Sigma.flatten()])
 
@@ -159,7 +158,7 @@ class GaussianManifold(
         eta_mu, eta_Sigma = _flatten_to_mu_Sigma(self.input_dimension, eta)
 
         mu = eta_mu
-        var = -eta_Sigma - eta_mu @ eta_mu.T
+        var = -eta_Sigma - np.outer(eta_mu, eta_mu)
 
         return np.concatenate([mu, var.flatten()])
 
@@ -171,3 +170,105 @@ def _flatten_to_mu_Sigma(
     sigma = vec[input_dimension:].reshape(input_dimension, input_dimension)
 
     return mu, sigma
+
+
+class EriksenIVPGeodesic(Geodesic):
+
+    def __init__(
+        self,
+        dest: Point,
+        manifold: GaussianManifold,
+    ) -> None:
+
+        dest_point = manifold.convert_to_display(dest)
+        self.dest_mu = dest_point.mu
+        self.dest_Sigma = dest_point.Sigma
+        self.dim = len(self.dest_mu)
+
+        id_lambda_coords = np.concatenate(
+            [np.zeros(self.dim), np.eye(self.dim).flatten()]
+        )
+        id_point = Point(LAMBDA_COORDS, id_lambda_coords)
+
+        A_matrix = np.zeros((2 * self.dim + 1, 2 * self.dim + 1))
+        A_matrix[: self.dim, : self.dim] = -dest_point.Sigma
+        A_matrix[self.dim + 1 :, self.dim + 1 :] = dest_point.Sigma
+        A_matrix[self.dim, : self.dim] = dest_point.mu
+        A_matrix[: self.dim, self.dim] = dest_point.mu
+        A_matrix[self.dim, self.dim + 1 :] = -dest_point.mu
+        # A_matrix[2 * self.dim, self.dim + 1 :] = -dest_point.mu
+        A_matrix[self.dim + 1 :, self.dim] = -dest_point.mu
+
+        print(A_matrix)
+
+        self.A_matrix = A_matrix
+
+        super().__init__(
+            LAMBDA_COORDS,
+            id_point,
+            manifold.convert_coord(LAMBDA_COORDS, dest),
+        )
+
+    def path(self, t: float) -> Point:
+
+        Lambda = expm(self.A_matrix * t)
+
+        Delta = Lambda[: self.dim, : self.dim]
+        delta = Lambda[self.dim, : self.dim]
+
+        Sigma = np.linalg.inv(Delta)
+        mu = Sigma @ delta
+
+        return Point(LAMBDA_COORDS, np.concatenate([mu, Sigma.flatten()]))
+
+    def __call__(self, t: float) -> Point:
+        assert 0 <= t <= 1
+        return self.path(t)
+
+
+"""
+class EriksenGeodesicStd(Geodesic):
+
+    def __init__(
+        self,
+        dest: Point,
+        manifold: GaussianManifold,
+    ) -> None:
+
+        dest_point = manifold.convert_to_display(dest)
+        self.dest_mu = dest_point.mu
+        self.dest_Sigma = dest_point.Sigma
+        self.dim = len(self.dest_mu)
+
+        id_lambda_coords = np.concatenate(
+            [np.zeros(self.dim), np.eye(self.dim).flatten()]
+        )
+        id_point = Point(LAMBDA_COORDS, id_lambda_coords)
+
+        A_matrix = np.zeros((2 * self.dim + 1, 2 * self.dim + 1))
+        A_matrix[: self.dim, : self.dim] = -dest_point.Sigma
+        A_matrix[self.dim + 1 :, self.dim + 1 :] = dest_point.Sigma
+        A_matrix[self.dim, : self.dim] = dest_point.mu
+        A_matrix[self.dim, self.dim : -1] = -dest_point.mu
+
+        self.A_matrix = A_matrix
+
+        super().__init__(
+            LAMBDA_COORDS,
+            id_point,
+            manifold.convert_coord(LAMBDA_COORDS, dest),
+        )
+
+    def path(self, t: float) -> Point:
+
+        Lambda = expm(self.A_matrix * t)
+
+        Delta = Lambda[: self.dim, : self.dim]
+        delta = Lambda[: self.dim, 0]
+
+        return Point(LAMBDA_COORDS, np.concatenate([delta, Delta.flatten()]))
+
+    def __call__(self, t: float) -> Point:
+        assert 0 <= t <= 1
+        return self.path(t)
+    """
