@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
 
 from bregman.base import Coordinates, CoordObject, Point
+from bregman.manifold.bisector import Bisector
 from bregman.manifold.manifold import BregmanManifold, Geodesic
 from bregman.manifold.parallel_transport import ParallelTansport
 
@@ -17,6 +19,7 @@ class CoordObjectVisualizer(ABC):
 
     plot_list: list[tuple[CoordObject, dict]] = []
     animate_list: list[tuple[CoordObject, dict]] = []
+    callback_list: list["VisualizerCallback"] = []
 
     def __init__(self, manifold: BregmanManifold) -> None:
         super().__init__()
@@ -29,6 +32,9 @@ class CoordObjectVisualizer(ABC):
     def animate_object(self, obj: CoordObject, **kwargs) -> None:
         self.animate_list.append((obj, kwargs))
 
+    def add_callback(self, callback: "VisualizerCallback") -> None:
+        self.callback_list.append(callback)
+
     @abstractmethod
     def plot_point(self, coords: Coordinates, point: Point, **kwargs) -> None:
         pass
@@ -36,6 +42,12 @@ class CoordObjectVisualizer(ABC):
     @abstractmethod
     def plot_geodesic(
         self, coords: Coordinates, geodesic: Geodesic, **kwargs
+    ) -> None:
+        pass
+
+    @abstractmethod
+    def plot_bisector(
+        self, coords: Coordinates, bisector: Bisector, **kwargs
     ) -> None:
         pass
 
@@ -63,6 +75,13 @@ class CoordObjectVisualizer(ABC):
     ) -> None:
         pass
 
+    def run_callbacks(
+        self, obj: CoordObject, coord: Coordinates, **kwarg
+    ) -> None:
+
+        for c in self.callback_list:
+            c.call(obj, coord, self, **kwarg)
+
     def visualize(self, coords: Coordinates) -> None:
         for obj, kwarg in self.plot_list:
             match obj:
@@ -70,6 +89,8 @@ class CoordObjectVisualizer(ABC):
                     self.plot_point(coords, obj, **kwarg)
                 case Geodesic():
                     self.plot_geodesic(coords, obj, **kwarg)
+                case Bisector():
+                    self.plot_bisector(coords, obj, **kwarg)
                 #                case ParallelTansport():
                 #                    self.plot_parallel_transport(coords, obj, **kwarg)
                 case _:
@@ -83,3 +104,23 @@ class CoordObjectVisualizer(ABC):
                     self.animate_parallel_transport(coords, obj, **kwarg)
                 case _:
                     raise NoAnimationRoutine
+
+        for obj, kwarg in self.plot_list:
+            for c in self.callback_list:
+                c.call(obj, coords, self, **kwarg)
+
+
+TVisualizer = TypeVar("TVisualizer", bound=CoordObjectVisualizer)
+
+
+class VisualizerCallback(ABC, Generic[TVisualizer]):
+
+    @abstractmethod
+    def call(
+        self,
+        obj: CoordObject,
+        coords: Coordinates,
+        visualizer: TVisualizer,
+        **kwargs,
+    ) -> None:
+        pass

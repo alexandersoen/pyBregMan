@@ -69,10 +69,11 @@ class GaussianPrimalGenerator(AutoDiffGenerator):
         self.dimension = dimension
 
     def _F(self, x: np.ndarray) -> np.ndarray:
+
         theta_mu, theta_sigma = _flatten_to_mu_Sigma(self.dimension, x)
 
         return 0.5 * (
-            0.5 * theta_mu.T @ anp.linalg.pinv(theta_sigma) @ theta_mu
+            0.5 * theta_mu.T @ anp.linalg.inv(theta_sigma) @ theta_mu
             - anp.log(anp.linalg.det(theta_sigma))
             + self.dimension * anp.log(np.pi)
         )
@@ -86,13 +87,20 @@ class GaussianDualGenerator(AutoDiffGenerator):
         self.dimension = dimension
 
     def _F(self, x: np.ndarray) -> np.ndarray:
-        eta_mu, eta_sigma = _flatten_to_mu_Sigma(self.dimension, x)
 
-        return (
-            -0.5 * anp.log(1 + eta_mu.T @ anp.linalg.pinv(eta_sigma) @ eta_mu)
-            - 0.5 * anp.log(anp.linalg.det(-eta_sigma))
-            - 0.5 * self.dimension * (1 + anp.log(2 * np.pi))
-        )
+        if self.dimension > 1:
+            eta_mu, eta_sigma = _flatten_to_mu_Sigma(self.dimension, x)
+
+            return (
+                -0.5
+                * anp.log(1 + eta_mu.T @ anp.linalg.inv(eta_sigma) @ eta_mu)
+                - 0.5 * anp.log(anp.linalg.det(-eta_sigma))
+                - 0.5 * self.dimension * (1 + anp.log(2 * np.pi))
+            )
+        else:
+            eta_mu, eta_sigma = x
+
+            return -0.5 * anp.log(anp.abs(eta_mu * eta_mu - eta_sigma))
 
 
 class GaussianManifold(

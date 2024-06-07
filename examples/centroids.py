@@ -42,6 +42,9 @@ if __name__ == "__main__":
     js_centroid = manifold.skew_burbea_rao_barycenter(
         points, alphas, weights, coord=DualCoord.THETA
     )
+    j_centroid = manifold.skew_burbea_rao_barycenter(
+        points, alphas, weights, coord=DualCoord.ETA
+    )
     theta_centroid = manifold.bregman_barycenter(
         points, weights, coord=DualCoord.THETA
     )
@@ -68,6 +71,12 @@ if __name__ == "__main__":
         c="purple",
         marker="x",
         label=f"JS Centroid: {manifold.convert_to_display(js_centroid)}",
+    )
+    visualizer.plot_object(
+        j_centroid,
+        c="pink",
+        marker="x",
+        label=f"J Centroid: {manifold.convert_to_display(j_centroid)}",
     )
     visualizer.plot_object(
         eta_centroid,

@@ -19,10 +19,17 @@ if __name__ == "__main__":
     num_frames = 120
 
     # Define manifold + objects
-    manifold = GaussianManifold(2)
+    manifold = GaussianManifold(1)
 
-    coord1 = Point(LAMBDA_COORDS, np.array([0, 0, 1, 0, 0, 1]))
-    coord2 = Point(LAMBDA_COORDS, np.array([1, 2, 1, 0, 0, 0.5]))
+    coord1 = Point(LAMBDA_COORDS, np.array([0.0, 1.0]))
+    coord2 = Point(LAMBDA_COORDS, np.array([1.0, 2.0]))
+
+    chernoff_point_alpha = manifold.chernoff_point(coord1, coord2)
+    mp = Point(
+        ETA_COORDS,
+        manifold.convert_coord(ETA_COORDS, coord1).data * 0.5
+        + manifold.convert_coord(ETA_COORDS, coord2).data * 0.5,
+    )
 
     print(manifold.convert_coord(ETA_COORDS, coord2))
     print(
@@ -31,11 +38,11 @@ if __name__ == "__main__":
         )
     )
 
-    chernoff_point_alpha = manifold.chernoff_point(coord1, coord2)
-    mp = Point(
-        ETA_COORDS,
-        manifold.convert_coord(ETA_COORDS, coord1).data * 0.5
-        + manifold.convert_coord(ETA_COORDS, coord2).data * 0.5,
+    print(manifold.convert_coord(THETA_COORDS, coord2))
+    print(
+        manifold.convert_coord(
+            ETA_COORDS, manifold.convert_coord(THETA_COORDS, coord2)
+        )
     )
 
     print(
@@ -54,11 +61,12 @@ if __name__ == "__main__":
         manifold.bregman_generator(DualCoord.ETA),
     )
 
-    eriksen = EriksenIVPGeodesic(coord2, manifold)
-
-    print(eriksen(0))
-    print(eriksen(0.5))
-    print(eriksen(1))
+    theta_bisector = BregmanBisector(
+        THETA_COORDS,
+        manifold.convert_coord(THETA_COORDS, coord1),
+        manifold.convert_coord(THETA_COORDS, coord2),
+        manifold.bregman_generator(DualCoord.THETA),
+    )
 
     # Define visualizer
     visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
@@ -72,15 +80,16 @@ if __name__ == "__main__":
         label=f"Chernoff Point, alpha={chernoff_point_alpha:.2f}",
     )
     visualizer.plot_object(primal_geo, c="blue", label="Primal Geodesic")
-    visualizer.plot_object(eriksen, c="purple", label="Eriksen Geodesic")
     visualizer.plot_object(dual_geo, c="red", label="Dual Geodesic")
     visualizer.plot_object(
         eta_bisector, alpha=0.7, c="red", label="Dual Bisector"
     )
+    visualizer.plot_object(
+        theta_bisector, alpha=0.7, c="blue", label="Primal Bisector"
+    )
 
     # Add animations
     visualizer.animate_object(primal_geo, c="blue")
-    visualizer.animate_object(eriksen, c="purple")
     visualizer.animate_object(dual_geo, c="red")
 
     visualizer.add_callback(cov_cb)
