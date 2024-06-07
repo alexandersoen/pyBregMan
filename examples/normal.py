@@ -7,13 +7,14 @@ from bregman.manifold.distribution.exponential_family.gaussian import (
     EriksenIVPGeodesic, GaussianManifold)
 from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, DualCoord
 from bregman.visualizer.matplotlib import (CoordObjectMatplotlibVisualizer,
+                                           Visualize2DTissotIndicatrix,
                                            VisualizeGaussian2DCovariancePoints)
 
 if __name__ == "__main__":
 
     # DISPLAY_TYPE = LAMBDA_COORDS
-    DISPLAY_TYPE = ETA_COORDS
-    # DISPLAY_TYPE = THETA_COORDS
+    # DISPLAY_TYPE = ETA_COORDS
+    DISPLAY_TYPE = THETA_COORDS
     VISUALIZE_INDEX = (0, 1)
 
     num_frames = 120
@@ -70,7 +71,7 @@ if __name__ == "__main__":
 
     # Define visualizer
     visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
-    cov_cb = VisualizeGaussian2DCovariancePoints()
+    metric_cb = Visualize2DTissotIndicatrix()
 
     # Add objects to visualize
     visualizer.plot_object(coord1, label=manifold.convert_to_display(coord1))
@@ -92,6 +93,6 @@ if __name__ == "__main__":
     visualizer.animate_object(primal_geo, c="blue")
     visualizer.animate_object(dual_geo, c="red")
 
-    visualizer.add_callback(cov_cb)
+    visualizer.add_callback(metric_cb)
 
     visualizer.visualize(DISPLAY_TYPE)

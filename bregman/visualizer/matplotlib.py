@@ -10,7 +10,7 @@ from bregman.base import LAMBDA_COORDS, Coordinates, CoordObject, Point
 from bregman.manifold.bisector import Bisector
 from bregman.manifold.distribution.exponential_family.gaussian import \
     _flatten_to_mu_Sigma
-from bregman.manifold.manifold import BregmanManifold, Geodesic
+from bregman.manifold.manifold import BregmanManifold, DualCoord, Geodesic
 from bregman.manifold.parallel_transport import ParallelTansport
 from bregman.visualizer.visualizer import (CoordObjectVisualizer,
                                            VisualizerCallback)
@@ -230,7 +230,9 @@ class VisualizeGaussian2DCovariancePoints(
 
         dim = int(0.5 * (np.sqrt(4 * visualizer.manifold.dimension + 1) - 1))
 
-        mu, Sigma = _flatten_to_mu_Sigma(dim, obj.data)
+        mu, Sigma = _flatten_to_mu_Sigma(
+            dim, visualizer.manifold.convert_coord(LAMBDA_COORDS, obj).data
+        )
 
         L = np.linalg.cholesky(Sigma).T
 
@@ -241,5 +243,45 @@ class VisualizeGaussian2DCovariancePoints(
             L.T
         )
         v = v + mu
+
+        visualizer.ax.plot(v[:, 0], v[:, 1], **kwargs)
+
+
+class Visualize2DTissotIndicatrix(
+    VisualizerCallback[CoordObjectMatplotlibVisualizer]
+):
+
+    def __init__(self, scale: float = 0.2, npoints: int = 1_000) -> None:
+        super().__init__()
+
+        self.scale = scale
+        self.npoints = npoints
+
+    def call(
+        self,
+        obj: CoordObject,
+        coords: Coordinates,
+        visualizer: CoordObjectMatplotlibVisualizer,
+        **kwargs,
+    ) -> None:
+
+        if coords == LAMBDA_COORDS or not isinstance(obj, Point):
+            return None
+
+        point = visualizer.manifold.convert_coord(coords, obj)
+
+        metric = visualizer.manifold.bregman_connection(
+            DualCoord(coords)
+        ).metric(point.data)
+
+        L = np.linalg.cholesky(metric).T
+
+        p = np.arange(self.npoints + 1)
+        thetas = 2 * np.pi * p / self.npoints
+
+        v = self.scale * np.column_stack([np.cos(thetas), np.sin(thetas)]).dot(
+            L.T
+        )
+        v = v + point.data
 
         visualizer.ax.plot(v[:, 0], v[:, 1], **kwargs)

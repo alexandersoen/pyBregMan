@@ -11,8 +11,8 @@ from bregman.visualizer.matplotlib import (CoordObjectMatplotlibVisualizer,
 
 if __name__ == "__main__":
 
-    # DISPLAY_TYPE = LAMBDA_COORDS
-    DISPLAY_TYPE = ETA_COORDS
+    DISPLAY_TYPE = LAMBDA_COORDS
+    # DISPLAY_TYPE = ETA_COORDS
     # DISPLAY_TYPE = THETA_COORDS
     VISUALIZE_INDEX = (0, 1)
 
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     # Define manifold + objects
     manifold = GaussianManifold(2)
 
-    coord1 = Point(LAMBDA_COORDS, np.array([0, 0, 1, 0, 0, 1]))
+    coord1 = Point(LAMBDA_COORDS, np.array([0, 0, 1, 0.5, 0.5, 2]))
     coord2 = Point(LAMBDA_COORDS, np.array([1, 2, 1, 0, 0, 0.5]))
 
     print(manifold.convert_coord(ETA_COORDS, coord2))

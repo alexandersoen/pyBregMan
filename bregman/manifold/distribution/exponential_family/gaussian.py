@@ -70,13 +70,22 @@ class GaussianPrimalGenerator(AutoDiffGenerator):
 
     def _F(self, x: np.ndarray) -> np.ndarray:
 
-        theta_mu, theta_sigma = _flatten_to_mu_Sigma(self.dimension, x)
+        if self.dimension > 1:
 
-        return 0.5 * (
-            0.5 * theta_mu.T @ anp.linalg.inv(theta_sigma) @ theta_mu
-            - anp.log(anp.linalg.det(theta_sigma))
-            + self.dimension * anp.log(np.pi)
-        )
+            theta_mu, theta_sigma = _flatten_to_mu_Sigma(self.dimension, x)
+
+            return 0.5 * (
+                0.5 * theta_mu.T @ anp.linalg.inv(theta_sigma) @ theta_mu
+                - anp.log(anp.linalg.det(theta_sigma))
+                + self.dimension * anp.log(anp.pi)
+            )
+        else:
+
+            theta_mu, theta_sigma = x
+
+            return -0.25 * theta_mu * theta_mu / theta_sigma + 0.5 * anp.log(
+                -anp.pi / theta_sigma
+            )
 
 
 class GaussianDualGenerator(AutoDiffGenerator):
@@ -135,40 +144,62 @@ class GaussianManifold(
         return self.display_factory(opoint)
 
     def _lambda_to_theta(self, lamb: np.ndarray) -> np.ndarray:
-        mu, Sigma = _flatten_to_mu_Sigma(self.input_dimension, lamb)
-        inv_Sigma = np.linalg.inv(Sigma)
+        if self.input_dimension > 1:
+            mu, Sigma = _flatten_to_mu_Sigma(self.input_dimension, lamb)
+            inv_Sigma = np.linalg.inv(Sigma)
 
-        theta_mu = inv_Sigma @ mu
-        theta_Sigma = 0.5 * inv_Sigma
+            theta_mu = inv_Sigma @ mu
+            theta_Sigma = 0.5 * inv_Sigma
 
-        return np.concatenate([theta_mu, theta_Sigma.flatten()])
+            return np.concatenate([theta_mu, theta_Sigma.flatten()])
+        else:
+            mu, sigma = lamb
+
+            return np.array([mu / sigma, -0.5 / sigma])
 
     def _lambda_to_eta(self, lamb: np.ndarray) -> np.ndarray:
-        mu, Sigma = _flatten_to_mu_Sigma(self.input_dimension, lamb)
+        if self.input_dimension > 1:
+            mu, Sigma = _flatten_to_mu_Sigma(self.input_dimension, lamb)
 
-        eta_mu = mu
-        eta_Sigma = -Sigma - np.outer(mu, mu)
+            eta_mu = mu
+            eta_Sigma = -Sigma - np.outer(mu, mu)
 
-        return np.concatenate([eta_mu, eta_Sigma.flatten()])
+            return np.concatenate([eta_mu, eta_Sigma.flatten()])
+        else:
+            mu, sigma = lamb
+
+            return np.array([mu, mu * mu + sigma])
 
     def _theta_to_lambda(self, theta: np.ndarray) -> np.ndarray:
-        theta_mu, theta_Sigma = _flatten_to_mu_Sigma(
-            self.input_dimension, theta
-        )
-        inv_theta_Sigma = np.linalg.inv(theta_Sigma)
+        if self.input_dimension > 1:
+            theta_mu, theta_Sigma = _flatten_to_mu_Sigma(
+                self.input_dimension, theta
+            )
+            inv_theta_Sigma = np.linalg.inv(theta_Sigma)
 
-        mu = 0.5 * inv_theta_Sigma @ theta_mu
-        var = 0.5 * inv_theta_Sigma
+            mu = 0.5 * inv_theta_Sigma @ theta_mu
+            var = 0.5 * inv_theta_Sigma
 
-        return np.concatenate([mu, var.flatten()])
+            return np.concatenate([mu, var.flatten()])
+        else:
+            theta_mu, theta_sigma = theta
+
+            return np.array(
+                [-0.5 * theta_mu / theta_sigma, -0.5 / theta_sigma]
+            )
 
     def _eta_to_lambda(self, eta: np.ndarray) -> np.ndarray:
-        eta_mu, eta_Sigma = _flatten_to_mu_Sigma(self.input_dimension, eta)
+        if self.input_dimension > 1:
+            eta_mu, eta_Sigma = _flatten_to_mu_Sigma(self.input_dimension, eta)
 
-        mu = eta_mu
-        var = -eta_Sigma - np.outer(eta_mu, eta_mu)
+            mu = eta_mu
+            var = -eta_Sigma - np.outer(eta_mu, eta_mu)
 
-        return np.concatenate([mu, var.flatten()])
+            return np.concatenate([mu, var.flatten()])
+        else:
+            eta_mu, eta_sigma = eta
+
+            return np.array([eta_mu, eta_sigma - eta_mu * eta_mu])
 
 
 def _flatten_to_mu_Sigma(
