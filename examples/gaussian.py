@@ -64,7 +64,6 @@ if __name__ == "__main__":
 
     # Define visualizer
     visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
-    cov_cb = VisualizeGaussian2DCovariancePoints()
 
     # Add objects to visualize
     visualizer.plot_object(coord1, label=manifold.convert_to_display(coord1))
@@ -108,6 +107,7 @@ if __name__ == "__main__":
     # visualizer.animate_object(eriksen, c="purple")
     visualizer.animate_object(dual_geo, c="red")
 
+    cov_cb = VisualizeGaussian2DCovariancePoints()
     visualizer.add_callback(cov_cb)
 
     visualizer.visualize(DISPLAY_TYPE)

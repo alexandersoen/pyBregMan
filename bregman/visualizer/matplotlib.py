@@ -73,10 +73,10 @@ class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
 
         edgecolors = None
         facecolors = None
-        if "edgecolors" in kwargs:
+        if "marker" not in kwargs and "edgecolors" in kwargs:
             edgecolors = kwargs["edgecolors"]
             facecolors = "none"
-        elif "c" in kwargs:
+        elif "marker" not in kwargs and "c" in kwargs:
             edgecolors = kwargs["c"]
             facecolors = "none"
             del kwargs["c"]
@@ -87,6 +87,7 @@ class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
             "facecolors": facecolors,
         }
         point_vis_kwargs.update(kwargs)
+        print(point_vis_kwargs)
 
         point = self.manifold.convert_coord(coords, point)
         self.ax.scatter(
