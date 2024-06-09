@@ -69,13 +69,34 @@ class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
         print(self.xmin, self.ymin, self.xmax, self.ymax)
 
     def plot_point(self, coords: Coordinates, point: Point, **kwargs) -> None:
+        kwargs = kwargs.copy()
+
+        edgecolors = None
+        facecolors = None
+        if "edgecolors" in kwargs:
+            edgecolors = kwargs["edgecolors"]
+            facecolors = "none"
+        elif "c" in kwargs:
+            edgecolors = kwargs["c"]
+            facecolors = "none"
+            del kwargs["c"]
+
+        point_vis_kwargs: dict[str, Any] = {
+            "marker": "o",
+            "edgecolors": edgecolors,
+            "facecolors": facecolors,
+        }
+        point_vis_kwargs.update(kwargs)
+
         point = self.manifold.convert_coord(coords, point)
-        self.ax.scatter(point.data[self.dim1], point.data[self.dim2], **kwargs)
+        self.ax.scatter(
+            point.data[self.dim1], point.data[self.dim2], **point_vis_kwargs
+        )
 
     def plot_geodesic(
         self, coords: Coordinates, geodesic: Geodesic, **kwargs
     ) -> None:
-        geo_vis_kwargs = {
+        geo_vis_kwargs: dict[str, Any] = {
             "ls": "-",
             "linewidth": 1,
         }
@@ -99,7 +120,7 @@ class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
         if bisector.coords != coords or self.manifold.dimension != 2:
             return None
 
-        bis_vis_kwargs = {
+        bis_vis_kwargs: dict[str, Any] = {
             "ls": "-.",
             "linewidth": 1,
         }

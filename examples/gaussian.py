@@ -3,16 +3,16 @@ import numpy as np
 from bregman.base import Point
 from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.bisector import BregmanBisector
-from bregman.manifold.distribution.exponential_family.gaussian import (
-    EriksenIVPGeodesic, GaussianManifold)
+from bregman.manifold.distribution.exponential_family.gaussian import \
+    GaussianManifold
 from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, DualCoord
 from bregman.visualizer.matplotlib import (CoordObjectMatplotlibVisualizer,
                                            VisualizeGaussian2DCovariancePoints)
 
 if __name__ == "__main__":
 
-    # DISPLAY_TYPE = LAMBDA_COORDS
-    DISPLAY_TYPE = ETA_COORDS
+    DISPLAY_TYPE = LAMBDA_COORDS
+    # DISPLAY_TYPE = ETA_COORDS
     # DISPLAY_TYPE = THETA_COORDS
     VISUALIZE_INDEX = (0, 1)
 
@@ -62,12 +62,6 @@ if __name__ == "__main__":
         manifold.bregman_generator(DualCoord.THETA),
     )
 
-    eriksen = EriksenIVPGeodesic(coord2, manifold)
-
-    print(eriksen(0))
-    print(eriksen(0.5))
-    print(eriksen(1))
-
     # Define visualizer
     visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
     cov_cb = VisualizeGaussian2DCovariancePoints()
@@ -80,7 +74,6 @@ if __name__ == "__main__":
         label=f"Chernoff Point, alpha={chernoff_point_alpha:.2f}",
     )
     visualizer.plot_object(primal_geo, c="blue", label="Primal Geodesic")
-    # visualizer.plot_object(eriksen, c="purple", label="Eriksen Geodesic")
     visualizer.plot_object(dual_geo, c="red", label="Dual Geodesic")
     visualizer.plot_object(
         eta_bisector, alpha=0.7, c="red", label="Dual Bisector"
