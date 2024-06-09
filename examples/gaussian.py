@@ -11,8 +11,8 @@ from bregman.visualizer.matplotlib import (CoordObjectMatplotlibVisualizer,
 
 if __name__ == "__main__":
 
-    DISPLAY_TYPE = LAMBDA_COORDS
-    # DISPLAY_TYPE = ETA_COORDS
+    # DISPLAY_TYPE = LAMBDA_COORDS
+    DISPLAY_TYPE = ETA_COORDS
     # DISPLAY_TYPE = THETA_COORDS
     VISUALIZE_INDEX = (0, 1)
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
         )
     )
 
-    chernoff_point_alpha = manifold.chernoff_point(coord1, coord2)
+    chernoff_point_alpha = manifold.chernoff_point(coord1, coord2, eps=1e-10)
     mp = Point(
         ETA_COORDS,
         manifold.convert_coord(ETA_COORDS, coord1).data * 0.5
@@ -45,13 +45,21 @@ if __name__ == "__main__":
     primal_geo = manifold.bregman_geodesic(coord1, coord2, DualCoord.THETA)
     dual_geo = manifold.bregman_geodesic(coord1, coord2, DualCoord.ETA)
 
-    chernoff_point = primal_geo(chernoff_point_alpha)
+    chernoff_point = primal_geo(1 - chernoff_point_alpha)
 
+    # This does not make sense to plot here. Only for 2D
     eta_bisector = BregmanBisector(
         ETA_COORDS,
         manifold.convert_coord(ETA_COORDS, coord1),
         manifold.convert_coord(ETA_COORDS, coord2),
         manifold.bregman_generator(DualCoord.ETA),
+    )
+
+    theta_bisector = BregmanBisector(
+        THETA_COORDS,
+        manifold.convert_coord(THETA_COORDS, coord1),
+        manifold.convert_coord(THETA_COORDS, coord2),
+        manifold.bregman_generator(DualCoord.THETA),
     )
 
     eriksen = EriksenIVPGeodesic(coord2, manifold)
@@ -72,15 +80,39 @@ if __name__ == "__main__":
         label=f"Chernoff Point, alpha={chernoff_point_alpha:.2f}",
     )
     visualizer.plot_object(primal_geo, c="blue", label="Primal Geodesic")
-    visualizer.plot_object(eriksen, c="purple", label="Eriksen Geodesic")
+    # visualizer.plot_object(eriksen, c="purple", label="Eriksen Geodesic")
     visualizer.plot_object(dual_geo, c="red", label="Dual Geodesic")
     visualizer.plot_object(
         eta_bisector, alpha=0.7, c="red", label="Dual Bisector"
     )
+    visualizer.plot_object(
+        theta_bisector, alpha=0.7, c="blue", label="Primal Bisector"
+    )
+
+    print()
+    print("Chernoff Check")
+    eta_chernoff = manifold.convert_coord(ETA_COORDS, chernoff_point).data
+    eta1 = manifold.convert_coord(ETA_COORDS, coord1).data
+    eta2 = manifold.convert_coord(ETA_COORDS, coord2).data
+    print(eta1, eta_chernoff, eta2)
+    print(
+        np.dot(
+            eta_chernoff,
+            manifold.eta_generator.grad(eta1)
+            - manifold.eta_generator.grad(eta2),
+        )
+        + manifold.eta_generator(eta1)
+        - manifold.eta_generator(eta2)
+        - (
+            np.dot(eta1.data, manifold.eta_generator.grad(eta1))
+            - np.dot(eta2.data, manifold.eta_generator.grad(eta2))
+        )
+    )
+    print()
 
     # Add animations
     visualizer.animate_object(primal_geo, c="blue")
-    visualizer.animate_object(eriksen, c="purple")
+    # visualizer.animate_object(eriksen, c="purple")
     visualizer.animate_object(dual_geo, c="red")
 
     visualizer.add_callback(cov_cb)

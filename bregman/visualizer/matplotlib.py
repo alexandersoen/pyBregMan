@@ -22,6 +22,7 @@ class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
         self,
         manifold: BregmanManifold,
         plot_dims: tuple[int, int],
+        dim_names: tuple[str, str] = ("", ""),
         resolution: int = 120,
         frames: int = 120,
         intervals: int = 1,
@@ -30,6 +31,8 @@ class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
 
         self.dim1 = plot_dims[0]
         self.dim2 = plot_dims[1]
+
+        self.dim_names = dim_names
 
         self.geodesic_rate = 0.1
 
@@ -73,7 +76,7 @@ class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
         self, coords: Coordinates, geodesic: Geodesic, **kwargs
     ) -> None:
         geo_vis_kwargs = {
-            "ls": "--",
+            "ls": "-",
             "linewidth": 1,
         }
         geo_vis_kwargs.update(kwargs)
@@ -93,7 +96,7 @@ class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
     def plot_bisector(
         self, coords: Coordinates, bisector: Bisector, **kwargs
     ) -> None:
-        if bisector.coords != coords:
+        if bisector.coords != coords or self.manifold.dimension != 2:
             return None
 
         bis_vis_kwargs = {
@@ -103,15 +106,12 @@ class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
         bis_vis_kwargs.update(kwargs)
 
         bis_point = bisector.bisect_proj_point()
-        w = bisector.w()
-
-        print(bis_point)
-        print(w)
+        w = bisector.shift()
 
         x, y = bis_point.data[[self.dim1, self.dim2]]
 
-        y1 = (w - x * self.xmin) / y
-        y2 = (w - x * self.xmax) / y
+        y1 = (-w - x * self.xmin) / y
+        y2 = (-w - x * self.xmax) / y
 
         self.ax.plot([self.xmin, self.xmax], [y1, y2], **bis_vis_kwargs)
 
@@ -203,6 +203,9 @@ class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
             interval=self.intervals,
         )
 
+        self.ax.set_xlabel(self.dim_names[0])
+        self.ax.set_ylabel(self.dim_names[1])
+
         self.ax.legend()
         plt.show()
 
@@ -251,7 +254,7 @@ class Visualize2DTissotIndicatrix(
     VisualizerCallback[CoordObjectMatplotlibVisualizer]
 ):
 
-    def __init__(self, scale: float = 0.2, npoints: int = 1_000) -> None:
+    def __init__(self, scale: float = 0.1, npoints: int = 1_000) -> None:
         super().__init__()
 
         self.scale = scale
@@ -274,6 +277,8 @@ class Visualize2DTissotIndicatrix(
             DualCoord(coords)
         ).metric(point.data)
 
+        # print(point, metric)
+
         L = np.linalg.cholesky(metric).T
 
         p = np.arange(self.npoints + 1)
@@ -284,4 +289,10 @@ class Visualize2DTissotIndicatrix(
         )
         v = v + point.data
 
-        visualizer.ax.plot(v[:, 0], v[:, 1], **kwargs)
+        tissot_kwargs = {
+            "c": kwargs["c"] if "c" in kwargs else None,
+            "alpha": kwargs["alpha"] if "alpha" in kwargs else None,
+            "ls": kwargs["ls"] if "ls" in kwargs else "--",
+            "zorder": 0,
+        }
+        visualizer.ax.plot(v[:, 0], v[:, 1], **tissot_kwargs)

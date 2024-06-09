@@ -64,25 +64,25 @@ if __name__ == "__main__":
         theta_centroid,
         c="blue",
         marker="x",
-        label=f"Theta Centroid: {manifold.convert_to_display(theta_centroid)}",
+        label=f"Theta Centroid",  #: {manifold.convert_to_display(theta_centroid)}",
     )
     visualizer.plot_object(
         js_centroid,
         c="purple",
         marker="x",
-        label=f"JS Centroid: {manifold.convert_to_display(js_centroid)}",
+        #        label=f"JS Centroid: {manifold.convert_to_display(js_centroid)}",
     )
-    visualizer.plot_object(
-        j_centroid,
-        c="pink",
-        marker="x",
-        label=f"J Centroid: {manifold.convert_to_display(j_centroid)}",
-    )
+    #    visualizer.plot_object(
+    #        j_centroid,
+    #        c="pink",
+    #        marker="x",
+    #        label=f"J Centroid: {manifold.convert_to_display(j_centroid)}",
+    #    )
     visualizer.plot_object(
         eta_centroid,
         c="red",
         marker="x",
-        label=f"Eta Centroid: {manifold.convert_to_display(eta_centroid)}",
+        label=f"Eta Centroid",  #: {manifold.convert_to_display(eta_centroid)}",
     )
 
     visualizer.plot_object(p12_primal_geo, c="blue")

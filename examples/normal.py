@@ -13,8 +13,8 @@ from bregman.visualizer.matplotlib import (CoordObjectMatplotlibVisualizer,
 if __name__ == "__main__":
 
     # DISPLAY_TYPE = LAMBDA_COORDS
-    # DISPLAY_TYPE = ETA_COORDS
-    DISPLAY_TYPE = THETA_COORDS
+    DISPLAY_TYPE = ETA_COORDS
+    # DISPLAY_TYPE = THETA_COORDS
     VISUALIZE_INDEX = (0, 1)
 
     num_frames = 120
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     manifold = GaussianManifold(1)
 
     coord1 = Point(LAMBDA_COORDS, np.array([0.0, 1.0]))
-    coord2 = Point(LAMBDA_COORDS, np.array([1.0, 2.0]))
+    coord2 = Point(LAMBDA_COORDS, np.array([1.0, 1.5]))
 
     chernoff_point_alpha = manifold.chernoff_point(coord1, coord2)
     mp = Point(
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     primal_geo = manifold.bregman_geodesic(coord1, coord2, DualCoord.THETA)
     dual_geo = manifold.bregman_geodesic(coord1, coord2, DualCoord.ETA)
 
-    chernoff_point = primal_geo(chernoff_point_alpha)
+    chernoff_point = primal_geo(1 - chernoff_point_alpha)
 
     eta_bisector = BregmanBisector(
         ETA_COORDS,
@@ -70,7 +70,9 @@ if __name__ == "__main__":
     )
 
     # Define visualizer
-    visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
+    visualizer = CoordObjectMatplotlibVisualizer(
+        manifold, VISUALIZE_INDEX  # , dim_names=(r"$\mu$", r"$\sigma$")
+    )
     metric_cb = Visualize2DTissotIndicatrix()
 
     # Add objects to visualize
@@ -82,6 +84,34 @@ if __name__ == "__main__":
     )
     visualizer.plot_object(primal_geo, c="blue", label="Primal Geodesic")
     visualizer.plot_object(dual_geo, c="red", label="Dual Geodesic")
+
+    # BISECTORS
+    eta_bisector_rev = BregmanBisector(
+        ETA_COORDS,
+        manifold.convert_coord(ETA_COORDS, coord2),
+        manifold.convert_coord(ETA_COORDS, coord1),
+        manifold.bregman_generator(DualCoord.ETA),
+    )
+    eta_bisector = BregmanBisector(
+        ETA_COORDS,
+        manifold.convert_coord(ETA_COORDS, coord1),
+        manifold.convert_coord(ETA_COORDS, coord2),
+        manifold.bregman_generator(DualCoord.ETA),
+    )
+
+    theta_bisector_rev = BregmanBisector(
+        THETA_COORDS,
+        manifold.convert_coord(THETA_COORDS, coord2),
+        manifold.convert_coord(THETA_COORDS, coord1),
+        manifold.bregman_generator(DualCoord.THETA),
+    )
+    theta_bisector = BregmanBisector(
+        THETA_COORDS,
+        manifold.convert_coord(THETA_COORDS, coord1),
+        manifold.convert_coord(THETA_COORDS, coord2),
+        manifold.bregman_generator(DualCoord.THETA),
+    )
+
     visualizer.plot_object(
         eta_bisector, alpha=0.7, c="red", label="Dual Bisector"
     )
@@ -89,9 +119,27 @@ if __name__ == "__main__":
         theta_bisector, alpha=0.7, c="blue", label="Primal Bisector"
     )
 
+    print("Chernoff Check")
+    eta_chernoff = manifold.convert_coord(ETA_COORDS, chernoff_point).data
+    eta1 = manifold.convert_coord(ETA_COORDS, coord1).data
+    eta2 = manifold.convert_coord(ETA_COORDS, coord2).data
+    print(
+        np.dot(
+            eta_chernoff,
+            manifold.eta_generator.grad(eta1)
+            - manifold.eta_generator.grad(eta2),
+        )
+        + manifold.eta_generator(eta1)
+        - manifold.eta_generator(eta2)
+        - (
+            np.dot(eta1.data, manifold.eta_generator.grad(eta1))
+            - np.dot(eta2.data, manifold.eta_generator.grad(eta2))
+        )
+    )
+
     # Add animations
-    visualizer.animate_object(primal_geo, c="blue")
-    visualizer.animate_object(dual_geo, c="red")
+    #     visualizer.animate_object(primal_geo, c="blue")
+    #     visualizer.animate_object(dual_geo, c="red")
 
     visualizer.add_callback(metric_cb)
 

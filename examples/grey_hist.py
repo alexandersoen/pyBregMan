@@ -67,12 +67,17 @@ if __name__ == "__main__":
     js_centroid = manifold.convert_coord(LAMBDA_COORDS, js_centroid)
 
     jef_centroid = manifold.skew_burbea_rao_barycenter(
-        [barbara, lena], [0.5, 0.5], [1.0, 1.0], coord=DualCoord.ETA
+        [barbara, lena], [0.5, 0.5], [1.0, 1.0], coord=DualCoord.THETA
     )
     jef_centroid = manifold.convert_coord(LAMBDA_COORDS, jef_centroid)
 
-    plt.plot(values, barbara.data, c="blue")
-    plt.plot(values, lena.data, c="red")
-    plt.plot(values, js_centroid.data, c="black")
-    plt.plot(values, jef_centroid.data, c="grey")
+    plt.plot(values, barbara.data, c="blue", label="Image 1 Pixels")
+    plt.plot(values, lena.data, c="red", label="Image 2 Pixels")
+    plt.plot(values, js_centroid.data, c="black", label="JS Centroid")
+    plt.plot(values, jef_centroid.data, c="grey", label="Jeffery Centroid")
+
+    plt.xlabel("Pixel Intensity")
+    plt.ylabel("Density")
+
+    plt.legend()
     plt.show()

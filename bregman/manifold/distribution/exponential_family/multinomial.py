@@ -17,7 +17,7 @@ class MultinomialPoint(DisplayPoint):
         super().__init__(coords, data)
 
     def display(self) -> str:
-        return str(self.data)
+        return f"Probs: {str(self.data)}"
 
 
 class MultinomialDistribution(ExponentialFamilyDistribution):
