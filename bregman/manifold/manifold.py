@@ -52,7 +52,7 @@ class BregmanManifold(ABC):
         self.atlas.add_transition(THETA_COORDS, ETA_COORDS, self._theta_to_eta)
         self.atlas.add_transition(ETA_COORDS, THETA_COORDS, self._eta_to_theta)
 
-    def fisher_rao_connection(self) -> Connection:
+    def riemannian_connection(self) -> Connection:
         return NotImplemented()
 
     def convert_coord(self, target_coords: Coordinates, point: Point) -> Point:
@@ -205,40 +205,46 @@ class BregmanManifold(ABC):
         return barycenter_point
 
     def bhattacharyya_distance(
-        self, point_1: Point, point_2: Point, alpha: float
+        self,
+        point_1: Point,
+        point_2: Point,
+        alpha: float,
+        coord: DualCoord = DualCoord.THETA,
     ) -> np.ndarray:
-        theta_1 = self.convert_coord(THETA_COORDS, point_1)
-        theta_2 = self.convert_coord(THETA_COORDS, point_2)
 
-        geodesic = self.theta_geodesic(theta_1, theta_2)
-        theta_alpha = geodesic(alpha)
+        coords_1 = self.convert_coord(coord.value, point_1)
+        coords_2 = self.convert_coord(coord.value, point_2)
 
-        F_1 = self.theta_generator(theta_1.data)
-        F_2 = self.theta_generator(theta_2.data)
-        F_alpha = self.theta_generator(theta_alpha.data)
+        geodesic = self.bregman_geodesic(coords_1, coords_2, coord)
+        coords_alpha = geodesic(alpha)
 
+        F_1 = self.bregman_generator(coord)(coords_1.data)
+        F_2 = self.bregman_generator(coord)(coords_2.data)
+        F_alpha = self.bregman_generator(coord)(coords_alpha.data)
+
+        # Notice thta the linear interpolation is opposite
         return alpha * F_1 + (1 - alpha) * F_2 - F_alpha
 
     def chernoff_point(
-        self, point_1: Point, point_2: Point, eps: float = 1e-8
+        self,
+        point_1: Point,
+        point_2: Point,
+        coord: DualCoord = DualCoord.THETA,
+        eps: float = 1e-8,
     ) -> float:
-        theta_1 = self.convert_coord(THETA_COORDS, point_1)
-        theta_2 = self.convert_coord(THETA_COORDS, point_2)
+        coords_1 = self.convert_coord(coord.value, point_1)
+        coords_2 = self.convert_coord(coord.value, point_2)
 
-        geodesic = self.theta_geodesic(theta_1, theta_2)
+        geodesic = self.bregman_geodesic(coords_1, coords_2, coord)
 
         alpha_min, alpha_mid, alpha_max = 0.0, 0.5, 1.0
         while abs(alpha_max - alpha_min) > eps:
             alpha_mid = 0.5 * (alpha_min + alpha_max)
 
-            theta_alpha = geodesic(alpha_mid)
+            coords_alpha = geodesic(alpha_mid)
 
-            bd_1 = self.bregman_divergence(
-                theta_1, theta_alpha, coord=DualCoord.THETA
-            )
-            bd_2 = self.bregman_divergence(
-                theta_2, theta_alpha, coord=DualCoord.THETA
-            )
+            bd_1 = self.bregman_divergence(coords_1, coords_alpha, coord=coord)
+            bd_2 = self.bregman_divergence(coords_2, coords_alpha, coord=coord)
             if bd_1 < bd_2:
                 alpha_min = alpha_mid
             else:
@@ -246,9 +252,14 @@ class BregmanManifold(ABC):
 
         return 1 - 0.5 * (alpha_min + alpha_max)
 
-    def chernoff_information(self, point_1: Point, point_2: Point):
-        alpha_star = self.chernoff_point(point_1, point_2)
-        return self.bhattacharyya_distance(point_1, point_2, alpha_star)
+    def chernoff_information(
+        self,
+        point_1: Point,
+        point_2: Point,
+        coord: DualCoord = DualCoord.THETA,
+    ):
+        alpha_star = self.chernoff_point(point_1, point_2, coord)
+        return self.bhattacharyya_distance(point_1, point_2, alpha_star, coord)
 
     def _theta_to_eta(self, theta: np.ndarray) -> np.ndarray:
         return self.theta_generator.grad(theta)
