@@ -3,8 +3,7 @@ import numpy as np
 
 from bregman.base import DisplayPoint
 from bregman.generator.generator import AutoDiffGenerator
-from bregman.manifold.application import (ApplicationManifold,
-                                          point_convert_wrapper)
+from bregman.manifold.application import ApplicationManifold
 
 
 class NotPSDMatrix(Exception):
@@ -90,7 +89,7 @@ class PSDManifold(ApplicationManifold[PSDPoint]):
         super().__init__(
             natural_generator=F_gen,
             expected_generator=G_gen,
-            display_factory=point_convert_wrapper(PSDPoint),
+            display_factory_class=PSDPoint,
             dimension=int(n_dimension * (n_dimension + 1) / 2),
         )
 

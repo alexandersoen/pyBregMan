@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Generic, TypeVar
+from typing import Generic, TypeVar
 
 import numpy as np
 
@@ -17,12 +17,12 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
         self,
         natural_generator: Generator,
         expected_generator: Generator,
-        display_factory: Callable[[Point], MyDisplayPoint],
+        display_factory_class: type[MyDisplayPoint],
         dimension: int,
     ) -> None:
         super().__init__(natural_generator, expected_generator, dimension)
 
-        self.display_factory = display_factory
+        self.display_factory_class = display_factory_class
 
         self.atlas.add_coords(LAMBDA_COORDS)
 
@@ -41,7 +41,7 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
 
     def convert_to_display(self, point: Point) -> MyDisplayPoint:
         point = self.convert_coord(LAMBDA_COORDS, point)
-        dpoint = self.display_factory(point)
+        dpoint = self.display_factory_class(point)
         return dpoint
 
     @abstractmethod
@@ -59,10 +59,3 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
     @abstractmethod
     def _eta_to_lambda(self, eta: np.ndarray) -> np.ndarray:
         pass
-
-
-def point_convert_wrapper(constructor):
-    def factory(p: Point) -> MyDisplayPoint:
-        return constructor(coords=p.coords, data=p.data)
-
-    return factory

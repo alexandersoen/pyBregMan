@@ -4,7 +4,6 @@ from scipy.linalg import expm, fractional_matrix_power
 
 from bregman.base import LAMBDA_COORDS, DisplayPoint, Point, Shape
 from bregman.generator.generator import AutoDiffGenerator
-from bregman.manifold.application import point_convert_wrapper
 from bregman.manifold.connection import Connection
 from bregman.manifold.distribution.exponential_family.exp_family import (
     ExponentialFamilyDistribution, ExponentialFamilyManifold)
@@ -124,7 +123,7 @@ class GaussianManifold(
         super().__init__(
             natural_generator=F_gen,
             expected_generator=G_gen,
-            display_factory=point_convert_wrapper(GaussianPoint),
+            display_factory_class=GaussianPoint,
             dimension=input_dimension * (input_dimension + 1),
         )
 
@@ -140,7 +139,7 @@ class GaussianManifold(
             coords=THETA_COORDS,
             data=distribution.theta,
         )
-        return self.display_factory(opoint)
+        return self.display_factory_class(opoint)
 
     def _lambda_to_theta(self, lamb: np.ndarray) -> np.ndarray:
         if self.input_dimension > 1:
@@ -389,16 +388,3 @@ class KobayashiGeodesic(Geodesic):
 
 def matrix_power(M: np.ndarray, p: float) -> np.ndarray:
     return fractional_matrix_power(M, p)
-
-
-"""
-    L, U = np.linalg.eig(M)
-    p_matrix = U @ np.diag(np.power(L, p)) @ U.T
-
-    #    print(V, U.T)
-
-    #    print(np.allclose(M - U @ np.diag(np.power(L, 1)) @ U.T, 1e-9))
-    #    print(np.allclose(M - U @ np.diag(np.power(L, 1)) @ V, 1e-9))
-
-    return p_matrix
-    """

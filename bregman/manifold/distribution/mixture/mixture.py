@@ -5,7 +5,7 @@ import numpy as np
 
 from bregman.base import DisplayPoint, Point
 from bregman.generator.generator import Generator
-from bregman.manifold.application import LAMBDA_COORDS, point_convert_wrapper
+from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.distribution.distribution import DistributionManifold
 from bregman.object.distribution import Distribution
 
@@ -15,9 +15,6 @@ class MixingDimensionMissMatch(Exception):
 
 
 class MixturePoint(DisplayPoint):
-
-    def __init__(self, coords, data) -> None:
-        super().__init__(coords, data)
 
     def display(self) -> str:
         return str(self.data)
@@ -63,7 +60,7 @@ class MixtureManifold(
         super().__init__(
             natural_generator,
             expected_generator,
-            point_convert_wrapper(MixturePoint),
+            MixturePoint,
             dimension,
         )
 

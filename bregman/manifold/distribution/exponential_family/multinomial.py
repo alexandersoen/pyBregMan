@@ -5,16 +5,13 @@ import numpy as np
 
 from bregman.base import DisplayPoint, Point
 from bregman.generator.generator import AutoDiffGenerator
-from bregman.manifold.application import LAMBDA_COORDS, point_convert_wrapper
+from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.distribution.exponential_family.exp_family import (
     ExponentialFamilyDistribution, ExponentialFamilyManifold)
 from bregman.manifold.manifold import THETA_COORDS
 
 
 class MultinomialPoint(DisplayPoint):
-
-    def __init__(self, coords, data) -> None:
-        super().__init__(coords, data)
 
     def display(self) -> str:
         return f"Probs: {str(self.data)}"
@@ -89,7 +86,7 @@ class MultinomialManifold(
         super().__init__(
             F_gen,
             G_gen,
-            point_convert_wrapper(MultinomialPoint),
+            MultinomialPoint,
             dimension=k - 1,
         )
 

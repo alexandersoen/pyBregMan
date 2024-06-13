@@ -47,8 +47,9 @@ class Curve(CoordObject, ABC):
 
 class DisplayPoint(ABC, Point):
 
-    def __init__(self, coords, data) -> None:
-        super().__init__(coords=coords, data=data)
+    # def __init__(self, coords, data) -> None:
+    def __init__(self, point: Point) -> None:
+        super().__init__(coords=point.coords, data=point.data)
 
     @abstractmethod
     def display(self) -> str:

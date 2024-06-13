@@ -1,10 +1,8 @@
-from dataclasses import dataclass
-
 import numpy as np
 
 from bregman.base import DisplayPoint, Point
 from bregman.generator.generator import AutoDiffGenerator
-from bregman.manifold.application import LAMBDA_COORDS, point_convert_wrapper
+from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.distribution.distribution import DistributionManifold
 from bregman.object.distribution import Distribution
 
@@ -74,7 +72,7 @@ class Gaussian1DManifold(
         super().__init__(
             natural_generator=F_gen,
             expected_generator=G_gen,
-            display_factory=point_convert_wrapper(Gaussian1DPoint),
+            display_factory_class=Gaussian1DPoint,
             dimension=2,
         )
 
