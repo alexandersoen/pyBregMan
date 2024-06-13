@@ -1,9 +1,7 @@
-from abc import ABC, abstractmethod
-
-from bregman.base import Coordinates, CoordObject, Point
+from bregman.base import Coordinates, Curve, Point
 
 
-class Geodesic(CoordObject, ABC):
+class Geodesic(Curve):
 
     def __init__(
         self,
@@ -18,14 +16,6 @@ class Geodesic(CoordObject, ABC):
 
         self.source = source
         self.dest = dest
-
-    @abstractmethod
-    def path(self, t: float) -> Point:
-        pass
-
-    def __call__(self, t: float) -> Point:
-        assert 0 <= t <= 1
-        return self.path(t)
 
 
 class FlatGeodesic(Geodesic):

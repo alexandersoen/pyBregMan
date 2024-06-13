@@ -34,6 +34,17 @@ class Point(CoordObject):
     data: np.ndarray
 
 
+class Curve(CoordObject, ABC):
+
+    @abstractmethod
+    def path(self, t: float) -> Point:
+        pass
+
+    def __call__(self, t: float) -> Point:
+        assert 0 <= t <= 1
+        return self.path(t)
+
+
 class DisplayPoint(ABC, Point):
 
     def __init__(self, coords, data) -> None:

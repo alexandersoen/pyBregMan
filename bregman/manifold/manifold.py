@@ -266,9 +266,3 @@ class BregmanManifold(ABC):
 
     def _eta_to_theta(self, eta: np.ndarray) -> np.ndarray:
         return self.eta_generator.grad(eta)
-
-
-class BregmanBall(InputObject):
-
-    def __init__(self, prime_generator: Generator, dual_generator: Generator):
-        pass

@@ -218,18 +218,19 @@ class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
 
             return res
 
-        ani = animation.FuncAnimation(
-            fig=self.fig,
-            func=update_all,
-            frames=self.frames,
-            interval=self.intervals,
-        )
+        with plt.style.context("bmh"):
+            ani = animation.FuncAnimation(
+                fig=self.fig,
+                func=update_all,
+                frames=self.frames,
+                interval=self.intervals,
+            )
 
-        self.ax.set_xlabel(self.dim_names[0])
-        self.ax.set_ylabel(self.dim_names[1])
+            self.ax.set_xlabel(self.dim_names[0])
+            self.ax.set_ylabel(self.dim_names[1])
 
-        self.ax.legend()
-        plt.show()
+            self.ax.legend()
+            plt.show()
 
 
 class VisualizeGaussian2DCovariancePoints(
