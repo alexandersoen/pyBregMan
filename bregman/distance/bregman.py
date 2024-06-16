@@ -1,7 +1,7 @@
 import numpy as np
 
 from bregman.base import Point
-from bregman.distance.distance import ApproxDistance, Distance
+from bregman.distance.base import ApproxDistance, Distance
 from bregman.manifold.manifold import BregmanManifold, DualCoord
 
 

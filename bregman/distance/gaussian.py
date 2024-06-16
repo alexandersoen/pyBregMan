@@ -1,8 +1,8 @@
 import numpy as np
 
 from bregman.base import Point
+from bregman.distance.base import ApproxDistance
 from bregman.distance.bregman import JeffreyBregmanDistance
-from bregman.distance.distance import ApproxDistance
 from bregman.geodesic.gaussian import KobayashiGeodesic
 from bregman.manifold.distribution.exponential_family.gaussian import \
     GaussianManifold
