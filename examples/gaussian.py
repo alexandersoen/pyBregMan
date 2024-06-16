@@ -1,6 +1,7 @@
 import numpy as np
 
 from bregman.base import Point
+from bregman.distance.bregman import ChernoffInformation
 from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.bisector import BregmanBisector
 from bregman.manifold.distribution.exponential_family.gaussian import \
@@ -31,16 +32,15 @@ if __name__ == "__main__":
         )
     )
 
-    chernoff_point_alpha = manifold.chernoff_point(coord1, coord2, eps=1e-10)
+    chernoff_information = ChernoffInformation(manifold, eps=1e-10)
+    chernoff_point_alpha = chernoff_information.chernoff_point(coord1, coord2)
     mp = Point(
         ETA_COORDS,
         manifold.convert_coord(ETA_COORDS, coord1).data * 0.5
         + manifold.convert_coord(ETA_COORDS, coord2).data * 0.5,
     )
 
-    print(
-        "Chernoff Information:", manifold.chernoff_information(coord1, coord2)
-    )
+    print("Chernoff Information:", chernoff_information(coord1, coord2))
 
     primal_geo = manifold.bregman_geodesic(coord1, coord2, DualCoord.THETA)
     dual_geo = manifold.bregman_geodesic(coord1, coord2, DualCoord.ETA)

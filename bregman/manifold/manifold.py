@@ -204,63 +204,6 @@ class BregmanManifold(ABC):
         barycenter_point = Point(coord_type, barycenter)
         return barycenter_point
 
-    def bhattacharyya_distance(
-        self,
-        point_1: Point,
-        point_2: Point,
-        alpha: float,
-        coord: DualCoord = DualCoord.THETA,
-    ) -> np.ndarray:
-
-        coords_1 = self.convert_coord(coord.value, point_1)
-        coords_2 = self.convert_coord(coord.value, point_2)
-
-        geodesic = self.bregman_geodesic(coords_1, coords_2, coord)
-        coords_alpha = geodesic(alpha)
-
-        F_1 = self.bregman_generator(coord)(coords_1.data)
-        F_2 = self.bregman_generator(coord)(coords_2.data)
-        F_alpha = self.bregman_generator(coord)(coords_alpha.data)
-
-        # Notice thta the linear interpolation is opposite
-        return alpha * F_1 + (1 - alpha) * F_2 - F_alpha
-
-    def chernoff_point(
-        self,
-        point_1: Point,
-        point_2: Point,
-        coord: DualCoord = DualCoord.THETA,
-        eps: float = 1e-8,
-    ) -> float:
-        coords_1 = self.convert_coord(coord.value, point_1)
-        coords_2 = self.convert_coord(coord.value, point_2)
-
-        geodesic = self.bregman_geodesic(coords_1, coords_2, coord)
-
-        alpha_min, alpha_mid, alpha_max = 0.0, 0.5, 1.0
-        while abs(alpha_max - alpha_min) > eps:
-            alpha_mid = 0.5 * (alpha_min + alpha_max)
-
-            coords_alpha = geodesic(alpha_mid)
-
-            bd_1 = self.bregman_divergence(coords_1, coords_alpha, coord=coord)
-            bd_2 = self.bregman_divergence(coords_2, coords_alpha, coord=coord)
-            if bd_1 < bd_2:
-                alpha_min = alpha_mid
-            else:
-                alpha_max = alpha_mid
-
-        return 1 - 0.5 * (alpha_min + alpha_max)
-
-    def chernoff_information(
-        self,
-        point_1: Point,
-        point_2: Point,
-        coord: DualCoord = DualCoord.THETA,
-    ):
-        alpha_star = self.chernoff_point(point_1, point_2, coord)
-        return self.bhattacharyya_distance(point_1, point_2, alpha_star, coord)
-
     def _theta_to_eta(self, theta: np.ndarray) -> np.ndarray:
         return self.theta_generator.grad(theta)
 

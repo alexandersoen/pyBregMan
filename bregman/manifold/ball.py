@@ -4,6 +4,7 @@ import numpy as np
 from scipy.special import lambertw
 
 from bregman.base import CoordObject, Curve, Point
+from bregman.distance.bregman import BregmanDivergence
 from bregman.manifold.manifold import THETA_COORDS, BregmanManifold, DualCoord
 
 
@@ -11,7 +12,6 @@ class BregmanBall(CoordObject, ABC):
 
     center: Point
     radius: float
-    dual_coords: DualCoord
 
     @abstractmethod
     def is_in(self, other: Point) -> bool:
@@ -28,22 +28,19 @@ class GeneratorBregmanBall(BregmanBall):
         manifold: BregmanManifold,
         center: Point,
         radius: float,
-        coords: DualCoord = DualCoord.THETA,
+        coord: DualCoord = DualCoord.THETA,
     ) -> None:
-        super().__init__(coords.value)
+        super().__init__(coord.value)
 
         self.manifold = manifold
 
         self.center = center
         self.radius = radius
 
-        self.dual_coords = coords
+        self.bregman_divergence = BregmanDivergence(manifold, coord=coord)
 
     def is_in(self, other: Point) -> bool:
-        return (
-            self.manifold.bregman_divergence(self.center, other).item()
-            < self.radius
-        )
+        return self.bregman_divergence(self.center, other).item() < self.radius
 
 
 def bregman_badoiu_clarkson(
