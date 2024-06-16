@@ -66,7 +66,6 @@ class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
 
         self.xmin, self.ymin = np.min(xys_data, axis=0)
         self.xmax, self.ymax = np.max(xys_data, axis=0)
-        print(self.xmin, self.ymin, self.xmax, self.ymax)
 
     def plot_point(self, coords: Coordinates, point: Point, **kwargs) -> None:
         kwargs = kwargs.copy()
@@ -87,7 +86,6 @@ class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
             "facecolors": facecolors,
         }
         point_vis_kwargs.update(kwargs)
-        print(point_vis_kwargs)
 
         point = self.manifold.convert_coord(coords, point)
         self.ax.scatter(
@@ -299,8 +297,6 @@ class Visualize2DTissotIndicatrix(
         metric = visualizer.manifold.bregman_connection(
             DualCoord(coords)
         ).metric(point.data)
-
-        # print(point, metric)
 
         L = np.linalg.cholesky(metric).T
 

@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
 from bregman.base import Coordinates, CoordObject, Point
+from bregman.geodesic.base import Geodesic
 from bregman.manifold.bisector import Bisector
-from bregman.manifold.manifold import BregmanManifold, Geodesic
+from bregman.manifold.manifold import BregmanManifold
 from bregman.manifold.parallel_transport import ParallelTansport
 
 

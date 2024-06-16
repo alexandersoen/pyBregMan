@@ -5,9 +5,9 @@ import numpy as np
 
 from bregman.base import Coordinates, InputObject, Point
 from bregman.generator.generator import Generator
+from bregman.geodesic.base import Geodesic
 from bregman.manifold.connection import Connection, FlatConnection
 from bregman.manifold.coordinate import Atlas
-from bregman.manifold.geodesic import Geodesic
 from bregman.manifold.parallel_transport import DualFlatParallelTransport
 
 THETA_COORDS = Coordinates("theta")
@@ -81,8 +81,6 @@ class BregmanManifold(ABC):
         coord_1 = self.convert_coord(coord.value, point_1)
         coord_2 = self.convert_coord(coord.value, point_2)
         generator = self.bregman_generator(coord)
-
-        print(coord_1, coord_2)
 
         return generator.bergman_divergence(coord_1.data, coord_2.data)
 

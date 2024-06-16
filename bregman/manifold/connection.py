@@ -5,7 +5,8 @@ import numpy as np
 
 from bregman.base import Coordinates, Point
 from bregman.generator.generator import Generator
-from bregman.manifold.geodesic import FlatGeodesic, Geodesic
+from bregman.geodesic.base import Geodesic
+from bregman.geodesic.flat_geodesic import FlatGeodesic
 
 
 class Connection(ABC):
