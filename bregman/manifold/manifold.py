@@ -135,7 +135,7 @@ class BregmanManifold(ABC):
         )
 
     """
-    Agg
+    Aggregation
     """
 
     def bregman_barycenter(
