@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Sequence
+from typing import Generic, Sequence, TypeVar
 
 import numpy as np
 
@@ -7,6 +7,8 @@ from bregman.base import DisplayPoint, Point
 from bregman.generator.generator import Generator
 from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.distribution.distribution import DistributionManifold
+from bregman.manifold.distribution.exponential_family.multinomial import (
+    MultinomialDualGenerator, MultinomialPrimalGenerator)
 from bregman.object.distribution import Distribution
 
 
@@ -20,12 +22,15 @@ class MixturePoint(DisplayPoint):
         return str(self.data)
 
 
-class MixtureDistribution(Distribution):
+MixedDistribution = TypeVar("MixedDistribution", bound=Distribution)
+
+
+class MixtureDistribution(Distribution, Generic[MixedDistribution]):
 
     def __init__(
         self,
         weights: np.ndarray,
-        distributions: Sequence[Distribution],
+        distributions: Sequence[MixedDistribution],
     ) -> None:
         super().__init__()
 
@@ -46,24 +51,30 @@ class MixtureDistribution(Distribution):
 
 
 class MixtureManifold(
-    DistributionManifold[MixturePoint, MixtureDistribution], ABC
+    DistributionManifold[MixturePoint, MixtureDistribution[MixedDistribution]],
+    Generic[MixedDistribution],
+    ABC,
 ):
 
     def __init__(
         self,
-        distributions: Sequence[Distribution],
-        natural_generator: Generator,
-        expected_generator: Generator,
+        distributions: Sequence[MixedDistribution],
     ) -> None:
         dimension = len(distributions) - 1
 
         super().__init__(
-            natural_generator,
-            expected_generator,
+            MultinomialDualGenerator(1, len(distributions)),
+            MultinomialPrimalGenerator(1, len(distributions)),
             MixturePoint,
             dimension,
         )
 
+        self.distributions = distributions
+
+    def set_distributions(
+        self, distributions: Sequence[MixedDistribution]
+    ) -> None:
+        assert len(distributions) == len(self.distributions)
         self.distributions = distributions
 
     def point_to_distribution(self, point: Point) -> MixtureDistribution:

@@ -23,10 +23,12 @@ class MultinomialDistribution(ExponentialFamilyDistribution):
         self.theta = theta
         self.n = n
 
-    def t(self, x: np.ndarray) -> np.ndarray:
+    @staticmethod
+    def t(x: np.ndarray) -> np.ndarray:
         return x
 
-    def k(self, x: np.ndarray) -> np.ndarray:
+    @staticmethod
+    def k(x: np.ndarray) -> np.ndarray:
         return -np.sum([np.log(math.factorial(i)) for i in x])
 
     def F(self, x: np.ndarray) -> np.ndarray:
@@ -84,9 +86,10 @@ class MultinomialManifold(
         G_gen = MultinomialDualGenerator(n, k)
 
         super().__init__(
-            F_gen,
-            G_gen,
-            MultinomialPoint,
+            natural_generator=F_gen,
+            expected_generator=G_gen,
+            distribution_class=MultinomialDistribution,
+            display_factory_class=MultinomialPoint,
             dimension=k - 1,
         )
 

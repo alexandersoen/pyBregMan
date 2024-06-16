@@ -40,11 +40,13 @@ class GaussianDistribution(ExponentialFamilyDistribution):
 
         self.dimension: Shape = (dimension,)
 
-    def t(self, x: np.ndarray) -> np.ndarray:
+    @staticmethod
+    def t(x: np.ndarray) -> np.ndarray:
         r"""t(x) sufficient statistics function."""
         return np.concatenate([x, -np.outer(x, x).flatten()])
 
-    def k(self, x: np.ndarray) -> np.ndarray:
+    @staticmethod
+    def k(x: np.ndarray) -> np.ndarray:
         r"""k(x) carrier measure."""
         return np.array(0.0)
 
@@ -55,7 +57,32 @@ class GaussianDistribution(ExponentialFamilyDistribution):
         return 0.5 * (
             0.5 * theta_mu.T @ np.linalg.inv(theta_sigma) @ theta_mu
             - np.log(np.linalg.det(theta_sigma))
-            + self.dimension * np.log(np.pi)
+            + self.dimension[0] * np.log(np.pi)
+        )
+
+
+class UnivariateGaussianDistribution(GaussianDistribution):
+
+    def __init__(self, theta: np.ndarray) -> None:
+        super().__init__(theta, 1)
+
+    @staticmethod
+    def t(x: np.ndarray) -> np.ndarray:
+        r"""t(x) sufficient statistics function."""
+        return np.concatenate([x, np.outer(x, x).flatten()])
+
+    @staticmethod
+    def k(x: np.ndarray) -> np.ndarray:
+        r"""k(x) carrier measure."""
+        return np.array(0.0)
+
+    def F(self, x: np.ndarray) -> np.ndarray:
+        r"""F(x) = \log \int \exp(\theta^\T t(x)) dx normalizer"""
+
+        theta_mu, theta_sigma = x
+
+        return -0.25 * theta_mu * theta_mu / theta_sigma + 0.5 * anp.log(
+            -anp.pi / theta_sigma
         )
 
 
@@ -107,6 +134,8 @@ class GaussianDualGenerator(AutoDiffGenerator):
         else:
             eta_mu, eta_sigma = x
 
+            print(anp.abs(eta_mu * eta_mu - eta_sigma))
+
             return -0.5 * anp.log(anp.abs(eta_mu * eta_mu - eta_sigma))
 
 
@@ -120,9 +149,15 @@ class GaussianManifold(
 
         self.input_dimension = input_dimension
 
+        if input_dimension == 1:
+            dist_class = UnivariateGaussianDistribution
+        else:
+            dist_class = GaussianDistribution
+
         super().__init__(
             natural_generator=F_gen,
             expected_generator=G_gen,
+            distribution_class=dist_class,
             display_factory_class=GaussianPoint,
             dimension=input_dimension * (input_dimension + 1),
         )
@@ -310,8 +345,8 @@ class KobayashiGeodesic(Geodesic):
         self.G0 = self._get_Gi(self.source_mu, self.source_Sigma)
         self.G1 = self._get_Gi(self.dest_mu, self.dest_Sigma)
 
-        self.G0_pos_sqrt = matrix_power(self.G0, 0.5)
-        self.G0_neg_sqrt = matrix_power(self.G0, -0.5)
+        self.G0_pos_sqrt = fractional_matrix_power(self.G0, 0.5)
+        self.G0_neg_sqrt = fractional_matrix_power(self.G0, -0.5)
 
         self.Gmix = self.G0_neg_sqrt @ self.G1 @ self.G0_neg_sqrt
 
@@ -360,14 +395,18 @@ class KobayashiGeodesic(Geodesic):
 
     def path(self, t: float) -> Point:
 
-        Gt = self.G0_pos_sqrt @ matrix_power(self.Gmix, t) @ self.G0_pos_sqrt
+        Gt = (
+            self.G0_pos_sqrt
+            @ fractional_matrix_power(self.Gmix, t)
+            @ self.G0_pos_sqrt
+        )
 
         if t == 0.5:
 
             print(self.G0)
             print(
                 self.G0_pos_sqrt
-                @ matrix_power(self.Gmix, 1)
+                @ fractional_matrix_power(self.Gmix, 1)
                 @ self.G0_pos_sqrt
             )
             print(Gt)
@@ -381,10 +420,33 @@ class KobayashiGeodesic(Geodesic):
 
         return Point(LAMBDA_COORDS, np.concatenate([mu, Sigma.flatten()]))
 
-    def __call__(self, t: float) -> Point:
-        assert 0 <= t <= 1
-        return self.path(t)
 
+class FastFisherRaoGeodesic(Geodesic):
 
-def matrix_power(M: np.ndarray, p: float) -> np.ndarray:
-    return fractional_matrix_power(M, p)
+    def __init__(
+        self,
+        source: Point,
+        dest: Point,
+        manifold: GaussianManifold,
+    ) -> None:
+
+        # Setup  up data
+        source_point = manifold.convert_to_display(source)
+        dest_point = manifold.convert_to_display(dest)
+
+        self.source_mu = source_point.mu
+        self.source_Sigma = source_point.Sigma
+
+        self.dest_mu = dest_point.mu
+        self.dest_Sigma = dest_point.Sigma
+
+        self.dim = len(self.dest_mu)
+
+        super().__init__(
+            LAMBDA_COORDS,
+            manifold.convert_coord(LAMBDA_COORDS, source),
+            manifold.convert_coord(LAMBDA_COORDS, dest),
+        )
+
+    def path(self, t: float) -> Point:
+        pass

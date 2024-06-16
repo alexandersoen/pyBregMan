@@ -27,15 +27,12 @@ class DeltaDistribution(Distribution):
         return (x == self.x).astype(float)
 
 
-class DiscreteMixture(MixtureManifold):
+class DiscreteMixture(MixtureManifold[DeltaDistribution]):
 
     def __init__(self, xs: list[np.ndarray]) -> None:
         distributions = [DeltaDistribution(x) for x in xs]
 
-        F_gen = MultinomialDualGenerator(1, len(xs))
-        G_gen = MultinomialPrimalGenerator(1, len(xs))
-
-        super().__init__(distributions, F_gen, G_gen)
+        super().__init__(distributions)
 
     def to_categorical_manifold(self) -> CategoricalManifold:
         from bregman.manifold.distribution.exponential_family.categorical import \

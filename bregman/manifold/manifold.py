@@ -82,6 +82,8 @@ class BregmanManifold(ABC):
         coord_2 = self.convert_coord(coord.value, point_2)
         generator = self.bregman_generator(coord)
 
+        print(coord_1, coord_2)
+
         return generator.bergman_divergence(coord_1.data, coord_2.data)
 
     def bregman_geodesic(
