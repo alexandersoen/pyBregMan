@@ -92,7 +92,7 @@ class BhattacharyyaDistance(DualDistance):
         F_alpha = gen(coords_alpha.data)
 
         # Notice thta the linear interpolation is opposite
-        return self.alpha * F_1 + (1 - self.alpha) * F_2 - F_alpha
+        return (1 - self.alpha) * F_1 + self.alpha * F_2 - F_alpha
 
 
 class ChernoffInformation(DualApproxDistance):
@@ -136,7 +136,7 @@ class ChernoffInformation(DualApproxDistance):
     def distance(self, point_1: Point, point_2: Point) -> np.ndarray:
         alpha_star = self.chernoff_point(point_1, point_2)
         bhattacharyya_distance = BhattacharyyaDistance(
-            self.manifold, alpha_star, self.coord
+            self.manifold, 1 - alpha_star, self.coord
         )
 
         return bhattacharyya_distance(point_1, point_2)
