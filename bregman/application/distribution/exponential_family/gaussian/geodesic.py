@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.linalg import expm, fractional_matrix_power
 
-from bregman.application.distribution.exponential_family.gaussian import \
+from bregman.application.distribution.exponential_family.gaussian.gaussian import \
     GaussianManifold
 from bregman.base import LAMBDA_COORDS, Point
 from bregman.manifold.geodesic import Geodesic
@@ -36,7 +36,7 @@ class EriksenIVPGeodesic(Geodesic):
         self.A_matrix = A_matrix
 
         super().__init__(
-            LAMBDA_COORDS,
+            manifold,
             id_point,
             manifold.convert_coord(LAMBDA_COORDS, dest),
         )

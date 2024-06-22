@@ -1,11 +1,12 @@
 import numpy as np
 
-from bregman.application.distribution.exponential_family.gaussian import \
+from bregman.application.distribution.exponential_family.gaussian.gaussian import \
     GaussianManifold
+from bregman.application.distribution.exponential_family.gaussian.geodesic import \
+    KobayashiGeodesic
 from bregman.base import Point
 from bregman.dissimilarity.base import ApproxDissimilarity
 from bregman.dissimilarity.bregman import JeffreyBregmanDivergence
-from bregman.geodesic.gaussian import KobayashiGeodesic
 
 
 # TODO make class... need to fix PSD application package first
