@@ -3,10 +3,8 @@ from abc import ABC, abstractmethod
 import autograd
 import numpy as np
 
-from bregman.base import Coordinates, Point
+from bregman.base import Coordinates
 from bregman.generator.generator import Generator
-from bregman.geodesic.base import Geodesic
-from bregman.geodesic.flat_geodesic import FlatGeodesic
 
 
 class Connection(ABC):
@@ -23,10 +21,6 @@ class Connection(ABC):
     def cubic(self, x: np.ndarray) -> np.ndarray:
         pass
 
-    @abstractmethod
-    def geodesic(self, source: Point, dest: Point) -> Geodesic:
-        pass
-
 
 class FlatConnection(Connection):
     def __init__(self, coord: Coordinates, generator: Generator) -> None:
@@ -41,6 +35,3 @@ class FlatConnection(Connection):
 
     def cubic(self, x: np.ndarray) -> np.ndarray:
         return autograd.jacobian(self.generator.hess)(x)
-
-    def geodesic(self, source: Point, dest: Point) -> Geodesic:
-        return FlatGeodesic(self.coord, source, dest)

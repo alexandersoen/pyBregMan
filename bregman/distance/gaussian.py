@@ -63,7 +63,9 @@ class GaussianFisherRaoDistance(ApproxDistance[GaussianManifold]):
             return ub
         else:
             kobayashi_geodesic = KobayashiGeodesic(
-                point_1, point_2, self.manifold
+                self.manifold,
+                point_1,
+                point_2,
             )
             mid = kobayashi_geodesic(0.5)
 

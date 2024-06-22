@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-from bregman.base import Coordinates, CoordObject, Point
-from bregman.geodesic.base import Geodesic
+from bregman.base import BregmanObject, Coordinates, Point
 from bregman.manifold.bisector import Bisector
+from bregman.manifold.geodesic import Geodesic
 from bregman.manifold.manifold import BregmanManifold
 from bregman.manifold.parallel_transport import ParallelTansport
 
@@ -16,10 +16,10 @@ class NoAnimationRoutine(Exception):
     pass
 
 
-class CoordObjectVisualizer(ABC):
+class BregmanObjectVisualizer(ABC):
 
-    plot_list: list[tuple[CoordObject, dict]] = []
-    animate_list: list[tuple[CoordObject, dict]] = []
+    plot_list: list[tuple[BregmanObject, dict]] = []
+    animate_list: list[tuple[BregmanObject, dict]] = []
     callback_list: list["VisualizerCallback"] = []
 
     def __init__(self, manifold: BregmanManifold) -> None:
@@ -27,10 +27,10 @@ class CoordObjectVisualizer(ABC):
 
         self.manifold = manifold
 
-    def plot_object(self, obj: CoordObject, **kwargs) -> None:
+    def plot_object(self, obj: BregmanObject, **kwargs) -> None:
         self.plot_list.append((obj, kwargs))
 
-    def animate_object(self, obj: CoordObject, **kwargs) -> None:
+    def animate_object(self, obj: BregmanObject, **kwargs) -> None:
         self.animate_list.append((obj, kwargs))
 
     def add_callback(self, callback: "VisualizerCallback") -> None:
@@ -77,7 +77,7 @@ class CoordObjectVisualizer(ABC):
         pass
 
     def run_callbacks(
-        self, obj: CoordObject, coord: Coordinates, **kwarg
+        self, obj: BregmanObject, coord: Coordinates, **kwarg
     ) -> None:
 
         for c in self.callback_list:
@@ -111,7 +111,7 @@ class CoordObjectVisualizer(ABC):
                 c.call(obj, coords, self, **kwarg)
 
 
-TVisualizer = TypeVar("TVisualizer", bound=CoordObjectVisualizer)
+TVisualizer = TypeVar("TVisualizer", bound=BregmanObjectVisualizer)
 
 
 class VisualizerCallback(ABC, Generic[TVisualizer]):
@@ -119,7 +119,7 @@ class VisualizerCallback(ABC, Generic[TVisualizer]):
     @abstractmethod
     def call(
         self,
-        obj: CoordObject,
+        obj: BregmanObject,
         coords: Coordinates,
         visualizer: TVisualizer,
         **kwargs,

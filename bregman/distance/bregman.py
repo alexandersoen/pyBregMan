@@ -2,6 +2,7 @@ import numpy as np
 
 from bregman.base import Point
 from bregman.distance.base import ApproxDistance, Distance
+from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.manifold.manifold import BregmanManifold, DualCoord
 
 
@@ -80,8 +81,8 @@ class BhattacharyyaDistance(DualDistance):
         coords_1 = self.manifold.convert_coord(self.coord.value, point_1)
         coords_2 = self.manifold.convert_coord(self.coord.value, point_2)
 
-        geodesic = self.manifold.bregman_geodesic(
-            coords_1, coords_2, self.coord
+        geodesic = BregmanGeodesic(
+            self.manifold, coords_1, coords_2, coord=self.coord
         )
         coords_alpha = geodesic(self.alpha)
 
@@ -113,8 +114,8 @@ class ChernoffInformation(DualApproxDistance):
         coords_1 = self.manifold.convert_coord(self.coord.value, point_1)
         coords_2 = self.manifold.convert_coord(self.coord.value, point_2)
 
-        geodesic = self.manifold.bregman_geodesic(
-            coords_1, coords_2, self.coord
+        geodesic = BregmanGeodesic(
+            self.manifold, coords_1, coords_2, coord=self.coord
         )
         divergence = BregmanDivergence(self.manifold, coord=self.coord)
 

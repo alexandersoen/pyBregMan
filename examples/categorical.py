@@ -4,8 +4,9 @@ from bregman.base import Point
 from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.distribution.exponential_family.categorical import \
     CategoricalManifold
-from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS
-from bregman.visualizer.matplotlib import CoordObjectMatplotlibVisualizer
+from bregman.manifold.geodesic import BregmanGeodesic
+from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, DualCoord
+from bregman.visualizer.matplotlib import BregmanObjectMatplotlibVisualizer
 
 if __name__ == "__main__":
 
@@ -39,13 +40,15 @@ if __name__ == "__main__":
         )
     )
 
-    primal_geo = manifold.theta_geodesic(coord1, coord2)
-    dual_geo = manifold.eta_geodesic(coord1, coord2)
+    primal_geo = BregmanGeodesic(
+        manifold, coord1, coord2, coord=DualCoord.THETA
+    )
+    dual_geo = BregmanGeodesic(manifold, coord1, coord2, coord=DualCoord.ETA)
 
     primal_pt = manifold.theta_parallel_transport(coord1, coord2)
 
     # Define visualizer
-    visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
+    visualizer = BregmanObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
 
     # Add objects to visualize
     visualizer.plot_object(coord1, label=manifold.convert_to_display(coord1))

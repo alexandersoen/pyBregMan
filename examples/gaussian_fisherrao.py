@@ -6,6 +6,7 @@ from bregman.geodesic.gaussian import KobayashiGeodesic
 from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.distribution.exponential_family.gaussian import \
     GaussianManifold
+from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, DualCoord
 from bregman.visualizer.matplotlib import CoordObjectMatplotlibVisualizer
 
@@ -24,9 +25,11 @@ if __name__ == "__main__":
     coord1 = Point(LAMBDA_COORDS, np.array([-1.0, 1.0]))
     coord2 = Point(LAMBDA_COORDS, np.array([1.0, 1.0]))
 
-    primal_geo = manifold.bregman_geodesic(coord1, coord2, DualCoord.THETA)
-    dual_geo = manifold.bregman_geodesic(coord1, coord2, DualCoord.ETA)
-    kobayashi = KobayashiGeodesic(coord1, coord2, manifold)
+    primal_geo = BregmanGeodesic(
+        manifold, coord1, coord2, coord=DualCoord.THETA
+    )
+    dual_geo = BregmanGeodesic(manifold, coord1, coord2, coord=DualCoord.ETA)
+    kobayashi = KobayashiGeodesic(manifold, coord1, coord2)
 
     # Define visualizer
     visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)

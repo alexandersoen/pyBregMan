@@ -2,9 +2,10 @@ import numpy as np
 
 from bregman.base import Point
 from bregman.manifold.application import LAMBDA_COORDS
-from bregman.manifold.manifold import ETA_COORDS
+from bregman.manifold.geodesic import BregmanGeodesic
+from bregman.manifold.manifold import ETA_COORDS, DualCoord
 from bregman.manifold.psd import PSDManifold
-from bregman.visualizer.matplotlib import CoordObjectMatplotlibVisualizer
+from bregman.visualizer.matplotlib import BregmanObjectMatplotlibVisualizer
 
 if __name__ == "__main__":
 
@@ -27,12 +28,12 @@ if __name__ == "__main__":
     coord1 = Point(LAMBDA_COORDS, m1)
     coord2 = Point(LAMBDA_COORDS, m2)
 
-    visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
+    visualizer = BregmanObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
 
     p, q = coord1, coord2
     for i in range(ITERS):
-        primal_geo = manifold.theta_geodesic(p, q)
-        dual_geo = manifold.eta_geodesic(p, q)
+        primal_geo = BregmanGeodesic(manifold, p, q, coord=DualCoord.THETA)
+        dual_geo = BregmanGeodesic(manifold, p, q, coord=DualCoord.ETA)
 
         if i == 0:
             visualizer.plot_object(

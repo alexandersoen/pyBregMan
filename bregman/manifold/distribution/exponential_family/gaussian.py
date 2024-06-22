@@ -1,11 +1,8 @@
 import autograd.numpy as anp
 import numpy as np
-from scipy.linalg import expm, fractional_matrix_power
 
 from bregman.base import LAMBDA_COORDS, DisplayPoint, Point, Shape
 from bregman.generator.generator import AutoDiffGenerator
-from bregman.geodesic.base import Geodesic
-from bregman.manifold.connection import Connection
 from bregman.manifold.distribution.exponential_family.exp_family import (
     ExponentialFamilyDistribution, ExponentialFamilyManifold)
 from bregman.manifold.manifold import THETA_COORDS

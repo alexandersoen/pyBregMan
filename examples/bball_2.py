@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from bregman.ball.parameterized import KL2DBregmanBallCurve
 from bregman.base import Point
-from bregman.manifold.ball import KL2DBregmanBallCurve
 from bregman.manifold.manifold import THETA_COORDS
 
 if __name__ == "__main__":

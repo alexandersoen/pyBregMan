@@ -6,17 +6,18 @@ from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from bregman.base import LAMBDA_COORDS, Coordinates, CoordObject, Point
+from bregman.base import LAMBDA_COORDS, BregmanObject, Coordinates, Point
 from bregman.manifold.bisector import Bisector
 from bregman.manifold.distribution.exponential_family.gaussian import \
     _flatten_to_mu_Sigma
-from bregman.manifold.manifold import BregmanManifold, DualCoord, Geodesic
+from bregman.manifold.geodesic import Geodesic
+from bregman.manifold.manifold import BregmanManifold, DualCoord
 from bregman.manifold.parallel_transport import ParallelTansport
-from bregman.visualizer.visualizer import (CoordObjectVisualizer,
+from bregman.visualizer.visualizer import (BregmanObjectVisualizer,
                                            VisualizerCallback)
 
 
-class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
+class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
 
     def __init__(
         self,
@@ -232,7 +233,7 @@ class CoordObjectMatplotlibVisualizer(CoordObjectVisualizer):
 
 
 class VisualizeGaussian2DCovariancePoints(
-    VisualizerCallback[CoordObjectMatplotlibVisualizer]
+    VisualizerCallback[BregmanObjectMatplotlibVisualizer]
 ):
 
     def __init__(self, scale: float = 0.2, npoints: int = 1_000) -> None:
@@ -243,9 +244,9 @@ class VisualizeGaussian2DCovariancePoints(
 
     def call(
         self,
-        obj: CoordObject,
+        obj: BregmanObject,
         coords: Coordinates,
-        visualizer: CoordObjectMatplotlibVisualizer,
+        visualizer: BregmanObjectMatplotlibVisualizer,
         **kwargs,
     ) -> None:
 
@@ -272,7 +273,7 @@ class VisualizeGaussian2DCovariancePoints(
 
 
 class Visualize2DTissotIndicatrix(
-    VisualizerCallback[CoordObjectMatplotlibVisualizer]
+    VisualizerCallback[BregmanObjectMatplotlibVisualizer]
 ):
 
     def __init__(self, scale: float = 0.1, npoints: int = 1_000) -> None:
@@ -283,9 +284,9 @@ class Visualize2DTissotIndicatrix(
 
     def call(
         self,
-        obj: CoordObject,
+        obj: BregmanObject,
         coords: Coordinates,
-        visualizer: CoordObjectMatplotlibVisualizer,
+        visualizer: BregmanObjectMatplotlibVisualizer,
         **kwargs,
     ) -> None:
 

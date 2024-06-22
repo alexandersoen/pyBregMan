@@ -6,8 +6,9 @@ from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.bisector import BregmanBisector
 from bregman.manifold.distribution.exponential_family.gaussian import \
     GaussianManifold
+from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, DualCoord
-from bregman.visualizer.matplotlib import (CoordObjectMatplotlibVisualizer,
+from bregman.visualizer.matplotlib import (BregmanObjectMatplotlibVisualizer,
                                            VisualizeGaussian2DCovariancePoints)
 
 if __name__ == "__main__":
@@ -42,8 +43,8 @@ if __name__ == "__main__":
 
     print("Chernoff Information:", chernoff_information(coord1, coord2))
 
-    primal_geo = manifold.bregman_geodesic(coord1, coord2, DualCoord.THETA)
-    dual_geo = manifold.bregman_geodesic(coord1, coord2, DualCoord.ETA)
+    primal_geo = BregmanGeodesic(manifold, coord1, coord2, DualCoord.THETA)
+    dual_geo = BregmanGeodesic(manifold, coord1, coord2, DualCoord.ETA)
 
     chernoff_point = primal_geo(1 - chernoff_point_alpha)
 
@@ -63,7 +64,7 @@ if __name__ == "__main__":
     )
 
     # Define visualizer
-    visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
+    visualizer = BregmanObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
 
     # Add objects to visualize
     visualizer.plot_object(coord1, label=manifold.convert_to_display(coord1))

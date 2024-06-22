@@ -3,7 +3,9 @@ import numpy as np
 from bregman.base import LAMBDA_COORDS, Point
 from bregman.manifold.distribution.exponential_family.normal import \
     Gaussian1DManifold
-from bregman.visualizer.matplotlib import CoordObjectMatplotlibVisualizer
+from bregman.manifold.geodesic import BregmanGeodesic
+from bregman.manifold.manifold import DualCoord
+from bregman.visualizer.matplotlib import BregmanObjectMatplotlibVisualizer
 
 if __name__ == "__main__":
 
@@ -17,11 +19,13 @@ if __name__ == "__main__":
     coord1 = Point(LAMBDA_COORDS, np.array([1, 1]))
     coord2 = Point(LAMBDA_COORDS, np.array([3, 1]))
 
-    primal_geo = manifold.theta_geodesic(coord1, coord2)
-    dual_geo = manifold.eta_geodesic(coord1, coord2)
+    primal_geo = BregmanGeodesic(
+        manifold, coord1, coord2, coord=DualCoord.THETA
+    )
+    dual_geo = BregmanGeodesic(manifold, coord1, coord2, coord=DualCoord.ETA)
 
     # Define visualizer
-    visualizer = CoordObjectMatplotlibVisualizer(manifold, (0, 1))
+    visualizer = BregmanObjectMatplotlibVisualizer(manifold, (0, 1))
 
     # Add objects to visualize
     visualizer.plot_object(coord1, label=manifold.convert_to_display(coord1))

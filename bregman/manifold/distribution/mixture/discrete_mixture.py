@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from bregman.base import Shape
-from bregman.manifold.distribution.exponential_family.multinomial import (
-    MultinomialDualGenerator, MultinomialPrimalGenerator)
 from bregman.manifold.distribution.mixture.mixture import MixtureManifold
 from bregman.object.distribution import Distribution
 

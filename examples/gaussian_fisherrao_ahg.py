@@ -6,6 +6,7 @@ from bregman.geodesic.gaussian import KobayashiGeodesic
 from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.distribution.exponential_family.gaussian import \
     GaussianManifold
+from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, DualCoord
 from bregman.visualizer.matplotlib import CoordObjectMatplotlibVisualizer
 
@@ -29,9 +30,11 @@ if __name__ == "__main__":
     coord1 = Point(LAMBDA_COORDS, np.array([0, 0, 1, 0.5, 0.5, 2]))
     coord2 = Point(LAMBDA_COORDS, np.array([0, 0, 1, 0, 0, 0.5]))
 
-    primal_geo = manifold.bregman_geodesic(coord1, coord2, DualCoord.THETA)
-    dual_geo = manifold.bregman_geodesic(coord1, coord2, DualCoord.ETA)
-    kobayashi = KobayashiGeodesic(coord1, coord2, manifold)
+    primal_geo = BregmanGeodesic(
+        manifold, coord1, coord2, coord=DualCoord.THETA
+    )
+    dual_geo = BregmanGeodesic(manifold, coord1, coord2, coord=DualCoord.ETA)
+    kobayashi = KobayashiGeodesic(manifold, coord1, coord2)
 
     # Define visualizer
     visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
@@ -48,8 +51,8 @@ if __name__ == "__main__":
     p, q = coord1, coord2
     ITERS = 5
     for i in range(ITERS):
-        primal_geo = manifold.theta_geodesic(p, q)
-        dual_geo = manifold.eta_geodesic(p, q)
+        primal_geo = BregmanGeodesic(manifold, p, q, coord=DualCoord.THETA)
+        dual_geo = BregmanGeodesic(manifold, p, q, coord=DualCoord.ETA)
 
         if i > 0:
             visualizer.plot_object(p, c="blue", alpha=0.3)

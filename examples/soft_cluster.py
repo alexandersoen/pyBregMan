@@ -2,13 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from bregman.base import Point
+from bregman.distance.bregman import BregmanDivergence
 from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.distribution.exponential_family.gaussian import \
     GaussianManifold
 from bregman.manifold.distribution.mixture.ef_mixture import EFMixtureManifold
 from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, DualCoord
-from bregman.visualizer.matplotlib import (CoordObjectMatplotlibVisualizer,
-                                           VisualizeGaussian2DCovariancePoints)
 
 if __name__ == "__main__":
 
@@ -41,6 +40,9 @@ if __name__ == "__main__":
     ef_mixture_manifold = EFMixtureManifold(
         [gaussian_manifold.point_to_distribution(p) for p in init_dist_points],
         gaussian_manifold,
+    )
+    eta_gaussian_div = BregmanDivergence(
+        ef_mixture_manifold.ef_manifold, coord=DualCoord.ETA
     )
 
     def loglikelihood(data, mixing_point, dist_points):
@@ -91,12 +93,9 @@ if __name__ == "__main__":
         ).data
         for i, (w, d) in enumerate(zip(cur_weights, cur_dist_points)):
 
-            def cur_breg_func(x):
-                return ef_mixture_manifold.ef_manifold.bregman_divergence(
-                    x, d, coord=DualCoord.ETA
-                )
-
-            div_values = np.stack([cur_breg_func(x) for x in embedded_data])
+            div_values = np.stack(
+                [eta_gaussian_div(x, d) for x in embedded_data]
+            )
             div_weights[:, i] += w * np.exp(-div_values)
 
         # Step M

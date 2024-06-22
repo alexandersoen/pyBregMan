@@ -2,17 +2,17 @@ import numpy as np
 from scipy.linalg import expm, fractional_matrix_power
 
 from bregman.base import LAMBDA_COORDS, Point
-from bregman.geodesic.base import Geodesic
 from bregman.manifold.distribution.exponential_family.gaussian import \
     GaussianManifold
+from bregman.manifold.geodesic import Geodesic
 
 
 class EriksenIVPGeodesic(Geodesic):
 
     def __init__(
         self,
-        dest: Point,
         manifold: GaussianManifold,
+        dest: Point,
     ) -> None:
 
         dest_point = manifold.convert_to_display(dest)
@@ -62,9 +62,9 @@ class KobayashiGeodesic(Geodesic):
 
     def __init__(
         self,
+        manifold: GaussianManifold,
         source: Point,
         dest: Point,
-        manifold: GaussianManifold,
     ) -> None:
 
         # Setup  up data
@@ -146,17 +146,6 @@ class KobayashiGeodesic(Geodesic):
             @ fractional_matrix_power(self.Gmix, t)
             @ self.G0_pos_sqrt
         )
-
-        #        if t == 0.5:
-        #
-        #            print(self.G0)
-        #            print(
-        #                self.G0_pos_sqrt
-        #                @ fractional_matrix_power(self.Gmix, 1)
-        #                @ self.G0_pos_sqrt
-        #            )
-        #            print(Gt)
-        #            print(self.G1)
 
         Delta = Gt[: self.dim, : self.dim]
         delta = Gt[self.dim, : self.dim]

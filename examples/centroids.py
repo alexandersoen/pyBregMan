@@ -4,6 +4,7 @@ from bregman.base import Point
 from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.distribution.exponential_family.categorical import \
     CategoricalManifold
+from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.manifold.manifold import DualCoord
 from bregman.visualizer.matplotlib import CoordObjectMatplotlibVisualizer
 
@@ -28,12 +29,12 @@ if __name__ == "__main__":
     points = [p1, p2, p3]
 
     # Triangles
-    p12_primal_geo = manifold.theta_geodesic(p1, p2)
-    p13_primal_geo = manifold.theta_geodesic(p1, p3)
-    p23_primal_geo = manifold.theta_geodesic(p2, p3)
-    p12_dual_geo = manifold.eta_geodesic(p1, p2)
-    p13_dual_geo = manifold.eta_geodesic(p1, p3)
-    p23_dual_geo = manifold.eta_geodesic(p2, p3)
+    p12_primal_geo = BregmanGeodesic(manifold, p1, p2, coord=DualCoord.THETA)
+    p13_primal_geo = BregmanGeodesic(manifold, p1, p3, coord=DualCoord.THETA)
+    p23_primal_geo = BregmanGeodesic(manifold, p2, p3, coord=DualCoord.THETA)
+    p12_dual_geo = BregmanGeodesic(manifold, p1, p2, coord=DualCoord.ETA)
+    p13_dual_geo = BregmanGeodesic(manifold, p1, p3, coord=DualCoord.ETA)
+    p23_dual_geo = BregmanGeodesic(manifold, p2, p3, coord=DualCoord.ETA)
 
     # Centroids
     alphas = [0.5, 0.5, 0.5]

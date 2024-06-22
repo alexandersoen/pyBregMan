@@ -1,14 +1,17 @@
 from abc import ABC
 from enum import Enum
+from typing import TYPE_CHECKING
 
 import numpy as np
 
-from bregman.base import Coordinates, InputObject, Point
+from bregman.base import Coordinates, Point
 from bregman.generator.generator import Generator
-from bregman.geodesic.base import Geodesic
 from bregman.manifold.connection import Connection, FlatConnection
 from bregman.manifold.coordinate import Atlas
 from bregman.manifold.parallel_transport import DualFlatParallelTransport
+
+if TYPE_CHECKING:
+    from bregman.manifold.geodesic import Geodesic
 
 THETA_COORDS = Coordinates("theta")
 ETA_COORDS = Coordinates("eta")
@@ -71,40 +74,6 @@ class BregmanManifold(ABC):
             if coord == DualCoord.THETA
             else self.eta_connection
         )
-
-    def bregman_divergence(
-        self,
-        point_1: Point,
-        point_2: Point,
-        coord: DualCoord = DualCoord.THETA,
-    ) -> np.ndarray:
-        coord_1 = self.convert_coord(coord.value, point_1)
-        coord_2 = self.convert_coord(coord.value, point_2)
-        generator = self.bregman_generator(coord)
-
-        return generator.bergman_divergence(coord_1.data, coord_2.data)
-
-    def bregman_geodesic(
-        self,
-        point_1: Point,
-        point_2: Point,
-        coord: DualCoord = DualCoord.THETA,
-    ) -> Geodesic:
-        coord_1 = self.convert_coord(coord.value, point_1)
-        coord_2 = self.convert_coord(coord.value, point_2)
-        connection = self.bregman_connection(coord)
-
-        return connection.geodesic(coord_1, coord_2)
-
-    def theta_geodesic(self, point_1: Point, point_2: Point) -> Geodesic:
-        theta_1 = self.convert_coord(THETA_COORDS, point_1)
-        theta_2 = self.convert_coord(THETA_COORDS, point_2)
-        return self.theta_connection.geodesic(theta_1, theta_2)
-
-    def eta_geodesic(self, point_1: Point, point_2: Point) -> Geodesic:
-        eta_1 = self.convert_coord(ETA_COORDS, point_1)
-        eta_2 = self.convert_coord(ETA_COORDS, point_2)
-        return self.eta_connection.geodesic(eta_1, eta_2)
 
     def theta_parallel_transport(
         self, point_1: Point, point_2: Point

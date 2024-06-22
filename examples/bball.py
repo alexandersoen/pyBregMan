@@ -1,6 +1,7 @@
 import numpy as np
 
 from bregman.base import Point
+from bregman.distance.bregman import BregmanDivergence
 from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.distribution.exponential_family.categorical import \
     CategoricalManifold
@@ -60,6 +61,7 @@ if __name__ == "__main__":
     lines = []
 
     lift = []
+    breg_divergence = BregmanDivergence(manifold)
     for i in range(xs.shape[0]):
         for j in range(xs.shape[1]):
             x = xs[i, j]
@@ -74,7 +76,8 @@ if __name__ == "__main__":
             test_f = manifold.bregman_generator(coord=DualCoord.THETA)(
                 manifold.convert_coord(THETA_COORDS, test_point).data
             )
-            test_bd = manifold.bregman_divergence(test_point, c1)
+
+            test_bd = breg_divergence(test_point, c1)
             if test_bd < r:
                 bds[i, j] = 0
                 ws[i, j] = test_f
@@ -134,7 +137,7 @@ if __name__ == "__main__":
     """
 
     # Define visualizer
-    visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
+    visualizer = BregmanObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
 
     # Add objects to visualize
     visualizer.plot_object(
