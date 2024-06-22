@@ -1,7 +1,7 @@
 import numpy as np
 
 from bregman.base import Point
-from bregman.distance.bregman import BregmanDivergence
+from bregman.dissimilarity.bregman import BregmanDivergence
 from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.distribution.exponential_family.categorical import \
     CategoricalManifold

@@ -1,7 +1,7 @@
 import numpy as np
 
 from bregman.base import Point
-from bregman.distance.bregman import ChernoffInformation
+from bregman.dissimilarity.bregman import ChernoffInformation
 from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.bisector import BregmanBisector
 from bregman.manifold.distribution.exponential_family.gaussian import \

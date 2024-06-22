@@ -9,7 +9,7 @@ from bregman.manifold.manifold import BregmanManifold
 TBregmanManifold = TypeVar("TBregmanManifold", bound=BregmanManifold)
 
 
-class Distance(Generic[TBregmanManifold], ABC):
+class Dissimilarity(Generic[TBregmanManifold], ABC):
 
     def __init__(self, manifold: TBregmanManifold) -> None:
         super().__init__()
@@ -23,7 +23,9 @@ class Distance(Generic[TBregmanManifold], ABC):
         return self.distance(point_1, point_2)
 
 
-class ApproxDistance(Distance[TBregmanManifold], Generic[TBregmanManifold]):
+class ApproxDissimilarity(
+    Dissimilarity[TBregmanManifold], Generic[TBregmanManifold]
+):
 
     def __init__(self, manifold: TBregmanManifold, eps: float = 1e-5) -> None:
         super().__init__(manifold)

@@ -1,8 +1,8 @@
 import numpy as np
 
 from bregman.base import Point
-from bregman.distance.base import ApproxDistance
-from bregman.distance.bregman import JeffreyBregmanDistance
+from bregman.dissimilarity.base import ApproxDissimilarity
+from bregman.dissimilarity.bregman import JeffreyBregmanDivergence
 from bregman.geodesic.gaussian import KobayashiGeodesic
 from bregman.manifold.distribution.exponential_family.gaussian import \
     GaussianManifold
@@ -35,12 +35,12 @@ def IsometricSPDEmbeddingCalvoOller(
     return res
 
 
-class GaussianFisherRaoDistance(ApproxDistance[GaussianManifold]):
+class GaussianFisherRaoDistance(ApproxDissimilarity[GaussianManifold]):
 
     def __init__(self, manifold: GaussianManifold, eps: float = 1e-5) -> None:
         super().__init__(manifold, eps)
 
-        self.jeffery_distance = JeffreyBregmanDistance(manifold)
+        self.jeffery_distance = JeffreyBregmanDivergence(manifold)
 
     def distance(self, point_1: Point, point_2: Point) -> np.ndarray:
         return self._go(point_1, point_2)

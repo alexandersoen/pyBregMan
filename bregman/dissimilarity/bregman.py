@@ -1,12 +1,12 @@
 import numpy as np
 
 from bregman.base import Point
-from bregman.distance.base import ApproxDistance, Distance
+from bregman.dissimilarity.base import ApproxDissimilarity, Dissimilarity
 from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.manifold.manifold import BregmanManifold, DualCoord
 
 
-class DualDistance(Distance[BregmanManifold]):
+class DualDissimilarity(Dissimilarity[BregmanManifold]):
     def __init__(
         self, manifold: BregmanManifold, coord: DualCoord = DualCoord.THETA
     ) -> None:
@@ -15,7 +15,7 @@ class DualDistance(Distance[BregmanManifold]):
         self.coord = coord
 
 
-class DualApproxDistance(ApproxDistance[BregmanManifold]):
+class DualApproxDissimilarity(ApproxDissimilarity[BregmanManifold]):
     def __init__(
         self,
         manifold: BregmanManifold,
@@ -27,7 +27,7 @@ class DualApproxDistance(ApproxDistance[BregmanManifold]):
         self.coord = coord
 
 
-class BregmanDivergence(DualDistance):
+class BregmanDivergence(DualDissimilarity):
 
     def __init__(
         self, manifold: BregmanManifold, coord: DualCoord = DualCoord.THETA
@@ -44,7 +44,7 @@ class BregmanDivergence(DualDistance):
         return gen.bergman_divergence(coord_1.data, coord_2.data)
 
 
-class JeffreyBregmanDistance(Distance[BregmanManifold]):
+class JeffreyBregmanDivergence(Dissimilarity[BregmanManifold]):
 
     def __init__(self, manifold: BregmanManifold) -> None:
         super().__init__(manifold)
@@ -60,7 +60,7 @@ class JeffreyBregmanDistance(Distance[BregmanManifold]):
         )
 
 
-class BhattacharyyaDistance(DualDistance):
+class BhattacharyyaDistance(DualDissimilarity):
 
     def __init__(
         self,
@@ -96,7 +96,7 @@ class BhattacharyyaDistance(DualDistance):
         return (1 - self.alpha) * F_1 + self.alpha * F_2 - F_alpha
 
 
-class ChernoffInformation(DualApproxDistance):
+class ChernoffInformation(DualApproxDissimilarity):
 
     def __init__(
         self,

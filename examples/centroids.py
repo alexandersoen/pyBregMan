@@ -6,7 +6,7 @@ from bregman.manifold.distribution.exponential_family.categorical import \
     CategoricalManifold
 from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.manifold.manifold import DualCoord
-from bregman.visualizer.matplotlib import CoordObjectMatplotlibVisualizer
+from bregman.visualizer.matplotlib import BregmanObjectMatplotlibVisualizer
 
 if __name__ == "__main__":
 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     )
 
     # Define visualizer
-    visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
+    visualizer = BregmanObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
 
     # Add objects to visualize
     visualizer.plot_object(p1, label=manifold.convert_to_display(p1))
