@@ -50,17 +50,17 @@ if __name__ == "__main__":
 
     # This does not make sense to plot here. Only for 2D
     eta_bisector = BregmanBisector(
-        ETA_COORDS,
-        manifold.convert_coord(ETA_COORDS, coord1),
-        manifold.convert_coord(ETA_COORDS, coord2),
-        manifold.bregman_generator(DualCoord.ETA),
+        manifold,
+        coord1,
+        coord2,
+        coord=DualCoord.ETA,
     )
 
     theta_bisector = BregmanBisector(
-        THETA_COORDS,
-        manifold.convert_coord(THETA_COORDS, coord1),
-        manifold.convert_coord(THETA_COORDS, coord2),
-        manifold.bregman_generator(DualCoord.THETA),
+        manifold,
+        coord1,
+        coord2,
+        coord=DualCoord.THETA,
     )
 
     # Define visualizer

@@ -1,3 +1,4 @@
+import warnings
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
@@ -91,7 +92,12 @@ class BregmanObjectVisualizer(ABC):
                 case Geodesic():
                     self.plot_geodesic(coords, obj, **kwarg)
                 case Bisector():
-                    self.plot_bisector(coords, obj, **kwarg)
+                    if self.manifold.dimension != 2:
+                        warnings.warn(
+                            f"Bisector {obj} cannot be visualized due to non-unique projection."
+                        )
+                    else:
+                        self.plot_bisector(coords, obj, **kwarg)
                 #                case ParallelTansport():
                 #                    self.plot_parallel_transport(coords, obj, **kwarg)
                 case _:

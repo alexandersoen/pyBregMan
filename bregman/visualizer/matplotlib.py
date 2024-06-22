@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Any, Callable
 
 import matplotlib.pyplot as plt
@@ -10,11 +11,20 @@ from bregman.base import LAMBDA_COORDS, BregmanObject, Coordinates, Point
 from bregman.manifold.bisector import Bisector
 from bregman.manifold.distribution.exponential_family.gaussian import \
     _flatten_to_mu_Sigma
-from bregman.manifold.geodesic import Geodesic
+from bregman.manifold.geodesic import BregmanGeodesic, Geodesic
 from bregman.manifold.manifold import BregmanManifold, DualCoord
 from bregman.manifold.parallel_transport import ParallelTansport
 from bregman.visualizer.visualizer import (BregmanObjectVisualizer,
                                            VisualizerCallback)
+
+
+@dataclass
+class DataLim:
+    coords: Coordinates
+    xmin: np.ndarray
+    xmax: np.ndarray
+    ymin: np.ndarray
+    ymax: np.ndarray
 
 
 class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
@@ -49,11 +59,7 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
 
         self.update_func_list: list[Callable[[int], Any]] = []
 
-        # Edges of visualizer
-        self.xmin, self.xmax = (0, 0)
-        self.ymin, self.ymax = (0, 0)
-
-    def calculate_lims(self, coords: Coordinates) -> None:
+    def calculate_lims(self, coords: Coordinates, cut: float = 1.0) -> DataLim:
         xys_list = []
 
         for obj, _ in self.plot_list:
@@ -65,8 +71,18 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
 
         xys_data = np.vstack(xys_list)
 
-        self.xmin, self.ymin = np.min(xys_data, axis=0)
-        self.xmax, self.ymax = np.max(xys_data, axis=0)
+        xmin, ymin = np.min(xys_data, axis=0)
+        xmax, ymax = np.max(xys_data, axis=0)
+
+        xcut = (xmax - xmin) * (1 - cut) / 2
+        xmin = xmin + xcut
+        xmax = xmax - xcut
+
+        ycut = (ymax - ymin) * (1 - cut) / 2
+        ymin = ymin + ycut
+        ymax = ymax - ycut
+
+        return DataLim(coords, xmin, xmax, ymin, ymax)
 
     def plot_point(self, coords: Coordinates, point: Point, **kwargs) -> None:
         kwargs = kwargs.copy()
@@ -107,6 +123,7 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
             for t in range(self.resolution)
         ]
         geodesic_data = np.vstack([p.data for p in geodesic_points])
+        print(geodesic_data)
 
         self.ax.plot(
             geodesic_data[:, self.dim1],
@@ -117,8 +134,6 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
     def plot_bisector(
         self, coords: Coordinates, bisector: Bisector, **kwargs
     ) -> None:
-        if bisector.coords != coords or self.manifold.dimension != 2:
-            return None
 
         bis_vis_kwargs: dict[str, Any] = {
             "ls": "-.",
@@ -130,11 +145,21 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
         w = bisector.shift()
 
         x, y = bis_point.data[[self.dim1, self.dim2]]
+        data_lim = self.calculate_lims(bisector.coords, 0.2)
 
-        y1 = (-w - x * self.xmin) / y
-        y2 = (-w - x * self.xmax) / y
+        y1 = (-w - x * data_lim.xmin) / y
+        y2 = (-w - x * data_lim.xmax) / y
 
-        self.ax.plot([self.xmin, self.xmax], [y1, y2], **bis_vis_kwargs)
+        p1_data = np.array([data_lim.xmin, y1])
+        p2_data = np.array([data_lim.xmax, y2])
+
+        plot_geo = BregmanGeodesic(
+            self.manifold,
+            Point(bisector.coords, p1_data),
+            Point(bisector.coords, p2_data),
+            coord=DualCoord(bisector.coords),
+        )
+        self.plot_geodesic(coords, plot_geo, **bis_vis_kwargs)
 
     def animate_geodesic(
         self, coords: Coordinates, geodesic: Geodesic, **kwargs
@@ -207,7 +232,6 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
 
     def visualize(self, coords: Coordinates) -> None:
         self.update_func_list = []
-        self.calculate_lims(coords)
         super().visualize(coords)
 
         def update_all(frame: int):
