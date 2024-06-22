@@ -1,14 +1,14 @@
 import numpy as np
 
-from bregman.base import Point
-from bregman.distance.gaussian import GaussianFisherRaoDistance
-from bregman.geodesic.gaussian import KobayashiGeodesic
-from bregman.manifold.application import LAMBDA_COORDS
-from bregman.manifold.distribution.exponential_family.gaussian import \
+from bregman.application.application import LAMBDA_COORDS
+from bregman.application.distribution.exponential_family.gaussian import \
     GaussianManifold
+from bregman.base import Point
+from bregman.dissimilarity.gaussian import GaussianFisherRaoDistance
+from bregman.geodesic.gaussian import KobayashiGeodesic
 from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, DualCoord
-from bregman.visualizer.matplotlib import CoordObjectMatplotlibVisualizer
+from bregman.visualizer.matplotlib import BregmanObjectMatplotlibVisualizer
 
 if __name__ == "__main__":
 
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     kobayashi = KobayashiGeodesic(manifold, coord1, coord2)
 
     # Define visualizer
-    visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
+    visualizer = BregmanObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
 
     # Add objects to visualize
     visualizer.plot_object(coord1, c="black")

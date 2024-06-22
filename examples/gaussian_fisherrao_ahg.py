@@ -1,14 +1,14 @@
 import numpy as np
 
-from bregman.base import Point
-from bregman.distance.gaussian import GaussianFisherRaoDistance
-from bregman.geodesic.gaussian import KobayashiGeodesic
-from bregman.manifold.application import LAMBDA_COORDS
-from bregman.manifold.distribution.exponential_family.gaussian import \
+from bregman.application.application import LAMBDA_COORDS
+from bregman.application.distribution.exponential_family.gaussian import \
     GaussianManifold
+from bregman.base import Point
+from bregman.dissimilarity.gaussian import GaussianFisherRaoDistance
+from bregman.geodesic.gaussian import KobayashiGeodesic
 from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, DualCoord
-from bregman.visualizer.matplotlib import CoordObjectMatplotlibVisualizer
+from bregman.visualizer.matplotlib import BregmanObjectMatplotlibVisualizer
 
 if __name__ == "__main__":
 
@@ -18,6 +18,7 @@ if __name__ == "__main__":
     VISUALIZE_INDEX = (2, 3)
 
     num_frames = 120
+    resolution = 120
 
     # Define manifold + objects
     # manifold = GaussianManifold(1)
@@ -37,7 +38,9 @@ if __name__ == "__main__":
     kobayashi = KobayashiGeodesic(manifold, coord1, coord2)
 
     # Define visualizer
-    visualizer = CoordObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
+    visualizer = BregmanObjectMatplotlibVisualizer(
+        manifold, VISUALIZE_INDEX, resolution=resolution, frames=num_frames
+    )
 
     # Add objects to visualize
     visualizer.plot_object(coord1, c="black")
@@ -66,10 +69,10 @@ if __name__ == "__main__":
 
     visualizer.plot_object(kobayashi(0.5), marker="x", c="purple", zorder=99)
 
-    fr_dist = GaussianFisherRaoDistance(manifold)
-    print("FR Distance", fr_dist(coord1, coord2))
-
     # cov_cb = VisualizeGaussian2DCovariancePoints()
     # visualizer.add_callback(cov_cb)
 
     visualizer.visualize(DISPLAY_TYPE)
+
+    fr_dist = GaussianFisherRaoDistance(manifold)
+    print("FR Distance", fr_dist(coord1, coord2))

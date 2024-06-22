@@ -1,9 +1,9 @@
 import numpy as np
 
-from bregman.base import Point
-from bregman.manifold.application import LAMBDA_COORDS
-from bregman.manifold.distribution.exponential_family.multinomial import \
+from bregman.application.application import LAMBDA_COORDS
+from bregman.application.distribution.exponential_family.multinomial import \
     MultinomialManifold
+from bregman.base import Point
 from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, DualCoord
 from bregman.visualizer.matplotlib import BregmanObjectMatplotlibVisualizer

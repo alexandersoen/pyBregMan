@@ -3,11 +3,9 @@ from typing import Generic, TypeVar
 
 import numpy as np
 
-from bregman.base import Coordinates, Point
+from bregman.application.application import MyDisplayPoint
+from bregman.application.distribution.distribution import DistributionManifold
 from bregman.generator.generator import Generator
-from bregman.manifold.application import MyDisplayPoint
-from bregman.manifold.distribution.distribution import DistributionManifold
-from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS
 from bregman.object.distribution import Distribution
 
 

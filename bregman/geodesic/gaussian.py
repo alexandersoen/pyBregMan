@@ -1,9 +1,9 @@
 import numpy as np
 from scipy.linalg import expm, fractional_matrix_power
 
-from bregman.base import LAMBDA_COORDS, Point
-from bregman.manifold.distribution.exponential_family.gaussian import \
+from bregman.application.distribution.exponential_family.gaussian import \
     GaussianManifold
+from bregman.base import LAMBDA_COORDS, Point
 from bregman.manifold.geodesic import Geodesic
 
 
@@ -80,7 +80,7 @@ class KobayashiGeodesic(Geodesic):
         self.dim = len(self.dest_mu)
 
         super().__init__(
-            LAMBDA_COORDS,
+            manifold,
             manifold.convert_coord(LAMBDA_COORDS, source),
             manifold.convert_coord(LAMBDA_COORDS, dest),
         )

@@ -1,9 +1,9 @@
 import autograd.numpy as anp
 import numpy as np
 
+from bregman.application.application import ApplicationManifold
 from bregman.base import DisplayPoint
 from bregman.generator.generator import AutoDiffGenerator
-from bregman.manifold.application import ApplicationManifold
 
 
 class NotPSDMatrix(Exception):

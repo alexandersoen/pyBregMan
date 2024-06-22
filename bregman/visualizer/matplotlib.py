@@ -7,10 +7,10 @@ from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
+from bregman.application.distribution.exponential_family.gaussian.gaussian import \
+    _flatten_to_mu_Sigma
 from bregman.base import LAMBDA_COORDS, BregmanObject, Coordinates, Point
 from bregman.manifold.bisector import Bisector
-from bregman.manifold.distribution.exponential_family.gaussian import \
-    _flatten_to_mu_Sigma
 from bregman.manifold.geodesic import BregmanGeodesic, Geodesic
 from bregman.manifold.manifold import BregmanManifold, DualCoord
 from bregman.manifold.parallel_transport import ParallelTansport
@@ -51,6 +51,7 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
         self.frames = frames
         self.intervals = intervals
 
+        self.rdelta = 1 / (self.resolution - 1)
         self.delta = 1 / (self.frames - 1)
 
         self.fig: Figure
@@ -119,11 +120,10 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
         geo_vis_kwargs.update(kwargs)
 
         geodesic_points = [
-            self.manifold.convert_coord(coords, geodesic(self.delta * t))
+            self.manifold.convert_coord(coords, geodesic(self.rdelta * t))
             for t in range(self.resolution)
         ]
         geodesic_data = np.vstack([p.data for p in geodesic_points])
-        print(geodesic_data)
 
         self.ax.plot(
             geodesic_data[:, self.dim1],

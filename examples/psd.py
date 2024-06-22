@@ -1,10 +1,10 @@
 import numpy as np
 
+from bregman.application.application import LAMBDA_COORDS
+from bregman.application.psd import PSDManifold
 from bregman.base import Point
-from bregman.manifold.application import LAMBDA_COORDS
 from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.manifold.manifold import ETA_COORDS, DualCoord
-from bregman.manifold.psd import PSDManifold
 from bregman.visualizer.matplotlib import BregmanObjectMatplotlibVisualizer
 
 if __name__ == "__main__":

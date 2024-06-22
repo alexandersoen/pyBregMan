@@ -4,11 +4,11 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from bregman.manifold.distribution.exponential_family.multinomial import \
+from bregman.application.distribution.exponential_family.multinomial import \
     MultinomialManifold
 
 if TYPE_CHECKING:
-    from bregman.manifold.distribution.mixture.discrete_mixture import \
+    from bregman.application.distribution.mixture.discrete_mixture import \
         DiscreteMixture
 
 

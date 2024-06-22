@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from bregman.application.distribution.mixture.mixture import MixtureManifold
 from bregman.base import Shape
-from bregman.manifold.distribution.mixture.mixture import MixtureManifold
 from bregman.object.distribution import Distribution
 
 if TYPE_CHECKING:
-    from bregman.manifold.distribution.exponential_family.categorical import \
+    from bregman.application.distribution.exponential_family.categorical import \
         CategoricalManifold
 
 

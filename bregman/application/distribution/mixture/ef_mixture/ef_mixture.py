@@ -1,10 +1,10 @@
 from typing import Generic, Sequence, TypeVar
 
-from bregman.base import LAMBDA_COORDS, DisplayPoint, Point
-from bregman.manifold.distribution.exponential_family.exp_family import (
+from bregman.application.distribution.exponential_family.exp_family import (
     ExponentialFamilyDistribution, ExponentialFamilyManifold)
-from bregman.manifold.distribution.mixture.mixture import (MixtureDistribution,
-                                                           MixtureManifold)
+from bregman.application.distribution.mixture.mixture import (
+    MixtureDistribution, MixtureManifold)
+from bregman.base import LAMBDA_COORDS, DisplayPoint, Point
 
 EFDistribution = TypeVar("EFDistribution", bound=ExponentialFamilyDistribution)
 EFDisplay = TypeVar("EFDisplay", bound=DisplayPoint)

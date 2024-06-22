@@ -1,10 +1,10 @@
 import numpy as np
 
+from bregman.application.application import LAMBDA_COORDS
+from bregman.application.distribution.exponential_family.categorical import \
+    CategoricalManifold
 from bregman.base import Point
 from bregman.dissimilarity.bregman import BregmanDivergence
-from bregman.manifold.application import LAMBDA_COORDS
-from bregman.manifold.distribution.exponential_family.categorical import \
-    CategoricalManifold
 from bregman.manifold.manifold import THETA_COORDS, DualCoord
 
 if __name__ == "__main__":

@@ -3,12 +3,11 @@ from typing import Generic, Sequence, TypeVar
 
 import numpy as np
 
-from bregman.base import DisplayPoint, Point
-from bregman.generator.generator import Generator
-from bregman.manifold.application import LAMBDA_COORDS
-from bregman.manifold.distribution.distribution import DistributionManifold
-from bregman.manifold.distribution.exponential_family.multinomial import (
+from bregman.application.application import LAMBDA_COORDS
+from bregman.application.distribution.distribution import DistributionManifold
+from bregman.application.distribution.exponential_family.multinomial import (
     MultinomialDualGenerator, MultinomialPrimalGenerator)
+from bregman.base import DisplayPoint, Point
 from bregman.object.distribution import Distribution
 
 

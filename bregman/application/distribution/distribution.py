@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-from bregman.base import DisplayPoint, Point
-from bregman.manifold.application import ApplicationManifold
+from bregman.application.application import ApplicationManifold
+from bregman.base import DisplayPoint
 from bregman.object.distribution import Distribution
 
 

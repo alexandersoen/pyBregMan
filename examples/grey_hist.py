@@ -10,9 +10,9 @@ import warnings
 import matplotlib.pyplot as plt
 import numpy as np
 
-from bregman.base import LAMBDA_COORDS, Point
-from bregman.manifold.distribution.exponential_family.categorical import \
+from bregman.application.distribution.exponential_family.categorical import \
     CategoricalManifold
+from bregman.base import LAMBDA_COORDS, Point
 from bregman.manifold.manifold import DualCoord
 
 warnings.filterwarnings("error")
