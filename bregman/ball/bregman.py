@@ -1,6 +1,6 @@
 from bregman.ball.base import Ball
 from bregman.base import Point
-from bregman.distance.bregman import BregmanDivergence
+from bregman.dissimilarity.bregman import BregmanDivergence
 from bregman.manifold.manifold import BregmanManifold, DualCoord
 
 
