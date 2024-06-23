@@ -5,7 +5,7 @@ import numpy as np
 
 from bregman.application.application import MyDisplayPoint
 from bregman.application.distribution.distribution import DistributionManifold
-from bregman.generator.generator import Generator
+from bregman.manifold.generator import Generator
 from bregman.object.distribution import Distribution
 
 

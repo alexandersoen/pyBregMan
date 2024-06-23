@@ -1,17 +1,13 @@
 from abc import ABC
 from enum import Enum
-from typing import TYPE_CHECKING
 
 import numpy as np
 
 from bregman.base import Coordinates, Point
-from bregman.generator.generator import Generator
 from bregman.manifold.connection import Connection, FlatConnection
 from bregman.manifold.coordinate import Atlas
+from bregman.manifold.generator import Generator
 from bregman.manifold.parallel_transport import DualFlatParallelTransport
-
-if TYPE_CHECKING:
-    from bregman.manifold.geodesic import Geodesic
 
 THETA_COORDS = Coordinates("theta")
 ETA_COORDS = Coordinates("eta")

@@ -60,6 +60,81 @@ class JeffreyBregmanDivergence(Dissimilarity[BregmanManifold]):
         )
 
 
+class SkewJensenBregmanDivergence(DualDissimilarity):
+
+    def __init__(
+        self,
+        manifold: BregmanManifold,
+        alpha_skews: list[float],
+        weight_skews: list[float],
+        coord: DualCoord = DualCoord.THETA,
+    ) -> None:
+        super().__init__(manifold, coord)
+
+        assert len(alpha_skews) == len(weight_skews)
+
+        self.alpha_skews = alpha_skews
+        self.weight_skews = weight_skews
+
+        self.alpha_mid = sum(w * a for w, a in zip(weight_skews, alpha_skews))
+
+    def distance(self, point_1: Point, point_2: Point) -> np.ndarray:
+
+        coord_1 = self.manifold.convert_coord(self.coord.value, point_1)
+        coord_2 = self.manifold.convert_coord(self.coord.value, point_2)
+
+        breg = BregmanDivergence(self.manifold, self.coord)
+
+        alpha_mixes = [
+            Point(self.coord.value, (1 - a) * coord_1.data + a * coord_2.data)
+            for a in self.alpha_skews
+        ]
+        alpha_mid = Point(
+            self.coord.value,
+            (1 - self.alpha_mid) * coord_1.data
+            + self.alpha_mid * coord_2.data,
+        )
+
+        breg_terms = np.stack(
+            [
+                w * breg(mix, alpha_mid)
+                for w, mix in zip(self.weight_skews, alpha_mixes)
+            ]
+        )
+
+        return np.sum(breg_terms, axis=0)
+
+
+class SkewBurbeaRaoDivergence(DualDissimilarity):
+
+    def __init__(
+        self,
+        manifold: BregmanManifold,
+        alpha: float,
+        coord: DualCoord = DualCoord.THETA,
+    ) -> None:
+        super().__init__(manifold, coord)
+
+        self.alpha = alpha
+
+    def distance(self, point_1: Point, point_2: Point) -> np.ndarray:
+        """Note the ordering of interpolation. Different from the typical alphas."""
+
+        coord_1 = self.manifold.convert_coord(self.coord.value, point_1)
+        coord_2 = self.manifold.convert_coord(self.coord.value, point_2)
+
+        gen = self.manifold.bregman_generator(self.coord)
+
+        const = 1 / (self.alpha * (1 - self.alpha))
+        mix = self.alpha * coord_1.data + (1 - self.alpha) * coord_2.data
+
+        return const * (
+            self.alpha * gen(coord_1.data)
+            + (1 - self.alpha) * gen(coord_2.data)
+            - gen(mix)
+        )
+
+
 class BhattacharyyaDistance(DualDissimilarity):
 
     def __init__(

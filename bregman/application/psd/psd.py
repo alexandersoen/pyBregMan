@@ -3,7 +3,7 @@ import numpy as np
 
 from bregman.application.application import ApplicationManifold
 from bregman.base import DisplayPoint
-from bregman.generator.generator import AutoDiffGenerator
+from bregman.manifold.generator import AutoDiffGenerator
 
 
 class NotPSDMatrix(Exception):

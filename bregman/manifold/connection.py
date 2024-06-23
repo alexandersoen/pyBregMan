@@ -4,7 +4,7 @@ import autograd
 import numpy as np
 
 from bregman.base import Coordinates
-from bregman.generator.generator import Generator
+from bregman.manifold.generator import Generator
 
 
 class Connection(ABC):
@@ -23,6 +23,7 @@ class Connection(ABC):
 
 
 class FlatConnection(Connection):
+
     def __init__(self, coord: Coordinates, generator: Generator) -> None:
         self.coord = coord
         self.generator = generator

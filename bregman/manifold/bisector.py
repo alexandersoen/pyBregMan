@@ -2,8 +2,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from bregman.base import BregmanObject, Coordinates, CoordObject, Point
-from bregman.generator.generator import Generator
+from bregman.base import Coordinates, CoordObject, Point
 from bregman.manifold.manifold import BregmanManifold, DualCoord
 
 
