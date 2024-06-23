@@ -12,8 +12,3 @@ class Distribution(ABC):
     @abstractmethod
     def pdf(self, x: np.ndarray) -> np.ndarray:
         pass
-
-
-#    @abstractmethod
-#    def cdf(self, x: np.ndarray) -> np.ndarray:
-#        pass
