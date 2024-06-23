@@ -7,7 +7,6 @@ from bregman.base import Coordinates, Point
 from bregman.manifold.connection import Connection, FlatConnection
 from bregman.manifold.coordinate import Atlas
 from bregman.manifold.generator import Generator
-from bregman.manifold.parallel_transport import DualFlatParallelTransport
 
 THETA_COORDS = Coordinates("theta")
 ETA_COORDS = Coordinates("eta")
@@ -69,32 +68,6 @@ class BregmanManifold(ABC):
             self.theta_connection
             if coord == DualCoord.THETA
             else self.eta_connection
-        )
-
-    def theta_parallel_transport(
-        self, point_1: Point, point_2: Point
-    ) -> DualFlatParallelTransport:
-        theta_1 = self.convert_coord(THETA_COORDS, point_1)
-        theta_2 = self.convert_coord(THETA_COORDS, point_2)
-        return DualFlatParallelTransport(
-            THETA_COORDS,
-            theta_1,
-            theta_2,
-            self.theta_connection,
-            self.eta_connection,
-        )
-
-    def eta_parallel_transport(
-        self, point_1: Point, point_2: Point
-    ) -> DualFlatParallelTransport:
-        eta_1 = self.convert_coord(ETA_COORDS, point_1)
-        eta_2 = self.convert_coord(ETA_COORDS, point_2)
-        return DualFlatParallelTransport(
-            ETA_COORDS,
-            eta_1,
-            eta_2,
-            self.eta_connection,
-            self.theta_connection,
         )
 
     """

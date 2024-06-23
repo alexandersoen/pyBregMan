@@ -45,8 +45,6 @@ if __name__ == "__main__":
     )
     dual_geo = BregmanGeodesic(manifold, coord1, coord2, coord=DualCoord.ETA)
 
-    primal_pt = manifold.theta_parallel_transport(coord1, coord2)
-
     # Define visualizer
     visualizer = BregmanObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
 
