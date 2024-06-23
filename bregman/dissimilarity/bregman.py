@@ -1,6 +1,7 @@
 import numpy as np
 
 from bregman.base import Point
+from bregman.constants import EPS
 from bregman.dissimilarity.base import ApproxDissimilarity, Dissimilarity
 from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.manifold.manifold import BregmanManifold, DualCoord
@@ -20,9 +21,8 @@ class DualApproxDissimilarity(ApproxDissimilarity[BregmanManifold]):
         self,
         manifold: BregmanManifold,
         coord: DualCoord = DualCoord.THETA,
-        eps: float = 1e-5,
     ) -> None:
-        super().__init__(manifold, eps)
+        super().__init__(manifold)
 
         self.coord = coord
 
@@ -177,14 +177,14 @@ class ChernoffInformation(DualApproxDissimilarity):
         self,
         manifold: BregmanManifold,
         coord: DualCoord = DualCoord.THETA,
-        eps: float = 1e-5,
     ) -> None:
-        super().__init__(manifold, coord, eps)
+        super().__init__(manifold, coord)
 
     def chernoff_point(
         self,
         point_1: Point,
         point_2: Point,
+        eps: float = EPS,
     ) -> float:
         coords_1 = self.manifold.convert_coord(self.coord.value, point_1)
         coords_2 = self.manifold.convert_coord(self.coord.value, point_2)
@@ -195,7 +195,7 @@ class ChernoffInformation(DualApproxDissimilarity):
         divergence = BregmanDivergence(self.manifold, coord=self.coord)
 
         alpha_min, alpha_mid, alpha_max = 0.0, 0.5, 1.0
-        while abs(alpha_max - alpha_min) > self.eps:
+        while abs(alpha_max - alpha_min) > eps:
             alpha_mid = 0.5 * (alpha_min + alpha_max)
 
             coords_alpha = geodesic(alpha_mid)
@@ -209,8 +209,10 @@ class ChernoffInformation(DualApproxDissimilarity):
 
         return 1 - 0.5 * (alpha_min + alpha_max)
 
-    def distance(self, point_1: Point, point_2: Point) -> np.ndarray:
-        alpha_star = self.chernoff_point(point_1, point_2)
+    def distance(
+        self, point_1: Point, point_2: Point, eps: float = EPS
+    ) -> np.ndarray:
+        alpha_star = self.chernoff_point(point_1, point_2, eps=eps)
         bhattacharyya_distance = BhattacharyyaDistance(
             self.manifold, 1 - alpha_star, self.coord
         )

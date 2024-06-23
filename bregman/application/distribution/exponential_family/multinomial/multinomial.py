@@ -7,7 +7,7 @@ from bregman.application.application import LAMBDA_COORDS
 from bregman.application.distribution.exponential_family.exp_family import (
     ExponentialFamilyDistribution, ExponentialFamilyManifold)
 from bregman.base import DisplayPoint, Point
-from bregman.generator.generator import AutoDiffGenerator
+from bregman.manifold.generator import AutoDiffGenerator
 from bregman.manifold.manifold import THETA_COORDS
 
 

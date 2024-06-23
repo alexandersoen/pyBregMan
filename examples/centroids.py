@@ -3,6 +3,8 @@ import numpy as np
 from bregman.application.application import LAMBDA_COORDS
 from bregman.application.distribution.exponential_family.categorical import \
     CategoricalManifold
+from bregman.barycenter.bregman import (BregmanBarycenter,
+                                        SkewBurbeaRaoBarycenter)
 from bregman.base import Point
 from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.manifold.manifold import DualCoord
@@ -40,17 +42,18 @@ if __name__ == "__main__":
     alphas = [0.5, 0.5, 0.5]
     weights = [1.0, 1.0, 1.0]
 
-    js_centroid = manifold.skew_burbea_rao_barycenter(
-        points, alphas, weights, coord=DualCoord.THETA
+    js_centroid = SkewBurbeaRaoBarycenter(manifold, coord=DualCoord.THETA)(
+        points, weights, alphas=alphas
     )
-    j_centroid = manifold.skew_burbea_rao_barycenter(
-        points, alphas, weights, coord=DualCoord.ETA
+    j_centroid = SkewBurbeaRaoBarycenter(manifold, coord=DualCoord.ETA)(
+        points, weights, alphas=alphas
     )
-    theta_centroid = manifold.bregman_barycenter(
-        points, weights, coord=DualCoord.THETA
+
+    theta_centroid = BregmanBarycenter(manifold, coord=DualCoord.THETA)(
+        points, weights
     )
-    eta_centroid = manifold.bregman_barycenter(
-        points, weights, coord=DualCoord.ETA
+    eta_centroid = BregmanBarycenter(manifold, coord=DualCoord.ETA)(
+        points, weights
     )
 
     # Define visualizer

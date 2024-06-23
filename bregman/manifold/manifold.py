@@ -4,7 +4,7 @@ from enum import Enum
 import numpy as np
 
 from bregman.base import Coordinates, Point
-from bregman.manifold.connection import Connection, FlatConnection
+from bregman.manifold.connection import FlatConnection
 from bregman.manifold.coordinate import Atlas
 from bregman.manifold.generator import Generator
 
@@ -50,9 +50,6 @@ class BregmanManifold(ABC):
         self.atlas.add_transition(THETA_COORDS, ETA_COORDS, self._theta_to_eta)
         self.atlas.add_transition(ETA_COORDS, THETA_COORDS, self._eta_to_theta)
 
-    def riemannian_connection(self) -> Connection:
-        return NotImplemented()
-
     def convert_coord(self, target_coords: Coordinates, point: Point) -> Point:
         return self.atlas(target_coords, point)
 
@@ -69,78 +66,6 @@ class BregmanManifold(ABC):
             if coord == DualCoord.THETA
             else self.eta_connection
         )
-
-    """
-    Aggregation
-    """
-
-    def bregman_barycenter(
-        self,
-        points: list[Point],
-        weights: list[float],
-        coord: DualCoord = DualCoord.THETA,
-    ) -> Point:
-        assert len(points) == len(weights)
-
-        nweights = [w / sum(weights) for w in weights]
-        coords_data = [self.convert_coord(coord.value, p).data for p in points]
-        coord_avg = np.sum(
-            np.stack([w * t for w, t in zip(nweights, coords_data)]), axis=0
-        )
-        return Point(coord.value, coord_avg)
-
-    def skew_burbea_rao_barycenter(
-        self,
-        points: list[Point],
-        alphas: list[float],
-        weights: list[float],
-        coord: DualCoord = DualCoord.THETA,
-        eps: float = 1e-8,
-    ) -> Point:
-        """
-        https://arxiv.org/pdf/1004.5049
-        """
-        coord_type = coord.value
-        primal_gen = self.bregman_generator(coord)
-        dual_gen = self.bregman_generator(coord.dual())
-
-        assert len(points) == len(alphas) == len(weights)
-
-        nweights = [w / sum(weights) for w in weights]
-        alpha_mid = sum(w * a for w, a in zip(nweights, alphas))
-        points_data = [self.convert_coord(coord_type, p).data for p in points]
-
-        def get_energy(p: np.ndarray) -> float:
-            weighted_term = sum(
-                w * primal_gen(a * p + (1 - a) * t)
-                for w, a, t in zip(nweights, alphas, points_data)
-            )
-            return float(alpha_mid * primal_gen(p) - weighted_term)
-
-        diff = float("inf")
-        barycenter = np.sum(
-            np.stack([w * t for w, t in zip(nweights, points_data)]), axis=0
-        )
-        cur_energy = get_energy(barycenter)
-        while diff > eps:
-            aw_grads = np.stack(
-                [
-                    a * w * primal_gen.grad(a * barycenter + (1 - a) * t)
-                    for w, a, t in zip(nweights, alphas, points_data)
-                ]
-            )
-            avg_grad = np.sum(aw_grads, axis=0)
-
-            # Update
-            barycenter = dual_gen.grad(avg_grad / alpha_mid)
-
-            new_energy = get_energy(barycenter)
-            diff = abs(new_energy - cur_energy)
-            cur_energy = new_energy
-
-        # Convert to point
-        barycenter_point = Point(coord_type, barycenter)
-        return barycenter_point
 
     def _theta_to_eta(self, theta: np.ndarray) -> np.ndarray:
         return self.theta_generator.grad(theta)

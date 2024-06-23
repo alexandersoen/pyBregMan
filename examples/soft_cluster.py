@@ -6,6 +6,7 @@ from bregman.application.distribution.exponential_family.gaussian import \
     GaussianManifold
 from bregman.application.distribution.mixture.ef_mixture import \
     EFMixtureManifold
+from bregman.barycenter.bregman import BregmanBarycenter
 from bregman.base import Point
 from bregman.dissimilarity.bregman import BregmanDivergence
 from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, DualCoord
@@ -43,6 +44,9 @@ if __name__ == "__main__":
         gaussian_manifold,
     )
     eta_gaussian_div = BregmanDivergence(
+        ef_mixture_manifold.ef_manifold, coord=DualCoord.ETA
+    )
+    eta_gaussian_bary = BregmanBarycenter(
         ef_mixture_manifold.ef_manifold, coord=DualCoord.ETA
     )
 
@@ -105,9 +109,7 @@ if __name__ == "__main__":
         cur_mixing_point = Point(LAMBDA_COORDS, new_weights)
 
         cur_dist_points = [
-            ef_mixture_manifold.ef_manifold.bregman_barycenter(
-                embedded_data, weights=div_weights[:, k], coord=DualCoord.ETA
-            )
+            eta_gaussian_bary(embedded_data, div_weights[:, k])
             for k in range(ef_mixture_manifold.dimension + 1)
         ]
 
