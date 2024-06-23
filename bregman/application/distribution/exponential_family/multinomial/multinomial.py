@@ -73,11 +73,11 @@ class MultinomialManifold(
     ExponentialFamilyManifold[MultinomialPoint, MultinomialDistribution]
 ):
 
-    def __init__(
-        self,
-        k: int,
-        n: int,
-    ) -> None:
+    def __init__(self, k: int, n: int) -> None:
+        """
+        k number of outcomes
+        n number of total draws
+        """
 
         self.k = k
         self.n = n

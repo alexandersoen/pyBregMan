@@ -7,7 +7,7 @@ from bregman.base import LAMBDA_COORDS, Point
 from bregman.manifold.geodesic import Geodesic
 
 
-class EriksenIVPGeodesic(Geodesic):
+class EriksenIVPGeodesic(Geodesic[GaussianManifold]):
 
     def __init__(
         self,
@@ -58,7 +58,7 @@ class EriksenIVPGeodesic(Geodesic):
         return self.path(t)
 
 
-class KobayashiGeodesic(Geodesic):
+class KobayashiGeodesic(Geodesic[GaussianManifold]):
 
     def __init__(
         self,

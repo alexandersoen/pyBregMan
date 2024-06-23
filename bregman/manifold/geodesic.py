@@ -1,12 +1,16 @@
+from typing import Generic, TypeVar
+
 from bregman.base import Curve, Point
 from bregman.manifold.manifold import BregmanManifold, DualCoord
 
+TBregmanManifold = TypeVar("TBregmanManifold", bound=BregmanManifold)
 
-class Geodesic(Curve):
+
+class Geodesic(Generic[TBregmanManifold], Curve):
 
     def __init__(
         self,
-        manifold: BregmanManifold,
+        manifold: TBregmanManifold,
         source: Point,
         dest: Point,
     ) -> None:
@@ -19,7 +23,7 @@ class Geodesic(Curve):
         self.dest = dest
 
 
-class BregmanGeodesic(Geodesic):
+class BregmanGeodesic(Geodesic[BregmanManifold]):
 
     def __init__(
         self,
