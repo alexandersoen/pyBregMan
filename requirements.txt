@@ -1,5 +1,5 @@
 numpy
 matplotlib
-ipython
 scipy
 autograd
+pytest
