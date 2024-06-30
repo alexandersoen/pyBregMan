@@ -93,6 +93,8 @@ class PSDManifold(ApplicationManifold[PSDPoint]):
             dimension=int(n_dimension * (n_dimension + 1) / 2),
         )
 
+        self.eta_generator = G_gen  # Fix typing
+
     def _lambda_to_theta(self, lamb: np.ndarray) -> np.ndarray:
         return lamb
 
