@@ -2,12 +2,11 @@ from pathlib import Path
 
 import numpy as np
 
-from bregman.application.application import LAMBDA_COORDS
 from bregman.application.distribution.exponential_family.gaussian import (
     GaussianFisherRaoDistance, GaussianManifold, KobayashiGeodesic)
-from bregman.base import Point
+from bregman.base import (ETA_COORDS, LAMBDA_COORDS, THETA_COORDS, DualCoords,
+                          Point)
 from bregman.manifold.geodesic import BregmanGeodesic
-from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, DualCoord
 from bregman.visualizer.matplotlib import BregmanObjectMatplotlibVisualizer
 
 if __name__ == "__main__":
@@ -32,9 +31,11 @@ if __name__ == "__main__":
     coord2 = Point(LAMBDA_COORDS, np.array([0, 0, 1, 0, 0, 0.5]))
 
     primal_geo = BregmanGeodesic(
-        manifold, coord1, coord2, coord=DualCoord.THETA
+        manifold, coord1, coord2, dcoords=DualCoords.THETA
     )
-    dual_geo = BregmanGeodesic(manifold, coord1, coord2, coord=DualCoord.ETA)
+    dual_geo = BregmanGeodesic(
+        manifold, coord1, coord2, dcoords=DualCoords.ETA
+    )
     kobayashi = KobayashiGeodesic(manifold, coord1, coord2)
 
     # Define visualizer
@@ -54,8 +55,8 @@ if __name__ == "__main__":
     p, q = coord1, coord2
     ITERS = 5
     for i in range(ITERS):
-        primal_geo = BregmanGeodesic(manifold, p, q, coord=DualCoord.THETA)
-        dual_geo = BregmanGeodesic(manifold, p, q, coord=DualCoord.ETA)
+        primal_geo = BregmanGeodesic(manifold, p, q, dcoords=DualCoords.THETA)
+        dual_geo = BregmanGeodesic(manifold, p, q, dcoords=DualCoords.ETA)
 
         if i > 0:
             visualizer.plot_object(p, c="blue", alpha=0.3)

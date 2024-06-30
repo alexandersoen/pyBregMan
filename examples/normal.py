@@ -2,14 +2,13 @@ from pathlib import Path
 
 import numpy as np
 
-from bregman.application.application import LAMBDA_COORDS
 from bregman.application.distribution.exponential_family.gaussian import \
     GaussianManifold
-from bregman.base import Point
+from bregman.base import (ETA_COORDS, LAMBDA_COORDS, THETA_COORDS, DualCoords,
+                          Point)
 from bregman.dissimilarity.bregman import ChernoffInformation
 from bregman.manifold.bisector import BregmanBisector
 from bregman.manifold.geodesic import BregmanGeodesic
-from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, DualCoord
 from bregman.visualizer.matplotlib import (BregmanObjectMatplotlibVisualizer,
                                            Visualize2DTissotIndicatrix)
 
@@ -55,8 +54,8 @@ if __name__ == "__main__":
         "Chernoff Information:", ChernoffInformation(manifold)(coord1, coord2)
     )
 
-    primal_geo = BregmanGeodesic(manifold, coord1, coord2, DualCoord.THETA)
-    dual_geo = BregmanGeodesic(manifold, coord1, coord2, DualCoord.ETA)
+    primal_geo = BregmanGeodesic(manifold, coord1, coord2, DualCoords.THETA)
+    dual_geo = BregmanGeodesic(manifold, coord1, coord2, DualCoords.ETA)
 
     chernoff_point = primal_geo(1 - chernoff_point_alpha)
 
@@ -64,14 +63,14 @@ if __name__ == "__main__":
         manifold,
         coord1,
         coord2,
-        coord=DualCoord.ETA,
+        dcoords=DualCoords.ETA,
     )
 
     theta_bisector = BregmanBisector(
         manifold,
         coord1,
         coord2,
-        coord=DualCoord.THETA,
+        dcoords=DualCoords.THETA,
     )
 
     # Define visualizer
@@ -93,9 +92,6 @@ if __name__ == "__main__":
     visualizer.plot_object(
         eta_bisector, alpha=0.7, c="red", label="Dual Bisector"
     )
-    #    visualizer.plot_object(
-    #        theta_bisector, alpha=0.7, c="blue", label="Primal Bisector"
-    #    )
 
     print("Chernoff Check")
     eta_chernoff = manifold.convert_coord(ETA_COORDS, chernoff_point).data
@@ -114,10 +110,6 @@ if __name__ == "__main__":
             - np.dot(eta2.data, manifold.eta_generator.grad(eta2))
         )
     )
-
-    # Add animations
-    #     visualizer.animate_object(primal_geo, c="blue")
-    #     visualizer.animate_object(dual_geo, c="red")
 
     visualizer.add_callback(metric_cb)
 

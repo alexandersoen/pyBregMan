@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import autograd
 import numpy as np
 
-from bregman.base import Coordinates
+from bregman.base import Coords
 from bregman.manifold.generator import Generator
 
 
@@ -24,8 +24,8 @@ class Connection(ABC):
 
 class FlatConnection(Connection):
 
-    def __init__(self, coord: Coordinates, generator: Generator) -> None:
-        self.coord = coord
+    def __init__(self, coords: Coords, generator: Generator) -> None:
+        self.coord = coords
         self.generator = generator
 
     def metric(self, x: np.ndarray) -> np.ndarray:

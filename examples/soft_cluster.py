@@ -1,15 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from bregman.application.application import LAMBDA_COORDS
 from bregman.application.distribution.exponential_family.gaussian import \
     GaussianManifold
 from bregman.application.distribution.mixture.ef_mixture import \
     EFMixtureManifold
 from bregman.barycenter.bregman import BregmanBarycenter
-from bregman.base import Point
+from bregman.base import (ETA_COORDS, LAMBDA_COORDS, THETA_COORDS, DualCoords,
+                          Point)
 from bregman.dissimilarity.bregman import BregmanDivergence
-from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, DualCoord
 
 if __name__ == "__main__":
 
@@ -44,10 +43,10 @@ if __name__ == "__main__":
         gaussian_manifold,
     )
     eta_gaussian_div = BregmanDivergence(
-        ef_mixture_manifold.ef_manifold, coord=DualCoord.ETA
+        ef_mixture_manifold.ef_manifold, dcoords=DualCoords.ETA
     )
     eta_gaussian_bary = BregmanBarycenter(
-        ef_mixture_manifold.ef_manifold, coord=DualCoord.ETA
+        ef_mixture_manifold.ef_manifold, dcoords=DualCoords.ETA
     )
 
     def loglikelihood(data, mixing_point, dist_points):

@@ -1,7 +1,7 @@
 from bregman.ball.base import Ball
-from bregman.base import Point
+from bregman.base import DualCoords, Point
 from bregman.dissimilarity.bregman import BregmanDivergence
-from bregman.manifold.manifold import BregmanManifold, DualCoord
+from bregman.manifold.manifold import BregmanManifold
 
 
 class BregmanBall(Ball):
@@ -11,11 +11,11 @@ class BregmanBall(Ball):
         manifold: BregmanManifold,
         center: Point,
         radius: float,
-        coord: DualCoord = DualCoord.THETA,
+        dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
-        super().__init__(manifold, center, radius, coord.value)
+        super().__init__(manifold, center, radius, dcoords.value)
 
-        self.bregman_divergence = BregmanDivergence(manifold, coord=coord)
+        self.bregman_divergence = BregmanDivergence(manifold, dcoords=dcoords)
 
     def is_in(self, other: Point) -> bool:
         return self.bregman_divergence(self.center, other).item() < self.radius
@@ -25,11 +25,11 @@ def bregman_badoiu_clarkson(
     manifold: BregmanManifold,
     points: list[Point],
     T: int,
-    coords: DualCoord = DualCoord.THETA,
+    dcoords: DualCoords = DualCoords.THETA,
 ) -> BregmanBall:
-    divergence = manifold.bregman_generator(coords).bergman_divergence
-    primal_gen = manifold.bregman_generator(coords)
-    dual_gen = manifold.bregman_generator(coords.dual())
+    divergence = manifold.bregman_generator(dcoords).bergman_divergence
+    primal_gen = manifold.bregman_generator(dcoords)
+    dual_gen = manifold.bregman_generator(dcoords.dual())
 
     datas = [p.data for p in points]
 
@@ -40,5 +40,5 @@ def bregman_badoiu_clarkson(
         s, d = min(dist_pairs, key=lambda pair: pair[1])
         c = dual_gen(t / (t + 1) * primal_gen(c) + 1 / (t + 1) * primal_gen(s))
 
-    center = Point(coords=coords.value, data=c)
-    return BregmanBall(manifold, center, d, coords)
+    center = Point(coords=dcoords.value, data=c)
+    return BregmanBall(manifold, center, d, dcoords)

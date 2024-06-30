@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from enum import Enum
 from typing import Callable
 
 import numpy as np
@@ -10,7 +11,7 @@ Shape = tuple[int, ...]
 
 
 @dataclass(frozen=True)
-class Coordinates:
+class Coords:
     coords_name: str
 
 
@@ -20,7 +21,7 @@ class BregmanObject:
 
 @dataclass
 class CoordObject(BregmanObject):
-    coords: Coordinates
+    coords: Coords
 
 
 @dataclass(unsafe_hash=True)
@@ -53,4 +54,20 @@ class DisplayPoint(ABC, Point):
         return self.display()
 
 
-LAMBDA_COORDS = Coordinates("lambda")
+THETA_COORDS = Coords("theta")
+ETA_COORDS = Coords("eta")
+LAMBDA_COORDS = Coords("lambda")
+
+
+class DualCoords(Enum):
+    THETA = THETA_COORDS
+    ETA = ETA_COORDS
+
+    def dual(self):
+        match self:
+            case self.THETA:
+                dual_coord = self.ETA
+            case self.ETA:
+                dual_coord = self.THETA
+
+        return dual_coord

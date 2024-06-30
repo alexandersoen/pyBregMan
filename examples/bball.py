@@ -1,11 +1,9 @@
 import numpy as np
 
-from bregman.application.application import LAMBDA_COORDS
 from bregman.application.distribution.exponential_family.categorical import \
     CategoricalManifold
-from bregman.base import Point
+from bregman.base import LAMBDA_COORDS, THETA_COORDS, DualCoords, Point
 from bregman.dissimilarity.bregman import BregmanDivergence
-from bregman.manifold.manifold import THETA_COORDS, DualCoord
 
 if __name__ == "__main__":
 
@@ -73,7 +71,7 @@ if __name__ == "__main__":
                 continue
 
             test_point = Point(LAMBDA_COORDS, np.array([x, y, 1 - x - y]))
-            test_f = manifold.bregman_generator(coord=DualCoord.THETA)(
+            test_f = manifold.bregman_generator(dcoords=DualCoords.THETA)(
                 manifold.convert_coord(THETA_COORDS, test_point).data
             )
 

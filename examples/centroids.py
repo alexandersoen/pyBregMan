@@ -2,14 +2,12 @@ from pathlib import Path
 
 import numpy as np
 
-from bregman.application.application import LAMBDA_COORDS
 from bregman.application.distribution.exponential_family.categorical import \
     CategoricalManifold
 from bregman.barycenter.bregman import (BregmanBarycenter,
                                         SkewBurbeaRaoBarycenter)
-from bregman.base import Point
+from bregman.base import LAMBDA_COORDS, DualCoords, Point
 from bregman.manifold.geodesic import BregmanGeodesic
-from bregman.manifold.manifold import DualCoord
 from bregman.visualizer.matplotlib import BregmanObjectMatplotlibVisualizer
 
 if __name__ == "__main__":
@@ -33,28 +31,34 @@ if __name__ == "__main__":
     points = [p1, p2, p3]
 
     # Triangles
-    p12_primal_geo = BregmanGeodesic(manifold, p1, p2, coord=DualCoord.THETA)
-    p13_primal_geo = BregmanGeodesic(manifold, p1, p3, coord=DualCoord.THETA)
-    p23_primal_geo = BregmanGeodesic(manifold, p2, p3, coord=DualCoord.THETA)
-    p12_dual_geo = BregmanGeodesic(manifold, p1, p2, coord=DualCoord.ETA)
-    p13_dual_geo = BregmanGeodesic(manifold, p1, p3, coord=DualCoord.ETA)
-    p23_dual_geo = BregmanGeodesic(manifold, p2, p3, coord=DualCoord.ETA)
+    p12_primal_geo = BregmanGeodesic(
+        manifold, p1, p2, dcoords=DualCoords.THETA
+    )
+    p13_primal_geo = BregmanGeodesic(
+        manifold, p1, p3, dcoords=DualCoords.THETA
+    )
+    p23_primal_geo = BregmanGeodesic(
+        manifold, p2, p3, dcoords=DualCoords.THETA
+    )
+    p12_dual_geo = BregmanGeodesic(manifold, p1, p2, dcoords=DualCoords.ETA)
+    p13_dual_geo = BregmanGeodesic(manifold, p1, p3, dcoords=DualCoords.ETA)
+    p23_dual_geo = BregmanGeodesic(manifold, p2, p3, dcoords=DualCoords.ETA)
 
     # Centroids
     alphas = [0.5, 0.5, 0.5]
     weights = [1.0, 1.0, 1.0]
 
-    js_centroid = SkewBurbeaRaoBarycenter(manifold, coord=DualCoord.THETA)(
+    js_centroid = SkewBurbeaRaoBarycenter(manifold, dcoords=DualCoords.THETA)(
         points, weights, alphas=alphas
     )
-    j_centroid = SkewBurbeaRaoBarycenter(manifold, coord=DualCoord.ETA)(
+    j_centroid = SkewBurbeaRaoBarycenter(manifold, dcoords=DualCoords.ETA)(
         points, weights, alphas=alphas
     )
 
-    theta_centroid = BregmanBarycenter(manifold, coord=DualCoord.THETA)(
+    theta_centroid = BregmanBarycenter(manifold, dcoords=DualCoords.THETA)(
         points, weights
     )
-    eta_centroid = BregmanBarycenter(manifold, coord=DualCoord.ETA)(
+    eta_centroid = BregmanBarycenter(manifold, dcoords=DualCoords.ETA)(
         points, weights
     )
 

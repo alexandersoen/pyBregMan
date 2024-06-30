@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from bregman.base import Coordinates, CoordObject, Point
-from bregman.manifold.manifold import BregmanManifold, DualCoord
+from bregman.base import CoordObject, Coords, DualCoords, Point
+from bregman.manifold.manifold import BregmanManifold
 
 
 class Bisector(CoordObject, ABC):
@@ -13,7 +13,7 @@ class Bisector(CoordObject, ABC):
         manifold: BregmanManifold,
         source: Point,
         dest: Point,
-        coords: Coordinates,
+        coords: Coords,
     ):
         super().__init__(coords)
 
@@ -38,11 +38,11 @@ class BregmanBisector(Bisector):
         manifold: BregmanManifold,
         source: Point,
         dest: Point,
-        coord: DualCoord = DualCoord.THETA,
+        dcoords: DualCoords = DualCoords.THETA,
     ):
-        super().__init__(manifold, source, dest, coord.value)
+        super().__init__(manifold, source, dest, dcoords.value)
 
-        self.coord = coord
+        self.coord = dcoords
 
     def bisect_proj_point(self) -> Point:
 

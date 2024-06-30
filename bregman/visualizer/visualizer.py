@@ -2,7 +2,7 @@ import warnings
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-from bregman.base import BregmanObject, Coordinates, Point
+from bregman.base import BregmanObject, Coords, Point
 from bregman.manifold.bisector import Bisector
 from bregman.manifold.geodesic import Geodesic
 from bregman.manifold.manifold import BregmanManifold
@@ -37,35 +37,35 @@ class BregmanObjectVisualizer(ABC):
         self.callback_list.append(callback)
 
     @abstractmethod
-    def plot_point(self, coords: Coordinates, point: Point, **kwargs) -> None:
+    def plot_point(self, coords: Coords, point: Point, **kwargs) -> None:
         pass
 
     @abstractmethod
     def plot_geodesic(
-        self, coords: Coordinates, geodesic: Geodesic, **kwargs
+        self, coords: Coords, geodesic: Geodesic, **kwargs
     ) -> None:
         pass
 
     @abstractmethod
     def plot_bisector(
-        self, coords: Coordinates, bisector: Bisector, **kwargs
+        self, coords: Coords, bisector: Bisector, **kwargs
     ) -> None:
         pass
 
     @abstractmethod
     def animate_geodesic(
-        self, coords: Coordinates, geodesic: Geodesic, **kwargs
+        self, coords: Coords, geodesic: Geodesic, **kwargs
     ) -> None:
         pass
 
     def run_callbacks(
-        self, obj: BregmanObject, coord: Coordinates, **kwarg
+        self, obj: BregmanObject, coords: Coords, **kwarg
     ) -> None:
 
         for c in self.callback_list:
-            c.call(obj, coord, self, **kwarg)
+            c.call(obj, coords, self, **kwarg)
 
-    def visualize(self, coords: Coordinates) -> None:
+    def visualize(self, coords: Coords) -> None:
         for obj, kwarg in self.plot_list:
             match obj:
                 case Point():
@@ -103,7 +103,7 @@ class VisualizerCallback(ABC, Generic[TVisualizer]):
     def call(
         self,
         obj: BregmanObject,
-        coords: Coordinates,
+        coords: Coords,
         visualizer: TVisualizer,
         **kwargs,
     ) -> None:

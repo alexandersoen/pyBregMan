@@ -1,4 +1,4 @@
-from bregman.base import CoordChange, Coordinates, Point
+from bregman.base import CoordChange, Coords, Point
 
 
 class UnrecordedCoordType(Exception):
@@ -16,18 +16,18 @@ class Atlas:
 
         self.dimension = dimension
 
-        self.recorded_coords: set[Coordinates] = set()
+        self.recorded_coords: set[Coords] = set()
         self.transitions: dict[
-            tuple[Coordinates, Coordinates], CoordChange
+            tuple[Coords, Coords], CoordChange
         ] = dict()
 
-    def add_coords(self, coords: Coordinates) -> None:
+    def add_coords(self, coords: Coords) -> None:
         self.recorded_coords.add(coords)
 
     def add_transition(
         self,
-        source_coords: Coordinates,
-        target_coords: Coordinates,
+        source_coords: Coords,
+        target_coords: Coords,
         transition: CoordChange,
     ) -> None:
         self.add_coords(source_coords)
@@ -35,7 +35,7 @@ class Atlas:
 
         self.transitions[(source_coords, target_coords)] = transition
 
-    def convert_coord(self, target_coords: Coordinates, point: Point) -> Point:
+    def convert_coord(self, target_coords: Coords, point: Point) -> Point:
         source_coord = point.coords
 
         if (
@@ -56,5 +56,5 @@ class Atlas:
 
         return Point(coords=target_coords, data=new_data)
 
-    def __call__(self, target_coords: Coordinates, point: Point) -> Point:
+    def __call__(self, target_coords: Coords, point: Point) -> Point:
         return self.convert_coord(target_coords, point)

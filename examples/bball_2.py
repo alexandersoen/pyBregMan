@@ -2,8 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from bregman.ball.parameterized import KL2DBregmanBallCurve
-from bregman.base import Point
-from bregman.manifold.manifold import THETA_COORDS
+from bregman.base import THETA_COORDS, Point
 
 if __name__ == "__main__":
     # Bregman ball center and radius

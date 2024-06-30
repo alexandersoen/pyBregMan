@@ -1,30 +1,15 @@
 from abc import ABC
-from enum import Enum
 
 import numpy as np
 
-from bregman.base import Coordinates, Point
+from bregman.base import ETA_COORDS, THETA_COORDS, Coords, DualCoords, Point
 from bregman.manifold.connection import FlatConnection
 from bregman.manifold.coordinate import Atlas
 from bregman.manifold.generator import Generator
 
-THETA_COORDS = Coordinates("theta")
-ETA_COORDS = Coordinates("eta")
-
 
 class EtaGeneratorNotAssigned(Exception):
     pass
-
-
-class DualCoord(Enum):
-    THETA = THETA_COORDS
-    ETA = ETA_COORDS
-
-    def dual(self):
-        if self == self.THETA:
-            return self.ETA
-        else:
-            return self.THETA
 
 
 class BregmanManifold(ABC):
@@ -63,13 +48,13 @@ class BregmanManifold(ABC):
                 ETA_COORDS, THETA_COORDS, self._eta_to_theta
             )
 
-    def convert_coord(self, target_coords: Coordinates, point: Point) -> Point:
+    def convert_coord(self, target_coords: Coords, point: Point) -> Point:
         return self.atlas(target_coords, point)
 
-    def bregman_generator(self, coord: DualCoord) -> Generator:
+    def bregman_generator(self, dcoords: DualCoords) -> Generator:
         generator = (
             self.theta_generator
-            if coord == DualCoord.THETA
+            if dcoords == DualCoords.THETA
             else self.eta_generator
         )
 
@@ -78,10 +63,10 @@ class BregmanManifold(ABC):
 
         return generator
 
-    def bregman_connection(self, coord: DualCoord) -> FlatConnection:
+    def bregman_connection(self, dcoords: DualCoords) -> FlatConnection:
         connection = (
             self.theta_connection
-            if coord == DualCoord.THETA
+            if dcoords == DualCoords.THETA
             else self.eta_connection
         )
 

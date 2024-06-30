@@ -1,13 +1,11 @@
 import numpy as np
 
-from bregman.application.distribution.exponential_family.gaussian.gaussian import (
-    GaussianManifold,
-)
-from bregman.base import LAMBDA_COORDS, BregmanObject, Coordinates, Point
-from bregman.manifold.manifold import DualCoord
-from bregman.visualizer.matplotlib.matplotlib import (
-    BregmanObjectMatplotlibVisualizer,
-)
+from bregman.application.distribution.exponential_family.gaussian.gaussian import \
+    GaussianManifold
+from bregman.base import (LAMBDA_COORDS, BregmanObject, Coords, DualCoords,
+                          Point)
+from bregman.visualizer.matplotlib.matplotlib import \
+    BregmanObjectMatplotlibVisualizer
 from bregman.visualizer.visualizer import VisualizerCallback
 
 
@@ -24,7 +22,7 @@ class VisualizeGaussian2DCovariancePoints(
     def call(
         self,
         obj: BregmanObject,
-        coords: Coordinates,
+        coords: Coords,
         visualizer: BregmanObjectMatplotlibVisualizer,
         **kwargs,
     ) -> None:
@@ -74,7 +72,7 @@ class Visualize2DTissotIndicatrix(
     def call(
         self,
         obj: BregmanObject,
-        coords: Coordinates,
+        coords: Coords,
         visualizer: BregmanObjectMatplotlibVisualizer,
         **kwargs,
     ) -> None:
@@ -88,7 +86,7 @@ class Visualize2DTissotIndicatrix(
         point = visualizer.manifold.convert_coord(coords, obj)
 
         metric = visualizer.manifold.bregman_connection(
-            DualCoord(coords)
+            DualCoords(coords)
         ).metric(point.data)
 
         L = np.linalg.cholesky(metric).T

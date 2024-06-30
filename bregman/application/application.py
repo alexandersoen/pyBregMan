@@ -3,9 +3,10 @@ from typing import Generic, TypeVar
 
 import numpy as np
 
-from bregman.base import LAMBDA_COORDS, DisplayPoint, Point
+from bregman.base import (ETA_COORDS, LAMBDA_COORDS, THETA_COORDS,
+                          DisplayPoint, Point)
 from bregman.manifold.generator import Generator
-from bregman.manifold.manifold import ETA_COORDS, THETA_COORDS, BregmanManifold
+from bregman.manifold.manifold import BregmanManifold
 
 MyDisplayPoint = TypeVar("MyDisplayPoint", bound=DisplayPoint)
 

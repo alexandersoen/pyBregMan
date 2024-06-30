@@ -13,8 +13,7 @@ import numpy as np
 from bregman.application.distribution.exponential_family.categorical import \
     CategoricalManifold
 from bregman.barycenter.bregman import SkewBurbeaRaoBarycenter
-from bregman.base import LAMBDA_COORDS, Point
-from bregman.manifold.manifold import DualCoord
+from bregman.base import LAMBDA_COORDS, DualCoords, Point
 
 warnings.filterwarnings("error")
 
@@ -62,12 +61,12 @@ if __name__ == "__main__":
     barbara = Point(LAMBDA_COORDS, hist1)
     lena = Point(LAMBDA_COORDS, hist2)
 
-    js_centroid = SkewBurbeaRaoBarycenter(manifold, coord=DualCoord.ETA)(
+    js_centroid = SkewBurbeaRaoBarycenter(manifold, dcoords=DualCoords.ETA)(
         [barbara, lena], weights=[0.5, 0.5], alphas=[1.0, 1.0]
     )
     js_centroid = manifold.convert_coord(LAMBDA_COORDS, js_centroid)
 
-    jef_centroid = SkewBurbeaRaoBarycenter(manifold, coord=DualCoord.THETA)(
+    jef_centroid = SkewBurbeaRaoBarycenter(manifold, dcoords=DualCoords.THETA)(
         [barbara, lena], weights=[0.5, 0.5], alphas=[1.0, 1.0]
     )
     jef_centroid = manifold.convert_coord(LAMBDA_COORDS, jef_centroid)
@@ -75,7 +74,7 @@ if __name__ == "__main__":
     plt.plot(values, barbara.data, c="blue", label="Image 1 Pixels")
     plt.plot(values, lena.data, c="red", label="Image 2 Pixels")
     plt.plot(values, js_centroid.data, c="black", label="JS Centroid")
-    plt.plot(values, jef_centroid.data, c="grey", label="Jeffery Centroid")
+    plt.plot(values, jef_centroid.data, c="grey", label="Jeffreys Centroid")
 
     plt.xlabel("Pixel Intensity")
     plt.ylabel("Density")

@@ -8,16 +8,16 @@ from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from bregman.base import Coordinates, Point
+from bregman.base import Coords, DualCoords, Point
 from bregman.manifold.bisector import Bisector
 from bregman.manifold.geodesic import BregmanGeodesic, Geodesic
-from bregman.manifold.manifold import BregmanManifold, DualCoord
+from bregman.manifold.manifold import BregmanManifold
 from bregman.visualizer.visualizer import BregmanObjectVisualizer
 
 
 @dataclass
 class DataLim:
-    coords: Coordinates
+    coords: Coords
     xmin: np.ndarray
     xmax: np.ndarray
     ymin: np.ndarray
@@ -57,7 +57,7 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
 
         self.update_func_list: list[Callable[[int], Any]] = []
 
-    def calculate_lims(self, coords: Coordinates, cut: float = 1.0) -> DataLim:
+    def calculate_lims(self, coords: Coords, cut: float = 1.0) -> DataLim:
         xys_list = []
 
         for obj, _ in self.plot_list:
@@ -82,7 +82,7 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
 
         return DataLim(coords, xmin, xmax, ymin, ymax)
 
-    def plot_point(self, coords: Coordinates, point: Point, **kwargs) -> None:
+    def plot_point(self, coords: Coords, point: Point, **kwargs) -> None:
         kwargs = kwargs.copy()
 
         edgecolors = None
@@ -108,7 +108,7 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
         )
 
     def plot_geodesic(
-        self, coords: Coordinates, geodesic: Geodesic, **kwargs
+        self, coords: Coords, geodesic: Geodesic, **kwargs
     ) -> None:
         geo_vis_kwargs: dict[str, Any] = {
             "ls": "-",
@@ -129,7 +129,7 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
         )
 
     def plot_bisector(
-        self, coords: Coordinates, bisector: Bisector, **kwargs
+        self, coords: Coords, bisector: Bisector, **kwargs
     ) -> None:
 
         bis_vis_kwargs: dict[str, Any] = {
@@ -154,12 +154,12 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
             self.manifold,
             Point(bisector.coords, p1_data),
             Point(bisector.coords, p2_data),
-            coord=DualCoord(bisector.coords),
+            dcoords=DualCoords(bisector.coords),
         )
         self.plot_geodesic(coords, plot_geo, **bis_vis_kwargs)
 
     def animate_geodesic(
-        self, coords: Coordinates, geodesic: Geodesic, **kwargs
+        self, coords: Coords, geodesic: Geodesic, **kwargs
     ) -> None:
         geodesic_points = [
             self.manifold.convert_coord(coords, geodesic(self.delta * t))
@@ -180,7 +180,7 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
 
         self.update_func_list.append(update)
 
-    def visualize(self, coords: Coordinates) -> None:
+    def visualize(self, coords: Coords) -> None:
         self.update_func_list = []
         super().visualize(coords)
 
@@ -205,7 +205,7 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
             self.ax.legend()
             plt.show()
 
-    def save(self, coords: Coordinates, path: Path) -> None:
+    def save(self, coords: Coords, path: Path) -> None:
         self.update_func_list = []
         super().visualize(coords)
 

@@ -1,38 +1,38 @@
 import numpy as np
 
-from bregman.base import Point
+from bregman.base import DualCoords, Point
 from bregman.constants import EPS
 from bregman.dissimilarity.base import ApproxDissimilarity, Dissimilarity
 from bregman.manifold.geodesic import BregmanGeodesic
-from bregman.manifold.manifold import BregmanManifold, DualCoord
+from bregman.manifold.manifold import BregmanManifold
 
 
 class DualDissimilarity(Dissimilarity[BregmanManifold]):
     def __init__(
-        self, manifold: BregmanManifold, coord: DualCoord = DualCoord.THETA
+        self, manifold: BregmanManifold, dcoords: DualCoords = DualCoords.THETA
     ) -> None:
         super().__init__(manifold)
 
-        self.coord = coord
+        self.coord = dcoords
 
 
 class DualApproxDissimilarity(ApproxDissimilarity[BregmanManifold]):
     def __init__(
         self,
         manifold: BregmanManifold,
-        coord: DualCoord = DualCoord.THETA,
+        dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
         super().__init__(manifold)
 
-        self.coord = coord
+        self.coord = dcoords
 
 
 class BregmanDivergence(DualDissimilarity):
 
     def __init__(
-        self, manifold: BregmanManifold, coord: DualCoord = DualCoord.THETA
+        self, manifold: BregmanManifold, dcoords: DualCoords = DualCoords.THETA
     ) -> None:
-        super().__init__(manifold, coord)
+        super().__init__(manifold, dcoords)
 
     def distance(self, point_1: Point, point_2: Point) -> np.ndarray:
 
@@ -44,15 +44,17 @@ class BregmanDivergence(DualDissimilarity):
         return gen.bergman_divergence(coord_1.data, coord_2.data)
 
 
-class JeffreyBregmanDivergence(Dissimilarity[BregmanManifold]):
+class JeffreysBregmanDivergence(Dissimilarity[BregmanManifold]):
 
     def __init__(self, manifold: BregmanManifold) -> None:
         super().__init__(manifold)
 
         self.theta_divergence = BregmanDivergence(
-            manifold, coord=DualCoord.THETA
+            manifold, dcoords=DualCoords.THETA
         )
-        self.eta_divergence = BregmanDivergence(manifold, coord=DualCoord.ETA)
+        self.eta_divergence = BregmanDivergence(
+            manifold, dcoords=DualCoords.ETA
+        )
 
     def distance(self, point_1: Point, point_2: Point) -> np.ndarray:
         return self.theta_divergence(point_1, point_2) + self.eta_divergence(
@@ -67,9 +69,9 @@ class SkewJensenBregmanDivergence(DualDissimilarity):
         manifold: BregmanManifold,
         alpha_skews: list[float],
         weight_skews: list[float],
-        coord: DualCoord = DualCoord.THETA,
+        dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
-        super().__init__(manifold, coord)
+        super().__init__(manifold, dcoords)
 
         assert len(alpha_skews) == len(weight_skews)
 
@@ -111,9 +113,9 @@ class SkewBurbeaRaoDivergence(DualDissimilarity):
         self,
         manifold: BregmanManifold,
         alpha: float,
-        coord: DualCoord = DualCoord.THETA,
+        dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
-        super().__init__(manifold, coord)
+        super().__init__(manifold, dcoords)
 
         self.alpha = alpha
 
@@ -141,9 +143,9 @@ class BhattacharyyaDistance(DualDissimilarity):
         self,
         manifold: BregmanManifold,
         alpha: float,
-        coord: DualCoord = DualCoord.THETA,
+        dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
-        super().__init__(manifold, coord)
+        super().__init__(manifold, dcoords)
 
         self.alpha = alpha
 
@@ -157,7 +159,7 @@ class BhattacharyyaDistance(DualDissimilarity):
         coords_2 = self.manifold.convert_coord(self.coord.value, point_2)
 
         geodesic = BregmanGeodesic(
-            self.manifold, coords_1, coords_2, coord=self.coord
+            self.manifold, coords_1, coords_2, dcoords=self.coord
         )
         coords_alpha = geodesic(self.alpha)
 
@@ -176,9 +178,9 @@ class ChernoffInformation(DualApproxDissimilarity):
     def __init__(
         self,
         manifold: BregmanManifold,
-        coord: DualCoord = DualCoord.THETA,
+        dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
-        super().__init__(manifold, coord)
+        super().__init__(manifold, dcoords)
 
     def chernoff_point(
         self,
@@ -190,9 +192,9 @@ class ChernoffInformation(DualApproxDissimilarity):
         coords_2 = self.manifold.convert_coord(self.coord.value, point_2)
 
         geodesic = BregmanGeodesic(
-            self.manifold, coords_1, coords_2, coord=self.coord
+            self.manifold, coords_1, coords_2, dcoords=self.coord
         )
-        divergence = BregmanDivergence(self.manifold, coord=self.coord)
+        divergence = BregmanDivergence(self.manifold, dcoords=self.coord)
 
         alpha_min, alpha_mid, alpha_max = 0.0, 0.5, 1.0
         while abs(alpha_max - alpha_min) > eps:

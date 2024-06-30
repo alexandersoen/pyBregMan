@@ -1,8 +1,7 @@
 import numpy as np
 from scipy.special import lambertw
 
-from bregman.base import Curve, Point
-from bregman.manifold.manifold import THETA_COORDS
+from bregman.base import THETA_COORDS, Curve, Point
 
 
 class KL2DBregmanBallCurve(Curve):

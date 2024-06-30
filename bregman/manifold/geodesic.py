@@ -1,7 +1,7 @@
 from typing import Generic, TypeVar
 
-from bregman.base import Curve, Point
-from bregman.manifold.manifold import BregmanManifold, DualCoord
+from bregman.base import Curve, DualCoords, Point
+from bregman.manifold.manifold import BregmanManifold
 
 TBregmanManifold = TypeVar("TBregmanManifold", bound=BregmanManifold)
 
@@ -30,11 +30,11 @@ class BregmanGeodesic(Geodesic[BregmanManifold]):
         manifold: BregmanManifold,
         source: Point,
         dest: Point,
-        coord: DualCoord = DualCoord.THETA,
+        dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
         super().__init__(manifold, source, dest)
 
-        self.coord = coord
+        self.coord = dcoords
 
     def path(self, t: float) -> Point:
         # TODO Should cache these values

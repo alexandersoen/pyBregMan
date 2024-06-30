@@ -2,11 +2,9 @@ from pathlib import Path
 
 import numpy as np
 
-from bregman.application.application import LAMBDA_COORDS
 from bregman.application.psd import PSDManifold
-from bregman.base import Point
+from bregman.base import ETA_COORDS, LAMBDA_COORDS, DualCoords, Point
 from bregman.manifold.geodesic import BregmanGeodesic
-from bregman.manifold.manifold import ETA_COORDS, DualCoord
 from bregman.visualizer.matplotlib import BregmanObjectMatplotlibVisualizer
 
 if __name__ == "__main__":
@@ -33,9 +31,11 @@ if __name__ == "__main__":
     print(manifold.theta_generator.grad(coord1.data))
 
     primal_geo = BregmanGeodesic(
-        manifold, coord1, coord2, coord=DualCoord.THETA
+        manifold, coord1, coord2, dcoords=DualCoords.THETA
     )
-    dual_geo = BregmanGeodesic(manifold, coord1, coord2, coord=DualCoord.ETA)
+    dual_geo = BregmanGeodesic(
+        manifold, coord1, coord2, dcoords=DualCoords.ETA
+    )
 
     # Define visualizer
     visualizer = BregmanObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)

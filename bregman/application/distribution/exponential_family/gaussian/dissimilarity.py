@@ -7,7 +7,7 @@ from bregman.application.distribution.exponential_family.gaussian.geodesic impor
 from bregman.base import Point
 from bregman.constants import EPS
 from bregman.dissimilarity.base import ApproxDissimilarity
-from bregman.dissimilarity.bregman import JeffreyBregmanDivergence
+from bregman.dissimilarity.bregman import JeffreysBregmanDivergence
 
 
 # TODO make class... need to fix PSD application package first
@@ -42,7 +42,7 @@ class GaussianFisherRaoDistance(ApproxDissimilarity[GaussianManifold]):
     def __init__(self, manifold: GaussianManifold) -> None:
         super().__init__(manifold)
 
-        self.jeffery_distance = JeffreyBregmanDivergence(manifold)
+        self.jeffery_distance = JeffreysBregmanDivergence(manifold)
 
     def distance(
         self, point_1: Point, point_2: Point, eps: float = EPS

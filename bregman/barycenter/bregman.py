@@ -1,19 +1,19 @@
 import numpy as np
 
 from bregman.barycenter.base import ApproxBarycenter, Barycenter
-from bregman.base import Point
+from bregman.base import DualCoords, Point
 from bregman.constants import EPS
-from bregman.manifold.manifold import BregmanManifold, DualCoord
+from bregman.manifold.manifold import BregmanManifold
 
 
 class DualBarycenter(Barycenter[BregmanManifold]):
 
     def __init__(
-        self, manifold: BregmanManifold, coord: DualCoord = DualCoord.THETA
+        self, manifold: BregmanManifold, dcoords: DualCoords = DualCoords.THETA
     ) -> None:
         super().__init__(manifold)
 
-        self.coord = coord
+        self.coord = dcoords
 
 
 class DualApproxBarycenter(ApproxBarycenter[BregmanManifold]):
@@ -21,11 +21,11 @@ class DualApproxBarycenter(ApproxBarycenter[BregmanManifold]):
     def __init__(
         self,
         manifold: BregmanManifold,
-        coord: DualCoord = DualCoord.THETA,
+        dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
         super().__init__(manifold)
 
-        self.coord = coord
+        self.coord = dcoords
 
 
 class BregmanBarycenter(DualBarycenter):
@@ -49,9 +49,9 @@ class SkewBurbeaRaoBarycenter(DualApproxBarycenter):
     def __init__(
         self,
         manifold: BregmanManifold,
-        coord: DualCoord = DualCoord.THETA,
+        dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
-        super().__init__(manifold, coord)
+        super().__init__(manifold, dcoords)
 
     def barycenter(
         self,

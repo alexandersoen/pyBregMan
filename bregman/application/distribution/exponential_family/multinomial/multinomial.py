@@ -3,12 +3,10 @@ import math
 import autograd.numpy as anp
 import numpy as np
 
-from bregman.application.application import LAMBDA_COORDS
 from bregman.application.distribution.exponential_family.exp_family import (
     ExponentialFamilyDistribution, ExponentialFamilyManifold)
-from bregman.base import DisplayPoint, Point
+from bregman.base import LAMBDA_COORDS, THETA_COORDS, DisplayPoint, Point
 from bregman.manifold.generator import AutoDiffGenerator
-from bregman.manifold.manifold import THETA_COORDS
 
 
 class MultinomialPoint(DisplayPoint):
