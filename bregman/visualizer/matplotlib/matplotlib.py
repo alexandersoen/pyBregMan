@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Callable
 
 import matplotlib.pyplot as plt
@@ -203,3 +204,11 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
 
             self.ax.legend()
             plt.show()
+
+    def save(self, coords: Coordinates, path: Path) -> None:
+        self.update_func_list = []
+        super().visualize(coords)
+
+        with plt.style.context("bmh"):
+            self.ax.legend()
+            plt.savefig(path)

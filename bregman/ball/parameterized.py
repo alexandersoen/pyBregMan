@@ -10,7 +10,7 @@ class KL2DBregmanBallCurve(Curve):
     def __init__(self, center: Point, radius: float) -> None:
         assert len(center.data) == 2
 
-        super().__init__(coords=THETA_COORDS)
+        super().__init__()
 
         self.center = center
         self.radius = radius
@@ -48,4 +48,4 @@ class KL2DBregmanBallCurve(Curve):
                 lambertw(-np.exp(-(self.radius - u) / cy - 1), k=0)
             )
 
-        return Point(data=np.array([x, y]), coords=self.coords)
+        return Point(data=np.array([x, y]), coords=THETA_COORDS)

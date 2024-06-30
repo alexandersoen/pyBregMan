@@ -130,4 +130,5 @@ if __name__ == "__main__":
             [x], [np.min(gen_plot_vals)], [np.max(gen_plot_vals)], alpha=0.3
         )
 
-    plt.show()
+    # plt.show()
+    plt.savefig("figures/chernoff.pdf")

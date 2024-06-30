@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 
 from bregman.application.application import LAMBDA_COORDS
@@ -57,6 +59,7 @@ if __name__ == "__main__":
     # Add animations
     visualizer.animate_object(primal_geo, c="blue")
     visualizer.animate_object(dual_geo, c="red")
-    visualizer.animate_object(primal_pt, c="black")
 
-    visualizer.visualize(DISPLAY_TYPE)
+    # visualizer.visualize(DISPLAY_TYPE)
+    SAVE_PATH = Path("figures/multinomial.pdf")
+    visualizer.save(DISPLAY_TYPE, SAVE_PATH)

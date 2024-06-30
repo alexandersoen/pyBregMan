@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 
 from bregman.application.application import LAMBDA_COORDS
@@ -33,8 +35,10 @@ if __name__ == "__main__":
         )
     )
 
-    chernoff_information = ChernoffInformation(manifold, eps=1e-10)
-    chernoff_point_alpha = chernoff_information.chernoff_point(coord1, coord2)
+    chernoff_information = ChernoffInformation(manifold)
+    chernoff_point_alpha = chernoff_information.chernoff_point(
+        coord1, coord2, eps=1e-10
+    )
     mp = Point(
         ETA_COORDS,
         manifold.convert_coord(ETA_COORDS, coord1).data * 0.5
@@ -111,4 +115,6 @@ if __name__ == "__main__":
     cov_cb = VisualizeGaussian2DCovariancePoints()
     visualizer.add_callback(cov_cb)
 
-    visualizer.visualize(DISPLAY_TYPE)
+    # visualizer.visualize(DISPLAY_TYPE)
+    SAVE_PATH = Path("figures/gaussian.pdf")
+    visualizer.save(DISPLAY_TYPE, SAVE_PATH)

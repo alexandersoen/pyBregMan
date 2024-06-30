@@ -52,4 +52,5 @@ if __name__ == "__main__":
         )
     with plt.style.context("bmh"):
         plt.plot(datas[:, 0], datas[:, 1])
-        plt.show()
+        # plt.show()
+        plt.savefig("figures/bball_2.pdf")

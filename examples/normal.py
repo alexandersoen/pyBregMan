@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 
 from bregman.application.application import LAMBDA_COORDS
@@ -119,4 +121,6 @@ if __name__ == "__main__":
 
     visualizer.add_callback(metric_cb)
 
-    visualizer.visualize(DISPLAY_TYPE)
+    # visualizer.visualize(DISPLAY_TYPE)
+    SAVE_PATH = Path("figures/normal.pdf")
+    visualizer.save(DISPLAY_TYPE, SAVE_PATH)

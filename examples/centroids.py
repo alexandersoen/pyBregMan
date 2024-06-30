@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 
 from bregman.application.application import LAMBDA_COORDS
@@ -97,4 +99,6 @@ if __name__ == "__main__":
     visualizer.plot_object(p13_dual_geo, c="red")
     visualizer.plot_object(p23_dual_geo, c="red")
 
-    visualizer.visualize(DISPLAY_TYPE)
+    # visualizer.visualize(DISPLAY_TYPE)
+    SAVE_PATH = Path("figures/centroids.pdf")
+    visualizer.save(DISPLAY_TYPE, SAVE_PATH)

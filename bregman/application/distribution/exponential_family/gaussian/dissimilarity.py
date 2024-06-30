@@ -5,6 +5,7 @@ from bregman.application.distribution.exponential_family.gaussian.gaussian impor
 from bregman.application.distribution.exponential_family.gaussian.geodesic import \
     KobayashiGeodesic
 from bregman.base import Point
+from bregman.constants import EPS
 from bregman.dissimilarity.base import ApproxDissimilarity
 from bregman.dissimilarity.bregman import JeffreyBregmanDivergence
 
@@ -38,13 +39,15 @@ def IsometricSPDEmbeddingCalvoOller(
 
 class GaussianFisherRaoDistance(ApproxDissimilarity[GaussianManifold]):
 
-    def __init__(self, manifold: GaussianManifold, eps: float = 1e-5) -> None:
-        super().__init__(manifold, eps)
+    def __init__(self, manifold: GaussianManifold) -> None:
+        super().__init__(manifold)
 
         self.jeffery_distance = JeffreyBregmanDivergence(manifold)
 
-    def distance(self, point_1: Point, point_2: Point) -> np.ndarray:
-        return self._go(point_1, point_2)
+    def distance(
+        self, point_1: Point, point_2: Point, eps: float = EPS
+    ) -> np.ndarray:
+        return self._go(point_1, point_2, eps)
 
     def _lower(self, point_1: Point, point_2: Point) -> np.ndarray:
         emb_1 = IsometricSPDEmbeddingCalvoOller(self.manifold, point_1)
@@ -55,12 +58,12 @@ class GaussianFisherRaoDistance(ApproxDissimilarity[GaussianManifold]):
     def _upper(self, point_1: Point, point_2: Point) -> np.ndarray:
         return np.sqrt(self.jeffery_distance(point_1, point_2))
 
-    def _go(self, point_1: Point, point_2: Point) -> np.ndarray:
+    def _go(self, point_1: Point, point_2: Point, eps) -> np.ndarray:
 
         lb = self._lower(point_1, point_2)
         ub = self._upper(point_1, point_2)
 
-        if ub / lb < 1 + self.eps:
+        if ub / lb < 1 + eps:
             return ub
         else:
             kobayashi_geodesic = KobayashiGeodesic(
@@ -70,4 +73,4 @@ class GaussianFisherRaoDistance(ApproxDissimilarity[GaussianManifold]):
             )
             mid = kobayashi_geodesic(0.5)
 
-            return self._go(point_1, mid) + self._go(mid, point_2)
+            return self._go(point_1, mid, eps) + self._go(mid, point_2, eps)

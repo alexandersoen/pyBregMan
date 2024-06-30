@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 
 from bregman.application.application import LAMBDA_COORDS
@@ -70,7 +72,9 @@ if __name__ == "__main__":
     # cov_cb = VisualizeGaussian2DCovariancePoints()
     # visualizer.add_callback(cov_cb)
 
-    visualizer.visualize(DISPLAY_TYPE)
+    # visualizer.visualize(DISPLAY_TYPE)
+    SAVE_PATH = Path("figures/gaussian_fisherrao_ahg.pdf")
+    visualizer.save(DISPLAY_TYPE, SAVE_PATH)
 
     fr_dist = GaussianFisherRaoDistance(manifold)
     print("FR Distance", fr_dist(coord1, coord2))

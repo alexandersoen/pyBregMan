@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 
 from bregman.application.application import LAMBDA_COORDS
@@ -57,4 +59,6 @@ if __name__ == "__main__":
         p = primal_geo(0.5)
         q = dual_geo(0.5)
 
-    visualizer.visualize(DISPLAY_TYPE)
+    # visualizer.visualize(DISPLAY_TYPE)
+    SAVE_PATH = Path("figures/ahg.pdf")
+    visualizer.save(DISPLAY_TYPE, SAVE_PATH)

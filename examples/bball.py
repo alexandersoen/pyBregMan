@@ -132,7 +132,8 @@ if __name__ == "__main__":
     ax.contourf(xs, ys, zs, zdir="x", offset=-40, cmap="coolwarm")
     ax.contourf(xs, ys, zs, zdir="y", offset=40, cmap="coolwarm")
 
-    plt.show()
+    # plt.show()
+    plt.savefig("figures/bball.pdf")
 
     """
 
