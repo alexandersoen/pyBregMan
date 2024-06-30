@@ -1,13 +1,7 @@
 import numpy as np
 
-from bregman.application.distribution.exponential_family.gaussian.gaussian import \
-    GaussianManifold
-from bregman.barycenter.bregman import (BregmanBarycenter,
-                                        SkewBurbeaRaoBarycenter)
+from bregman.application.distribution.exponential_family.gaussian import GaussianManifold
 from bregman.base import LAMBDA_COORDS, DualCoords, Point
-from bregman.visualizer.matplotlib.callback import \
-    VisualizeGaussian2DCovariancePoints
-from bregman.visualizer.matplotlib.matplotlib import MatplotlibVisualizer
 
 # Define Bivariate Normal Manifold
 manifold = GaussianManifold(input_dimension=2)
@@ -27,6 +21,8 @@ rkl = manifold.kl_divergence(point_2, point_1)
 print("KL(point_1 || point_2):", kl)
 print("KL(point_2 || point_1):", rkl)
 
+from bregman.barycenter.bregman import BregmanBarycenter, SkewBurbeaRaoBarycenter 
+
 # We can define and calculate centroids
 theta_barycenter = BregmanBarycenter(manifold, DualCoords.THETA)
 eta_barycenter = BregmanBarycenter(manifold, DualCoords.ETA)
@@ -41,6 +37,9 @@ dbr_centroid = dbr_barycenter([point_1, point_2])
 print("Right-Sided Centroid:", manifold.convert_to_display(theta_centroid))
 print("Left-Sided Centroid:", manifold.convert_to_display(eta_centroid))
 print("Bhattacharyya Centroid:", manifold.convert_to_display(br_centroid))
+
+from bregman.visualizer.matplotlib.callback import VisualizeGaussian2DCovariancePoints
+from bregman.visualizer.matplotlib.matplotlib import MatplotlibVisualizer
 
 # These objects can be visualized through matplotlib
 visualizer = MatplotlibVisualizer(manifold, (0, 1))
