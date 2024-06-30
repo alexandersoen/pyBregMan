@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     visualizer.plot_object(
         theta_centroid,
-        c="blue",
+        c="red",
         marker="x",
         label=f"Theta Centroid",  #: {manifold.convert_to_display(theta_centroid)}",
     )
@@ -88,18 +88,18 @@ if __name__ == "__main__":
     )
     visualizer.plot_object(
         eta_centroid,
-        c="red",
+        c="blue",
         marker="x",
         label=f"Eta Centroid",  #: {manifold.convert_to_display(eta_centroid)}",
     )
 
-    visualizer.plot_object(p12_primal_geo, c="blue")
-    visualizer.plot_object(p13_primal_geo, c="blue")
-    visualizer.plot_object(p23_primal_geo, c="blue")
+    visualizer.plot_object(p12_primal_geo, c="red")
+    visualizer.plot_object(p13_primal_geo, c="red")
+    visualizer.plot_object(p23_primal_geo, c="red")
 
-    visualizer.plot_object(p12_dual_geo, c="red")
-    visualizer.plot_object(p13_dual_geo, c="red")
-    visualizer.plot_object(p23_dual_geo, c="red")
+    visualizer.plot_object(p12_dual_geo, c="blue")
+    visualizer.plot_object(p13_dual_geo, c="blue")
+    visualizer.plot_object(p23_dual_geo, c="blue")
 
     visualizer.visualize(DISPLAY_TYPE)
     # SAVE_PATH = Path("figures/centroids.pdf")

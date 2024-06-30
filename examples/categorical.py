@@ -54,12 +54,12 @@ if __name__ == "__main__":
     # Add objects to visualize
     visualizer.plot_object(coord1, label=manifold.convert_to_display(coord1))
     visualizer.plot_object(coord2, label=manifold.convert_to_display(coord2))
-    visualizer.plot_object(primal_geo, c="blue", label="Primal Geodesic")
-    visualizer.plot_object(dual_geo, c="red", label="Dual Geodesic")
+    visualizer.plot_object(primal_geo, c="red", label="Primal Geodesic")
+    visualizer.plot_object(dual_geo, c="blue", label="Dual Geodesic")
 
     # Add animations
-    visualizer.animate_object(primal_geo, c="blue")
-    visualizer.animate_object(dual_geo, c="red")
+    visualizer.animate_object(primal_geo, c="red")
+    visualizer.animate_object(dual_geo, c="blue")
 
     # visualizer.visualize(DISPLAY_TYPE)
     SAVE_PATH = Path("figures/categorical.pdf")

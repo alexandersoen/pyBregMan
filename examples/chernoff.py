@@ -54,8 +54,8 @@ if __name__ == "__main__":
         chernoff_point,
         label=f"Chernoff Point, alpha={chernoff_point_alpha:.2f}",
     )
-    visualizer.plot_object(primal_geo, c="blue", label="Primal Geodesic")
-    visualizer.plot_object(dual_geo, c="red", label="Dual Geodesic")
+    visualizer.plot_object(primal_geo, c="red", label="Primal Geodesic")
+    visualizer.plot_object(dual_geo, c="blue", label="Dual Geodesic")
 
     print()
     print("Chernoff Check")
@@ -79,9 +79,9 @@ if __name__ == "__main__":
     print()
 
     # Add animations
-    visualizer.animate_object(primal_geo, c="blue")
+    visualizer.animate_object(primal_geo, c="red")
     # visualizer.animate_object(eriksen, c="purple")
-    visualizer.animate_object(dual_geo, c="red")
+    visualizer.animate_object(dual_geo, c="blue")
 
     visualizer.visualize(DISPLAY_TYPE)
 
@@ -121,8 +121,8 @@ if __name__ == "__main__":
         ),
     ]
 
-    plt.scatter(*coord1_pv, c="red")
-    plt.scatter(*coord2_pv, c="blue")
+    plt.scatter(*coord1_pv, c="blue")
+    plt.scatter(*coord2_pv, c="red")
     plt.scatter(*chernoff_point_pv, c="purple")
     plt.plot([coord1_pv[0], coord2_pv[0]], [coord1_pv[1], coord2_pv[1]])
 

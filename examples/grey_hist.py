@@ -71,8 +71,8 @@ if __name__ == "__main__":
     )
     jef_centroid = manifold.convert_coord(LAMBDA_COORDS, jef_centroid)
 
-    plt.plot(values, barbara.data, c="blue", label="Image 1 Pixels")
-    plt.plot(values, lena.data, c="red", label="Image 2 Pixels")
+    plt.plot(values, barbara.data, c="red", label="Image 1 Pixels")
+    plt.plot(values, lena.data, c="blue", label="Image 2 Pixels")
     plt.plot(values, js_centroid.data, c="black", label="JS Centroid")
     plt.plot(values, jef_centroid.data, c="grey", label="Jeffreys Centroid")
 

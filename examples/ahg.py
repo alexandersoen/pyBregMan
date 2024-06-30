@@ -44,15 +44,15 @@ if __name__ == "__main__":
             )
 
             visualizer.plot_object(
-                primal_geo, c="blue", label="Primal Geodesic"
+                primal_geo, c="red", label="Primal Geodesic"
             )
-            visualizer.plot_object(dual_geo, c="red", label="Dual Geodesic")
+            visualizer.plot_object(dual_geo, c="blue", label="Dual Geodesic")
         else:
             visualizer.plot_object(p, c="green")
             visualizer.plot_object(q, c="orange")
 
-            visualizer.plot_object(primal_geo, c="blue")
-            visualizer.plot_object(dual_geo, c="red")
+            visualizer.plot_object(primal_geo, c="red")
+            visualizer.plot_object(dual_geo, c="blue")
 
         p = primal_geo(0.5)
         q = dual_geo(0.5)

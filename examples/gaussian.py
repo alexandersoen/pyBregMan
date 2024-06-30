@@ -76,13 +76,13 @@ if __name__ == "__main__":
         chernoff_point,
         label=f"Chernoff Point, alpha={chernoff_point_alpha:.2f}",
     )
-    visualizer.plot_object(primal_geo, c="blue", label="Primal Geodesic")
-    visualizer.plot_object(dual_geo, c="red", label="Dual Geodesic")
+    visualizer.plot_object(primal_geo, c="red", label="Primal Geodesic")
+    visualizer.plot_object(dual_geo, c="blue", label="Dual Geodesic")
     visualizer.plot_object(
-        eta_bisector, alpha=0.7, c="red", label="Dual Bisector"
+        eta_bisector, alpha=0.7, c="blue", label="Dual Bisector"
     )
     visualizer.plot_object(
-        theta_bisector, alpha=0.7, c="blue", label="Primal Bisector"
+        theta_bisector, alpha=0.7, c="red", label="Primal Bisector"
     )
 
     print()
@@ -107,9 +107,9 @@ if __name__ == "__main__":
     print()
 
     # Add animations
-    visualizer.animate_object(primal_geo, c="blue")
+    visualizer.animate_object(primal_geo, c="red")
     # visualizer.animate_object(eriksen, c="purple")
-    visualizer.animate_object(dual_geo, c="red")
+    visualizer.animate_object(dual_geo, c="blue")
 
     cov_cb = VisualizeGaussian2DCovariancePoints()
     visualizer.add_callback(cov_cb)

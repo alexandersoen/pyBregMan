@@ -38,12 +38,12 @@ if __name__ == "__main__":
     # Add objects to visualize
     visualizer.plot_object(coord1, c="black")
     visualizer.plot_object(coord2, c="black")
-    visualizer.plot_object(primal_geo(0.5), c="blue")
+    visualizer.plot_object(primal_geo(0.5), c="red")
     visualizer.plot_object(kobayashi(0.5), c="purple")
-    visualizer.plot_object(dual_geo(0.5), c="red")
-    visualizer.plot_object(primal_geo, c="blue")
+    visualizer.plot_object(dual_geo(0.5), c="blue")
+    visualizer.plot_object(primal_geo, c="red")
     visualizer.plot_object(kobayashi, c="purple")
-    visualizer.plot_object(dual_geo, c="red")
+    visualizer.plot_object(dual_geo, c="blue")
 
     fr_dist = GaussianFisherRaoDistance(manifold)
     print("FR Distance", fr_dist(coord1, coord2))

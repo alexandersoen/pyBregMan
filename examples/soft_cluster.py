@@ -139,7 +139,7 @@ if __name__ == "__main__":
             for ds in mixing_dist
         ],
         1 + np.arange(len(mixing_dist)),
-        c="red",
+        c="blue",
     )
     plt.plot(
         [
@@ -149,7 +149,7 @@ if __name__ == "__main__":
             for ds in mixing_dist
         ],
         -1 - np.arange(len(mixing_dist)),
-        c="blue",
+        c="red",
     )
 
     plt.vlines([-3, 1.5], -1, 1)

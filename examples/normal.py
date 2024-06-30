@@ -86,11 +86,11 @@ if __name__ == "__main__":
         chernoff_point,
         label=f"Chernoff Point, alpha={chernoff_point_alpha:.2f}",
     )
-    visualizer.plot_object(primal_geo, c="blue", label="Primal Geodesic")
-    visualizer.plot_object(dual_geo, c="red", label="Dual Geodesic")
+    visualizer.plot_object(primal_geo, c="red", label="Primal Geodesic")
+    visualizer.plot_object(dual_geo, c="blue", label="Dual Geodesic")
 
     visualizer.plot_object(
-        eta_bisector, alpha=0.7, c="red", label="Dual Bisector"
+        eta_bisector, alpha=0.7, c="blue", label="Dual Bisector"
     )
 
     print("Chernoff Check")

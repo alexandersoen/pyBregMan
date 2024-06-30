@@ -46,11 +46,11 @@ if __name__ == "__main__":
     # Add objects to visualize
     visualizer.plot_object(coord1, c="black")
     visualizer.plot_object(coord2, c="black")
-    # visualizer.plot_object(primal_geo(0.5), c="blue")
-    # visualizer.plot_object(dual_geo(0.5), c="red")
-    visualizer.plot_object(primal_geo, c="blue")
+    # visualizer.plot_object(primal_geo(0.5), c="red")
+    # visualizer.plot_object(dual_geo(0.5), c="blue")
+    visualizer.plot_object(primal_geo, c="red")
     visualizer.plot_object(kobayashi, c="purple")
-    visualizer.plot_object(dual_geo, c="red")
+    visualizer.plot_object(dual_geo, c="blue")
 
     p, q = coord1, coord2
     ITERS = 5
@@ -59,11 +59,11 @@ if __name__ == "__main__":
         dual_geo = BregmanGeodesic(manifold, p, q, dcoords=DualCoords.ETA)
 
         if i > 0:
-            visualizer.plot_object(p, c="blue", alpha=0.3)
-            visualizer.plot_object(q, c="red", alpha=0.3)
+            visualizer.plot_object(p, c="red", alpha=0.3)
+            visualizer.plot_object(q, c="blue", alpha=0.3)
 
-            visualizer.plot_object(primal_geo, c="blue", alpha=0.3)
-            visualizer.plot_object(dual_geo, c="red", alpha=0.3)
+            visualizer.plot_object(primal_geo, c="red", alpha=0.3)
+            visualizer.plot_object(dual_geo, c="blue", alpha=0.3)
 
         p = primal_geo(0.5)
         q = dual_geo(0.5)
