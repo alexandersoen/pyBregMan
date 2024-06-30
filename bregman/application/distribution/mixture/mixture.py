@@ -8,6 +8,8 @@ from bregman.application.distribution.distribution import DistributionManifold
 from bregman.application.distribution.exponential_family.multinomial import (
     MultinomialDualGenerator, MultinomialPrimalGenerator)
 from bregman.base import DisplayPoint, Point
+from bregman.dissimilarity.bregman import (BregmanDivergence,
+                                           SkewBurbeaRaoDivergence)
 from bregman.object.distribution import Distribution
 
 
@@ -90,6 +92,16 @@ class MixtureManifold(
                 data=distribution.weights,
             )
         )
+
+    def kl_divergence(self, point_1: Point, point_2: Point) -> np.ndarray:
+        breg_div = BregmanDivergence(self)
+        return breg_div(point_1, point_2)
+
+    def jensen_shannon_divergence(
+        self, point_1: Point, point_2: Point
+    ) -> np.ndarray:
+        br_div = SkewBurbeaRaoDivergence(self, alpha=0.5)
+        return br_div(point_1, point_2)
 
     def _lambda_to_theta(self, lamb: np.ndarray) -> np.ndarray:
         return lamb

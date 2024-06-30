@@ -12,7 +12,7 @@ from bregman.base import Coords, DualCoords, Point
 from bregman.manifold.bisector import Bisector
 from bregman.manifold.geodesic import BregmanGeodesic, Geodesic
 from bregman.manifold.manifold import BregmanManifold
-from bregman.visualizer.visualizer import BregmanObjectVisualizer
+from bregman.visualizer.visualizer import BregmanVisualizer
 
 
 @dataclass
@@ -24,13 +24,13 @@ class DataLim:
     ymax: np.ndarray
 
 
-class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
+class MatplotlibVisualizer(BregmanVisualizer):
 
     def __init__(
         self,
         manifold: BregmanManifold,
         plot_dims: tuple[int, int],
-        dim_names: tuple[str, str] = ("", ""),
+        dim_names: tuple[str, str] | None = None,
         resolution: int = 120,
         frames: int = 120,
         intervals: int = 1,
@@ -40,6 +40,8 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
         self.dim1 = plot_dims[0]
         self.dim2 = plot_dims[1]
 
+        if dim_names is None:
+            dim_names = (f"Dim {plot_dims[0]}", f"Dim {plot_dims[1]}")
         self.dim_names = dim_names
 
         self.geodesic_rate = 0.1
@@ -182,16 +184,17 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
 
     def visualize(self, coords: Coords) -> None:
         self.update_func_list = []
-        super().visualize(coords)
-
-        def update_all(frame: int):
-            res = []
-            for update in self.update_func_list:
-                res.append(update(frame))
-
-            return res
 
         with plt.style.context("bmh"):
+            super().visualize(coords)
+
+            def update_all(frame: int):
+                res = []
+                for update in self.update_func_list:
+                    res.append(update(frame))
+
+                return res
+
             ani = animation.FuncAnimation(
                 fig=self.fig,
                 func=update_all,
@@ -205,10 +208,13 @@ class BregmanObjectMatplotlibVisualizer(BregmanObjectVisualizer):
             self.ax.legend()
             plt.show()
 
-    def save(self, coords: Coords, path: Path) -> None:
-        self.update_func_list = []
-        super().visualize(coords)
+    def save(self, coords: Coords, path: Path | str) -> None:
+        if path is str:
+            path = Path(path)
 
+        self.update_func_list = []
         with plt.style.context("bmh"):
+            super().visualize(coords)
+
             self.ax.legend()
             plt.savefig(path)

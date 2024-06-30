@@ -18,7 +18,12 @@ class Barycenter(Generic[TBregmanManifold], ABC):
     def barycenter(self, points: list[Point], weights: list[float]) -> Point:
         pass
 
-    def __call__(self, points: list[Point], weights: list[float]) -> Point:
+    def __call__(
+        self, points: list[Point], weights: list[float] | None = None
+    ) -> Point:
+        if weights is None:
+            weights = [1.0] * len(points)
+
         assert len(points) == len(weights)
 
         return self.barycenter(points, weights)
@@ -38,8 +43,14 @@ class ApproxBarycenter(
         pass
 
     def __call__(
-        self, points: list[Point], weights: list[float], eps: float = EPS
+        self,
+        points: list[Point],
+        weights: list[float] | None = None,
+        eps: float = EPS,
     ) -> Point:
+        if weights is None:
+            weights = [1.0] * len(points)
+
         assert len(points) == len(weights)
 
         return self.barycenter(points, weights, eps=eps)

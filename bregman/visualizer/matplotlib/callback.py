@@ -1,16 +1,17 @@
+from copy import deepcopy
+
 import numpy as np
 
 from bregman.application.distribution.exponential_family.gaussian.gaussian import \
     GaussianManifold
 from bregman.base import (LAMBDA_COORDS, BregmanObject, Coords, DualCoords,
                           Point)
-from bregman.visualizer.matplotlib.matplotlib import \
-    BregmanObjectMatplotlibVisualizer
+from bregman.visualizer.matplotlib.matplotlib import MatplotlibVisualizer
 from bregman.visualizer.visualizer import VisualizerCallback
 
 
 class VisualizeGaussian2DCovariancePoints(
-    VisualizerCallback[BregmanObjectMatplotlibVisualizer]
+    VisualizerCallback[MatplotlibVisualizer]
 ):
 
     def __init__(self, scale: float = 0.2, npoints: int = 1_000) -> None:
@@ -23,7 +24,7 @@ class VisualizeGaussian2DCovariancePoints(
         self,
         obj: BregmanObject,
         coords: Coords,
-        visualizer: BregmanObjectMatplotlibVisualizer,
+        visualizer: MatplotlibVisualizer,
         **kwargs,
     ) -> None:
 
@@ -56,12 +57,16 @@ class VisualizeGaussian2DCovariancePoints(
         )
         v = v + mu
 
-        visualizer.ax.plot(v[:, 0], v[:, 1], **kwargs)
+        tissot_kwargs = {
+            "c": kwargs["c"] if "c" in kwargs else None,
+            "alpha": kwargs["alpha"] * 0.5 if "alpha" in kwargs else 0.5,
+            "ls": kwargs["ls"] if "ls" in kwargs else "--",
+            "zorder": 0,
+        }
+        visualizer.ax.plot(v[:, 0], v[:, 1], **tissot_kwargs)
 
 
-class Visualize2DTissotIndicatrix(
-    VisualizerCallback[BregmanObjectMatplotlibVisualizer]
-):
+class Visualize2DTissotIndicatrix(VisualizerCallback[MatplotlibVisualizer]):
 
     def __init__(self, scale: float = 0.1, npoints: int = 1_000) -> None:
         super().__init__()
@@ -73,7 +78,7 @@ class Visualize2DTissotIndicatrix(
         self,
         obj: BregmanObject,
         coords: Coords,
-        visualizer: BregmanObjectMatplotlibVisualizer,
+        visualizer: MatplotlibVisualizer,
         **kwargs,
     ) -> None:
 

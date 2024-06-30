@@ -9,7 +9,7 @@ from bregman.base import (ETA_COORDS, LAMBDA_COORDS, THETA_COORDS, DualCoords,
 from bregman.dissimilarity.bregman import ChernoffInformation
 from bregman.manifold.bisector import BregmanBisector
 from bregman.manifold.geodesic import BregmanGeodesic
-from bregman.visualizer.matplotlib import (BregmanObjectMatplotlibVisualizer,
+from bregman.visualizer.matplotlib import (MatplotlibVisualizer,
                                            Visualize2DTissotIndicatrix)
 
 if __name__ == "__main__":
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     )
 
     # Define visualizer
-    visualizer = BregmanObjectMatplotlibVisualizer(
+    visualizer = MatplotlibVisualizer(
         manifold, VISUALIZE_INDEX  # , dim_names=(r"$\mu$", r"$\sigma$")
     )
     metric_cb = Visualize2DTissotIndicatrix()

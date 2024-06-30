@@ -5,7 +5,7 @@ import numpy as np
 from bregman.application.psd import PSDManifold
 from bregman.base import ETA_COORDS, LAMBDA_COORDS, DualCoords, Point
 from bregman.manifold.geodesic import BregmanGeodesic
-from bregman.visualizer.matplotlib import BregmanObjectMatplotlibVisualizer
+from bregman.visualizer.matplotlib import MatplotlibVisualizer
 
 if __name__ == "__main__":
 
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     coord1 = Point(LAMBDA_COORDS, m1)
     coord2 = Point(LAMBDA_COORDS, m2)
 
-    visualizer = BregmanObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
+    visualizer = MatplotlibVisualizer(manifold, VISUALIZE_INDEX)
 
     p, q = coord1, coord2
     for i in range(ITERS):

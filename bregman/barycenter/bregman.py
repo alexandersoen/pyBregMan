@@ -61,7 +61,7 @@ class SkewBurbeaRaoBarycenter(DualApproxBarycenter):
         alphas: list[float] | None = None,
     ) -> Point:
         """
-        https://arxiv.org/pdf/1004.5049
+        Use CCCP to calculate barycenter: https://arxiv.org/pdf/1004.5049
         """
 
         coord_type = self.coord.value
@@ -74,17 +74,18 @@ class SkewBurbeaRaoBarycenter(DualApproxBarycenter):
         assert len(points) == len(alphas) == len(weights)
 
         nweights = [w / sum(weights) for w in weights]
+
         alpha_mid = sum(w * a for w, a in zip(nweights, alphas))
         points_data = [
             self.manifold.convert_coord(coord_type, p).data for p in points
         ]
 
-        def get_energy(p: np.ndarray) -> float:
+        def get_energy(c: np.ndarray) -> float:
             weighted_term = sum(
-                w * primal_gen(a * p + (1 - a) * t)
+                w * primal_gen(a * c + (1 - a) * t)
                 for w, a, t in zip(nweights, alphas, points_data)
             )
-            return float(alpha_mid * primal_gen(p) - weighted_term)
+            return float(alpha_mid * primal_gen(c) - weighted_term)
 
         diff = float("inf")
         barycenter = np.sum(
@@ -98,10 +99,10 @@ class SkewBurbeaRaoBarycenter(DualApproxBarycenter):
                     for w, a, t in zip(nweights, alphas, points_data)
                 ]
             )
-            avg_grad = np.sum(aw_grads, axis=0)
+            avg_grad = np.sum(aw_grads, axis=0) / alpha_mid
 
             # Update
-            barycenter = dual_gen.grad(avg_grad / alpha_mid)
+            barycenter = dual_gen.grad(avg_grad)
 
             new_energy = get_energy(barycenter)
             diff = abs(new_energy - cur_energy)
@@ -114,8 +115,11 @@ class SkewBurbeaRaoBarycenter(DualApproxBarycenter):
     def __call__(
         self,
         points: list[Point],
-        weights: list[float],
+        weights: list[float] | None = None,
         eps: float = EPS,
         alphas: list[float] | None = None,
     ) -> Point:
+        if weights is None:
+            weights = [1.0] * len(points)
+
         return self.barycenter(points, weights, eps=eps, alphas=alphas)

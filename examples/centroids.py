@@ -8,7 +8,7 @@ from bregman.barycenter.bregman import (BregmanBarycenter,
                                         SkewBurbeaRaoBarycenter)
 from bregman.base import LAMBDA_COORDS, DualCoords, Point
 from bregman.manifold.geodesic import BregmanGeodesic
-from bregman.visualizer.matplotlib import BregmanObjectMatplotlibVisualizer
+from bregman.visualizer.matplotlib import MatplotlibVisualizer
 
 if __name__ == "__main__":
 
@@ -49,21 +49,19 @@ if __name__ == "__main__":
     weights = [1.0, 1.0, 1.0]
 
     js_centroid = SkewBurbeaRaoBarycenter(manifold, dcoords=DualCoords.THETA)(
-        points, weights, alphas=alphas
+        points
     )
     j_centroid = SkewBurbeaRaoBarycenter(manifold, dcoords=DualCoords.ETA)(
-        points, weights, alphas=alphas
+        points
     )
 
     theta_centroid = BregmanBarycenter(manifold, dcoords=DualCoords.THETA)(
-        points, weights
+        points
     )
-    eta_centroid = BregmanBarycenter(manifold, dcoords=DualCoords.ETA)(
-        points, weights
-    )
+    eta_centroid = BregmanBarycenter(manifold, dcoords=DualCoords.ETA)(points)
 
     # Define visualizer
-    visualizer = BregmanObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
+    visualizer = MatplotlibVisualizer(manifold, VISUALIZE_INDEX)
 
     # Add objects to visualize
     visualizer.plot_object(p1, label=manifold.convert_to_display(p1))
@@ -82,12 +80,12 @@ if __name__ == "__main__":
         marker="x",
         #        label=f"JS Centroid: {manifold.convert_to_display(js_centroid)}",
     )
-    #    visualizer.plot_object(
-    #        j_centroid,
-    #        c="pink",
-    #        marker="x",
-    #        label=f"J Centroid: {manifold.convert_to_display(j_centroid)}",
-    #    )
+    visualizer.plot_object(
+        j_centroid,
+        c="pink",
+        marker="x",
+        # label=f"J Centroid: {manifold.convert_to_display(j_centroid)}",
+    )
     visualizer.plot_object(
         eta_centroid,
         c="red",
@@ -103,6 +101,6 @@ if __name__ == "__main__":
     visualizer.plot_object(p13_dual_geo, c="red")
     visualizer.plot_object(p23_dual_geo, c="red")
 
-    # visualizer.visualize(DISPLAY_TYPE)
-    SAVE_PATH = Path("figures/centroids.pdf")
-    visualizer.save(DISPLAY_TYPE, SAVE_PATH)
+    visualizer.visualize(DISPLAY_TYPE)
+    # SAVE_PATH = Path("figures/centroids.pdf")
+    # visualizer.save(DISPLAY_TYPE, SAVE_PATH)

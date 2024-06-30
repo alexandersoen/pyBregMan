@@ -16,7 +16,7 @@ class NoAnimationRoutine(Exception):
     pass
 
 
-class BregmanObjectVisualizer(ABC):
+class BregmanVisualizer(ABC):
 
     plot_list: list[tuple[BregmanObject, dict]] = []
     animate_list: list[tuple[BregmanObject, dict]] = []
@@ -94,7 +94,7 @@ class BregmanObjectVisualizer(ABC):
                 c.call(obj, coords, self, **kwarg)
 
 
-TVisualizer = TypeVar("TVisualizer", bound=BregmanObjectVisualizer)
+TVisualizer = TypeVar("TVisualizer", bound=BregmanVisualizer)
 
 
 class VisualizerCallback(ABC, Generic[TVisualizer]):

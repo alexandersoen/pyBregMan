@@ -5,6 +5,8 @@ import numpy as np
 
 from bregman.application.application import MyDisplayPoint
 from bregman.application.distribution.distribution import DistributionManifold
+from bregman.base import Point
+from bregman.dissimilarity.bregman import BregmanDivergence
 from bregman.manifold.generator import Generator
 from bregman.object.distribution import Distribution
 
@@ -66,3 +68,7 @@ class ExponentialFamilyManifold(
 
     def t(self, x: np.ndarray) -> np.ndarray:
         return self.distribution_class.t(x)
+
+    def kl_divergence(self, point_1: Point, point_2: Point) -> np.ndarray:
+        breg_div = BregmanDivergence(self)
+        return breg_div(point_1, point_2)
