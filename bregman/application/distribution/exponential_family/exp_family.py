@@ -61,6 +61,7 @@ class ExponentialFamilyManifold(
             dimension,
         )
 
+        self.eta_generator = expected_generator  # Fix typing
         self.distribution_class = distribution_class
 
     def t(self, x: np.ndarray) -> np.ndarray:

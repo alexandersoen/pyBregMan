@@ -16,12 +16,12 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
 
     def __init__(
         self,
-        natural_generator: Generator,
-        expected_generator: Generator | None,
+        theta_generator: Generator,
+        eta_generator: Generator | None,
         display_factory_class: type[MyDisplayPoint],
         dimension: int,
     ) -> None:
-        super().__init__(natural_generator, expected_generator, dimension)
+        super().__init__(theta_generator, eta_generator, dimension)
 
         self.display_factory_class = display_factory_class
 
@@ -34,7 +34,7 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
             THETA_COORDS, LAMBDA_COORDS, self._theta_to_lambda
         )
 
-        if expected_generator is not None:
+        if eta_generator is not None:
             self.atlas.add_transition(
                 LAMBDA_COORDS, ETA_COORDS, self._lambda_to_eta
             )

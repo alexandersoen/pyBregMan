@@ -87,8 +87,8 @@ class PSDManifold(ApplicationManifold[PSDPoint]):
         G_gen = PSDDualGenerator(n_dimension)
 
         super().__init__(
-            natural_generator=F_gen,
-            expected_generator=G_gen,
+            theta_generator=F_gen,
+            eta_generator=G_gen,
             display_factory_class=PSDPoint,
             dimension=int(n_dimension * (n_dimension + 1) / 2),
         )

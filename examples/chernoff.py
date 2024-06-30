@@ -23,8 +23,10 @@ if __name__ == "__main__":
     coord1 = Point(LAMBDA_COORDS, np.array([0.7, 0.3]))
     coord2 = Point(LAMBDA_COORDS, np.array([0.1, 0.9]))
 
-    chernoff_information = ChernoffInformation(manifold, eps=1e-10)
-    chernoff_point_alpha = chernoff_information.chernoff_point(coord1, coord2)
+    chernoff_information = ChernoffInformation(manifold)
+    chernoff_point_alpha = chernoff_information.chernoff_point(
+        coord1, coord2, eps=1e-10
+    )
     mp = Point(
         ETA_COORDS,
         manifold.convert_coord(ETA_COORDS, coord1).data * 0.5
