@@ -35,6 +35,8 @@ In addition, we also provide an inbuilt visualization framework which calls `mat
 
 In the following code example, we define the manifold of bivariate Gaussian distribution. We then define and compute different types of centroids. Finally, we visualize the data and centroids.
 
+Pre-defined manifolds can be found in the `bregman.application` submodule.
+The following demonstrates how to define a manifold object for bivariate Gaussians. We additionally define two points.
 ```python
 import numpy as np
 
@@ -51,7 +53,12 @@ mu_2, sigma_2 = np.array([1.0, 2.0]), np.array([[2.0, 1.0], [1.0, 1.0]])
 
 point_1 = Point(LAMBDA_COORDS, to_vector(mu_1, sigma_1))
 point_2 = Point(LAMBDA_COORDS, to_vector(mu_2, sigma_2))
+```
 
+We note that the points are not specific to the Gaussian manifold.
+However, given compatible dimensions, one can utilize manifold specific method. For instance, we can define the KL divergence between the two points.
+
+```python
 # KL divergence can be calculated
 kl = manifold.kl_divergence(point_1, point_2)
 rkl = manifold.kl_divergence(point_2, point_1)
@@ -59,6 +66,14 @@ rkl = manifold.kl_divergence(point_2, point_1)
 print("KL(point_1 || point_2):", kl)
 print("KL(point_2 || point_1):", rkl)
 
+# >>> KL(point_1 || point_2): 0.9940936082534253
+# >>> KL(point_2 || point_1): 1.2201921060322891
+```
+
+More complicated geometric objects can be imported from other submodules.
+In this example, we will import various objects to allow us to compute a centroid of the two Gaussian distributions we have defined.
+
+```python
 from bregman.barycenter.bregman import BregmanBarycenter, SkewBurbeaRaoBarycenter 
 
 # We can define and calculate centroids
@@ -76,6 +91,17 @@ print("Right-Sided Centroid:", manifold.convert_to_display(theta_centroid))
 print("Left-Sided Centroid:", manifold.convert_to_display(eta_centroid))
 print("Bhattacharyya Centroid:", manifold.convert_to_display(br_centroid))
 
+# >>> Right-Sided Centroid: $\mu$ = [0.33333333 1.55555556]; $\Sigma$ = [[1.33333333 0.66666667]
+# >>>  [0.66666667 1.11111111]]
+# >>> Left-Sided Centroid: $\mu$ = [0.5 1.5]; $\Sigma$ = [[1.75 1.  ]
+# >>>  [1.   1.75]]
+# >>> Bhattacharyya Centroid: $\mu$ = [0.41772374 1.53238683]; $\Sigma$ = [[1.53973074 0.82458984]
+# >>>  [0.82458984 1.40126629]]
+```
+
+Finally, one can simply visualize the objects by using the inbuilt `matplotlib` visualizer.
+
+```python
 from bregman.visualizer.matplotlib.callback import VisualizeGaussian2DCovariancePoints
 from bregman.visualizer.matplotlib.matplotlib import MatplotlibVisualizer
 
@@ -90,4 +116,3 @@ visualizer.add_callback(VisualizeGaussian2DCovariancePoints())
 
 visualizer.visualize(LAMBDA_COORDS)  # Display coordinate type
 ```
-
