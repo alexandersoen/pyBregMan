@@ -1,9 +1,13 @@
-![pyBregMan Logo](./pyBregMan-LogoDoc.png)
+![pyBregMan Logo](./img/pyBregMan-LogoDoc.png)
 
 **pyBregMan**:
 
 A Python library for geometric computing on BREGman MANifolds with applications.
-The focus of the library is to provide a specialized framework for Bregman manifolds: dually flat manifolds which consists of two convex generators related via Legendre–Fenchel duality.
+The focus of the library is to provide a specialized framework for Bregman
+manifolds: dually flat manifolds which consists of two convex generators
+related via Legendre–Fenchel duality.
+
+Currently in early access.
 
 # Installation
 
@@ -87,9 +91,14 @@ eta_centroid = eta_barycenter([point_1, point_2])
 br_centroid = br_barycenter([point_1, point_2])
 dbr_centroid = dbr_barycenter([point_1, point_2])
 
+# Mid point of Fisher-Rao Geodesic is its corresponding centroid of two points
+fr_geodesic = FisherRaoKobayashiGeodesic(manifold, point_1, point_2)
+fr_centroid = fr_geodesic(t=0.5)
+
 print("Right-Sided Centroid:", manifold.convert_to_display(theta_centroid))
 print("Left-Sided Centroid:", manifold.convert_to_display(eta_centroid))
 print("Bhattacharyya Centroid:", manifold.convert_to_display(br_centroid))
+print("Fisher-Rao Centroid:", manifold.convert_to_display(fr_centroid))
 
 # >>> Right-Sided Centroid: $\mu$ = [0.33333333 1.55555556]; $\Sigma$ = [[1.33333333 0.66666667]
 # >>>  [0.66666667 1.11111111]]
@@ -97,6 +106,8 @@ print("Bhattacharyya Centroid:", manifold.convert_to_display(br_centroid))
 # >>>  [1.   1.75]]
 # >>> Bhattacharyya Centroid: $\mu$ = [0.41772374 1.53238683]; $\Sigma$ = [[1.53973074 0.82458984]
 # >>>  [0.82458984 1.40126629]]
+# >>> Fisher-Rao Centroid: $\mu$ = [0.5326167  1.62759115]; $\Sigma$ = [[1.72908532 0.98542147]
+# >>>  [0.98542147 1.54545598]]
 ```
 
 Finally, one can simply visualize the objects by using the inbuilt `matplotlib` visualizer.
@@ -112,7 +123,12 @@ visualizer.plot_object(point_2, c="black")
 visualizer.plot_object(theta_centroid, c="red", label="Right-Sided Centroid")
 visualizer.plot_object(eta_centroid, c="blue", label="Left-Sided Centroid")
 visualizer.plot_object(br_centroid, c="purple", label="Bhattacharyya Centroid")
+visualizer.plot_object(fr_centroid, c="pink", label="Fisher-Rao Centroid")
 visualizer.add_callback(VisualizeGaussian2DCovariancePoints())
 
 visualizer.visualize(LAMBDA_COORDS)  # Display coordinate type
 ```
+
+![Centroid Example](./img/centroid_example.png)
+
+Code can be found in `examples/centroids.py`.

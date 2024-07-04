@@ -1,4 +1,4 @@
-from pathlib import Path
+# Animated example of geodesics on PSD manifold.
 
 import numpy as np
 
@@ -50,6 +50,4 @@ if __name__ == "__main__":
     visualizer.animate_object(primal_geo, c="red")
     visualizer.animate_object(dual_geo, c="blue")
 
-    # visualizer.visualize(DISPLAY_TYPE)
-    SAVE_PATH = Path("figures/psd.pdf")
-    visualizer.save(DISPLAY_TYPE, SAVE_PATH)
+    visualizer.visualize(DISPLAY_TYPE)

@@ -1,3 +1,5 @@
+# Ad-hoc method for viewing Bregman balls.
+
 import numpy as np
 
 from bregman.application.distribution.exponential_family.categorical import \
@@ -23,26 +25,6 @@ if __name__ == "__main__":
 
     xs = np.arange(0, 1, 1 / 200)[1:-1]
     ys = np.arange(0, 1, 1 / 200)[1:-1]
-
-    """
-    bd_points = []
-    for x, y in product(xs, ys):
-        if x + y > 1 - eps:
-            continue
-
-        test_point = Point(LAMBDA_COORDS, np.array([x, y, 1 - x - y]))
-        test_bd = manifold.bregman_divergence(test_point, c1)
-
-        if r - eps < test_bd < r + eps:
-            bd_points.append(test_point)
-
-    print(bd_points)
-
-    values = np.stack([p.data for p in bd_points])
-    vx = values[:, 0]
-    vy = values[:, 1]
-    vz = np.zeros_like(vx)
-    """
 
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import axes3d
@@ -130,21 +112,4 @@ if __name__ == "__main__":
     ax.contourf(xs, ys, zs, zdir="x", offset=-40, cmap="coolwarm")
     ax.contourf(xs, ys, zs, zdir="y", offset=40, cmap="coolwarm")
 
-    # plt.show()
-    plt.savefig("figures/bball.pdf")
-
-    """
-
-    # Define visualizer
-    visualizer = BregmanObjectMatplotlibVisualizer(manifold, VISUALIZE_INDEX)
-
-    # Add objects to visualize
-    visualizer.plot_object(
-        c1, color="black", label=f"Center: {manifold.convert_to_display(c1)}"
-    )
-
-    for p in bd_points:
-        visualizer.plot_object(p, color="red")
-
-    visualizer.visualize(DISPLAY_TYPE)
-    """
+    plt.show()

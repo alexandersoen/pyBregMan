@@ -205,7 +205,8 @@ class MatplotlibVisualizer(BregmanVisualizer):
             self.ax.set_xlabel(self.dim_names[0])
             self.ax.set_ylabel(self.dim_names[1])
 
-            self.ax.legend()
+            if len(self.ax.get_legend_handles_labels()[0]) > 0:
+                self.ax.legend()
             plt.show()
 
     def save(self, coords: Coords, path: Path | str) -> None:
@@ -216,5 +217,6 @@ class MatplotlibVisualizer(BregmanVisualizer):
         with plt.style.context("bmh"):
             super().visualize(coords)
 
-            self.ax.legend()
+            if len(self.ax.get_legend_handles_labels()[0]) > 0:
+                self.ax.legend()
             plt.savefig(path)

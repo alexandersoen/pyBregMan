@@ -3,7 +3,7 @@ import numpy as np
 from bregman.application.distribution.exponential_family.gaussian.gaussian import \
     GaussianManifold
 from bregman.application.distribution.exponential_family.gaussian.geodesic import \
-    KobayashiGeodesic
+    FisherRaoKobayashiGeodesic
 from bregman.base import Point
 from bregman.constants import EPS
 from bregman.dissimilarity.base import ApproxDissimilarity
@@ -66,7 +66,7 @@ class GaussianFisherRaoDistance(ApproxDissimilarity[GaussianManifold]):
         if ub / lb < 1 + eps:
             return ub
         else:
-            kobayashi_geodesic = KobayashiGeodesic(
+            kobayashi_geodesic = FisherRaoKobayashiGeodesic(
                 self.manifold,
                 point_1,
                 point_2,

@@ -1,9 +1,12 @@
-from pathlib import Path
+# Inductive arithmetic-harmonic-mean converging to the geometric matrix
+# mean. Usually, the algorithm only works on the PSD manifold.
+# However, we can example this algorithm on the Gaussian manifold when
+# we ensure that the points are centered.
 
 import numpy as np
 
 from bregman.application.distribution.exponential_family.gaussian import (
-    GaussianFisherRaoDistance, GaussianManifold, KobayashiGeodesic)
+    FisherRaoKobayashiGeodesic, GaussianManifold)
 from bregman.base import (ETA_COORDS, LAMBDA_COORDS, THETA_COORDS, DualCoords,
                           Point)
 from bregman.manifold.geodesic import BregmanGeodesic
@@ -12,22 +15,14 @@ from bregman.visualizer.matplotlib import MatplotlibVisualizer
 if __name__ == "__main__":
 
     DISPLAY_TYPE = LAMBDA_COORDS
-    # DISPLAY_TYPE = ETA_COORDS
-    # DISPLAY_TYPE = THETA_COORDS
     VISUALIZE_INDEX = (2, 3)
 
     num_frames = 120
     resolution = 120
 
-    # Define manifold + objects
-    # manifold = GaussianManifold(1)
-
-    # coord1 = Point(LAMBDA_COORDS, np.array([-1, 1]))
-    # coord2 = Point(LAMBDA_COORDS, np.array([1, 1]))
-
     manifold = GaussianManifold(2)
 
-    coord1 = Point(LAMBDA_COORDS, np.array([0, 1, 1, 0.5, 0.5, 2]))
+    coord1 = Point(LAMBDA_COORDS, np.array([0, 0, 1, 0.5, 0.5, 2]))
     coord2 = Point(LAMBDA_COORDS, np.array([0, 0, 1, 0, 0, 0.5]))
 
     primal_geo = BregmanGeodesic(
@@ -36,7 +31,7 @@ if __name__ == "__main__":
     dual_geo = BregmanGeodesic(
         manifold, coord1, coord2, dcoords=DualCoords.ETA
     )
-    kobayashi = KobayashiGeodesic(manifold, coord1, coord2)
+    kobayashi = FisherRaoKobayashiGeodesic(manifold, coord1, coord2)
 
     # Define visualizer
     visualizer = MatplotlibVisualizer(
@@ -46,10 +41,8 @@ if __name__ == "__main__":
     # Add objects to visualize
     visualizer.plot_object(coord1, c="black")
     visualizer.plot_object(coord2, c="black")
-    # visualizer.plot_object(primal_geo(0.5), c="red")
-    # visualizer.plot_object(dual_geo(0.5), c="blue")
-    visualizer.plot_object(primal_geo, c="red")
-    visualizer.plot_object(kobayashi, c="purple")
+    visualizer.plot_object(primal_geo, c="red", label="Primal Geodesics")
+    visualizer.plot_object(kobayashi, c="purple", label="Dual Geodesics")
     visualizer.plot_object(dual_geo, c="blue")
 
     p, q = coord1, coord2
@@ -68,14 +61,8 @@ if __name__ == "__main__":
         p = primal_geo(0.5)
         q = dual_geo(0.5)
 
-    visualizer.plot_object(kobayashi(0.5), marker="x", c="purple", zorder=99)
+    visualizer.plot_object(
+        kobayashi(0.5), marker="x", c="purple", zorder=99, label="FR Centroid"
+    )
 
-    # cov_cb = VisualizeGaussian2DCovariancePoints()
-    # visualizer.add_callback(cov_cb)
-
-    # visualizer.visualize(DISPLAY_TYPE)
-    SAVE_PATH = Path("figures/gaussian_fisherrao_ahg.pdf")
-    visualizer.save(DISPLAY_TYPE, SAVE_PATH)
-
-    fr_dist = GaussianFisherRaoDistance(manifold)
-    print("FR Distance", fr_dist(coord1, coord2))
+    visualizer.visualize(DISPLAY_TYPE)

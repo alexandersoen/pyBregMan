@@ -1,8 +1,6 @@
-"""
-TODO: Current method of grabbing the probabilities is not pedagogical.
-Need to define a method of converting to a mixture distribution ->
-then use the mixture pdf defined on [0 ... 255] to make hists.
-"""
+# Replication of https://arxiv.org/pdf/1303.7286 Figure 1.
+# Calculates centroids of gray intensity histograms of two images.
+# The histograms are encoded as categorical distributions.
 
 import pathlib
 import warnings
@@ -31,18 +29,6 @@ def image_red_hist(image_path: pathlib.Path) -> np.ndarray:
     hist = hist / np.sum(hist)
 
     return hist
-
-
-# def category_to_coord(cat: int, dim=256) -> np.ndarray:
-#    return np.eye(dim)[cat]
-#
-#
-# def wrap_categorical_pdf(pdf, dim=256):
-#    def wrapped(cat: int):
-#        v = category_to_coord(cat, dim)
-#        return pdf(v)
-#
-#    return wrapped
 
 
 if __name__ == "__main__":
@@ -80,5 +66,4 @@ if __name__ == "__main__":
     plt.ylabel("Density")
 
     plt.legend()
-    # plt.show()
-    plt.savefig("figures/grey_hist.pdf")
+    plt.show()

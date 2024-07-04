@@ -1,9 +1,10 @@
-from pathlib import Path
+# Generate pyBregMan logo from different geodesics on the Gaussian
+# manifold.
 
 import numpy as np
 
 from bregman.application.distribution.exponential_family.gaussian import (
-    GaussianFisherRaoDistance, GaussianManifold, KobayashiGeodesic)
+    FisherRaoKobayashiGeodesic, GaussianFisherRaoDistance, GaussianManifold)
 from bregman.base import (ETA_COORDS, LAMBDA_COORDS, THETA_COORDS, DualCoords,
                           Point)
 from bregman.manifold.geodesic import BregmanGeodesic
@@ -30,7 +31,7 @@ if __name__ == "__main__":
     dual_geo = BregmanGeodesic(
         manifold, coord1, coord2, dcoords=DualCoords.ETA
     )
-    kobayashi = KobayashiGeodesic(manifold, coord1, coord2)
+    kobayashi = FisherRaoKobayashiGeodesic(manifold, coord1, coord2)
 
     # Define visualizer
     visualizer = MatplotlibVisualizer(manifold, VISUALIZE_INDEX)
@@ -48,6 +49,4 @@ if __name__ == "__main__":
     fr_dist = GaussianFisherRaoDistance(manifold)
     print("FR Distance", fr_dist(coord1, coord2))
 
-    # visualizer.visualize(DISPLAY_TYPE)
-    SAVE_PATH = Path("figures/gaussian_fisherrao.pdf")
-    visualizer.save(DISPLAY_TYPE, SAVE_PATH)
+    visualizer.visualize(DISPLAY_TYPE)

@@ -1,3 +1,5 @@
+# Ad-hoc implementation of Bregman soft clustering.
+
 import matplotlib.pyplot as plt
 import numpy as np
 

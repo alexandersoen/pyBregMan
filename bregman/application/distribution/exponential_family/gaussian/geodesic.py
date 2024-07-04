@@ -58,7 +58,7 @@ class EriksenIVPGeodesic(Geodesic[GaussianManifold]):
         return self.path(t)
 
 
-class KobayashiGeodesic(Geodesic[GaussianManifold]):
+class FisherRaoKobayashiGeodesic(Geodesic[GaussianManifold]):
 
     def __init__(
         self,

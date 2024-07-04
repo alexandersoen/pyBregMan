@@ -1,106 +1,73 @@
-from pathlib import Path
+# Calculate various centroids of two points on the Gaussian manifold. Example
+# from README.md.
 
 import numpy as np
 
-from bregman.application.distribution.exponential_family.categorical import \
-    CategoricalManifold
-from bregman.barycenter.bregman import (BregmanBarycenter,
-                                        SkewBurbeaRaoBarycenter)
+from bregman.application.distribution.exponential_family.gaussian import \
+    GaussianManifold
+from bregman.application.distribution.exponential_family.gaussian.geodesic import \
+    FisherRaoKobayashiGeodesic
 from bregman.base import LAMBDA_COORDS, DualCoords, Point
-from bregman.manifold.geodesic import BregmanGeodesic
-from bregman.visualizer.matplotlib import MatplotlibVisualizer
 
 if __name__ == "__main__":
 
-    DISPLAY_TYPE = LAMBDA_COORDS
-    VISUALIZE_INDEX = (0, 1)
+    # Define Bivariate Normal Manifold
+    manifold = GaussianManifold(input_dimension=2)
 
-    num_frames = 120
+    # Define data
+    to_vector = lambda mu, sigma: np.concatenate([mu, sigma.flatten()])
+    mu_1, sigma_1 = np.array([0.0, 1.0]), np.array([[1.0, 0.5], [0.5, 2.0]])
+    mu_2, sigma_2 = np.array([1.0, 2.0]), np.array([[2.0, 1.0], [1.0, 1.0]])
 
-    # Define manifold + objects
-    manifold = CategoricalManifold(3)
+    point_1 = Point(LAMBDA_COORDS, to_vector(mu_1, sigma_1))
+    point_2 = Point(LAMBDA_COORDS, to_vector(mu_2, sigma_2))
 
-    p1 = np.array([0.2, 0.4, 0.4])
-    p2 = np.array([0.3, 0.5, 0.2])
-    p3 = np.array([0.7, 0.1, 0.2])
+    # KL divergence can be calculated
+    kl = manifold.kl_divergence(point_1, point_2)
+    rkl = manifold.kl_divergence(point_2, point_1)
 
-    p1 = Point(LAMBDA_COORDS, p1)
-    p2 = Point(LAMBDA_COORDS, p2)
-    p3 = Point(LAMBDA_COORDS, p3)
+    print("KL(point_1 || point_2):", kl)
+    print("KL(point_2 || point_1):", rkl)
 
-    points = [p1, p2, p3]
+    from bregman.barycenter.bregman import (BregmanBarycenter,
+                                            SkewBurbeaRaoBarycenter)
 
-    # Triangles
-    p12_primal_geo = BregmanGeodesic(
-        manifold, p1, p2, dcoords=DualCoords.THETA
-    )
-    p13_primal_geo = BregmanGeodesic(
-        manifold, p1, p3, dcoords=DualCoords.THETA
-    )
-    p23_primal_geo = BregmanGeodesic(
-        manifold, p2, p3, dcoords=DualCoords.THETA
-    )
-    p12_dual_geo = BregmanGeodesic(manifold, p1, p2, dcoords=DualCoords.ETA)
-    p13_dual_geo = BregmanGeodesic(manifold, p1, p3, dcoords=DualCoords.ETA)
-    p23_dual_geo = BregmanGeodesic(manifold, p2, p3, dcoords=DualCoords.ETA)
+    # We can define and calculate centroids
+    theta_barycenter = BregmanBarycenter(manifold, DualCoords.THETA)
+    eta_barycenter = BregmanBarycenter(manifold, DualCoords.ETA)
+    br_barycenter = SkewBurbeaRaoBarycenter(manifold)
+    dbr_barycenter = SkewBurbeaRaoBarycenter(manifold, DualCoords.ETA)
 
-    # Centroids
-    alphas = [0.5, 0.5, 0.5]
-    weights = [1.0, 1.0, 1.0]
+    theta_centroid = theta_barycenter([point_1, point_2])
+    eta_centroid = eta_barycenter([point_1, point_2])
+    br_centroid = br_barycenter([point_1, point_2])
+    dbr_centroid = dbr_barycenter([point_1, point_2])
 
-    js_centroid = SkewBurbeaRaoBarycenter(manifold, dcoords=DualCoords.THETA)(
-        points
-    )
-    j_centroid = SkewBurbeaRaoBarycenter(manifold, dcoords=DualCoords.ETA)(
-        points
-    )
+    # Mid point of Fisher-Rao Geodesic is its corresponding centroid of two points
+    fr_geodesic = FisherRaoKobayashiGeodesic(manifold, point_1, point_2)
+    fr_centroid = fr_geodesic(t=0.5)
 
-    theta_centroid = BregmanBarycenter(manifold, dcoords=DualCoords.THETA)(
-        points
-    )
-    eta_centroid = BregmanBarycenter(manifold, dcoords=DualCoords.ETA)(points)
+    print("Right-Sided Centroid:", manifold.convert_to_display(theta_centroid))
+    print("Left-Sided Centroid:", manifold.convert_to_display(eta_centroid))
+    print("Bhattacharyya Centroid:", manifold.convert_to_display(br_centroid))
+    print("Fisher-Rao Centroid:", manifold.convert_to_display(fr_centroid))
 
-    # Define visualizer
-    visualizer = MatplotlibVisualizer(manifold, VISUALIZE_INDEX)
+    from bregman.visualizer.matplotlib.callback import \
+        VisualizeGaussian2DCovariancePoints
+    from bregman.visualizer.matplotlib.matplotlib import MatplotlibVisualizer
 
-    # Add objects to visualize
-    visualizer.plot_object(p1, label=manifold.convert_to_display(p1))
-    visualizer.plot_object(p2, label=manifold.convert_to_display(p2))
-    visualizer.plot_object(p3, label=manifold.convert_to_display(p3))
-
+    # These objects can be visualized through matplotlib
+    visualizer = MatplotlibVisualizer(manifold, (0, 1))
+    visualizer.plot_object(point_1, c="black")
+    visualizer.plot_object(point_2, c="black")
     visualizer.plot_object(
-        theta_centroid,
-        c="red",
-        marker="x",
-        label=f"Theta Centroid",  #: {manifold.convert_to_display(theta_centroid)}",
+        theta_centroid, c="red", label="Right-Sided Centroid"
     )
+    visualizer.plot_object(eta_centroid, c="blue", label="Left-Sided Centroid")
     visualizer.plot_object(
-        js_centroid,
-        c="purple",
-        marker="x",
-        #        label=f"JS Centroid: {manifold.convert_to_display(js_centroid)}",
+        br_centroid, c="purple", label="Bhattacharyya Centroid"
     )
-    visualizer.plot_object(
-        j_centroid,
-        c="pink",
-        marker="x",
-        # label=f"J Centroid: {manifold.convert_to_display(j_centroid)}",
-    )
-    visualizer.plot_object(
-        eta_centroid,
-        c="blue",
-        marker="x",
-        label=f"Eta Centroid",  #: {manifold.convert_to_display(eta_centroid)}",
-    )
+    visualizer.plot_object(fr_centroid, c="pink", label="Fisher-Rao Centroid")
+    visualizer.add_callback(VisualizeGaussian2DCovariancePoints())
 
-    visualizer.plot_object(p12_primal_geo, c="red")
-    visualizer.plot_object(p13_primal_geo, c="red")
-    visualizer.plot_object(p23_primal_geo, c="red")
-
-    visualizer.plot_object(p12_dual_geo, c="blue")
-    visualizer.plot_object(p13_dual_geo, c="blue")
-    visualizer.plot_object(p23_dual_geo, c="blue")
-
-    visualizer.visualize(DISPLAY_TYPE)
-    # SAVE_PATH = Path("figures/centroids.pdf")
-    # visualizer.save(DISPLAY_TYPE, SAVE_PATH)
+    visualizer.visualize(LAMBDA_COORDS)  # Display coordinate type
