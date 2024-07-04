@@ -7,7 +7,7 @@ The focus of the library is to provide a specialized framework for Bregman
 manifolds: dually flat manifolds which consists of two convex generators
 related via Legendre–Fenchel duality.
 
-Currently in early access.
+Currently in pre-release.
 
 # Installation
 
