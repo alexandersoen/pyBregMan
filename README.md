@@ -78,7 +78,8 @@ More complicated geometric objects can be imported from other submodules.
 In this example, we will import various objects to allow us to compute a centroid of the two Gaussian distributions we have defined.
 
 ```python
-from bregman.barycenter.bregman import BregmanBarycenter, SkewBurbeaRaoBarycenter 
+from bregman.barycenter.bregman import BregmanBarycenter, SkewBurbeaRaoBarycenter
+from bregman.application.distribution.exponential_family.gaussian.geodesic import FisherRaoKobayashiGeodesic
 
 # We can define and calculate centroids
 theta_barycenter = BregmanBarycenter(manifold, DualCoords.THETA)
