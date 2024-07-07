@@ -11,7 +11,7 @@ class FisherRaoMultinomialDistance(Dissimilarity[MultinomialManifold]):
     def __init__(self, manifold: MultinomialManifold) -> None:
         super().__init__(manifold)
 
-    def distance(self, point_1: Point, point_2: Point) -> np.ndarray:
+    def dissimilarity(self, point_1: Point, point_2: Point) -> np.ndarray:
 
         probs_1 = self.manifold.convert_coord(LAMBDA_COORDS, point_1).data
         probs_2 = self.manifold.convert_coord(LAMBDA_COORDS, point_2).data

@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     # Define visualizer
     visualizer = MatplotlibVisualizer(
-        manifold, VISUALIZE_INDEX  # , dim_names=(r"$\mu$", r"$\sigma$")
+        manifold, VISUALIZE_INDEX, dim_names=(r"$\mu$", r"$\sigma$")
     )
     metric_cb = Visualize2DTissotIndicatrix()
 

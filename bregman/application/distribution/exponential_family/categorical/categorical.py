@@ -6,10 +6,11 @@ import numpy as np
 
 from bregman.application.distribution.exponential_family.multinomial import \
     MultinomialManifold
+from bregman.base import ETA_COORDS, THETA_COORDS, Point
 
 if TYPE_CHECKING:
     from bregman.application.distribution.mixture.discrete_mixture import \
-        DiscreteMixture
+        DiscreteMixtureManifold
 
 
 class NumberOfCategoriesMissMatch(Exception):
@@ -33,9 +34,13 @@ class CategoricalManifold(MultinomialManifold):
 
         self.categories = categories
 
-    def to_discrete_mixture_manifold(self) -> DiscreteMixture:
+    def to_discrete_mixture_manifold(self) -> DiscreteMixtureManifold:
 
-        from bregman.manifold.distribution.mixture.discrete_mixture import \
-            DiscreteMixture
+        from bregman.application.distribution.mixture.discrete_mixture import \
+            DiscreteMixtureManifold
 
-        return DiscreteMixture(self.categories)
+        return DiscreteMixtureManifold(self.categories)
+
+    def point_to_mixture_point(self, point: Point) -> Point:
+        eta_point = self.convert_coord(ETA_COORDS, point)
+        return Point(THETA_COORDS, eta_point.data)

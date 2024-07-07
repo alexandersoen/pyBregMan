@@ -2,65 +2,92 @@
 # Calculates centroids of gray intensity histograms of two images.
 # The histograms are encoded as categorical distributions.
 
-import pathlib
-import warnings
+try:
+    import requests
+except ImportError:
+    print("This example requires `requests` library to be installed.")
+    exit()
 
 import matplotlib.pyplot as plt
 import numpy as np
-
-from bregman.application.distribution.exponential_family.categorical import \
-    CategoricalManifold
-from bregman.barycenter.bregman import SkewBurbeaRaoBarycenter
-from bregman.base import LAMBDA_COORDS, DualCoords, Point
-
-warnings.filterwarnings("error")
+from PIL import Image
 
 
-def image_red_hist(image_path: pathlib.Path) -> np.ndarray:
-    im_array = plt.imread(image_path)
-    r_pixel_array = 255 * im_array.reshape(-1, 4)[:, 0]  # Get "r" in "rgba"
-    r_pixel_array = np.rint(r_pixel_array)
+def image_gray_hist(image_url: str, ratio: float = 1.0) -> np.ndarray:
+    # Get image from url
+    image_path = requests.get(image_url, stream=True).raw
+    image = Image.open(image_path)
+    size = image.size
+    image = image.resize((int(size[0] * ratio), int(size[1] * ratio)))
+    im_array = np.array(image)
 
+    # Discritize pixel intensity
+    pixel_array = np.mean(im_array.reshape(-1, 3), axis=1)
+    pixel_array = np.rint(pixel_array)
+
+    # Make intensity array
     hist = np.zeros(256)
-    for p in r_pixel_array:
+    for p in pixel_array:
         hist[int(p)] += 1
 
+    # Ensures we are in the interiors of the simplex
     hist += 1e-8
     hist = hist / np.sum(hist)
 
     return hist
 
 
-if __name__ == "__main__":
+image_url_1 = "https://docs.google.com/uc?export=download&id=1l0A34WzilLRknLaCc3iVdE229O8mGO5s"
+image_url_2 = "https://docs.google.com/uc?export=download&id=1coIGtI5za3mz-eIvOeXrlaPsNZxqReh1"
 
-    im1 = pathlib.Path("examples/images/Barbara-gray.png")
-    im2 = pathlib.Path("examples/images/Lena-gray.png")
+hist_1 = image_gray_hist(image_url_1)
+hist_2 = image_gray_hist(image_url_2)
 
-    hist1 = image_red_hist(im1)
-    hist2 = image_red_hist(im2)
+from bregman.application.distribution.exponential_family.categorical import \
+    CategoricalManifold
+from bregman.base import LAMBDA_COORDS, DualCoords, Point
 
-    assert len(hist1) == len(hist2)
-    manifold = CategoricalManifold(k=len(hist1))
+cat_manifold = CategoricalManifold(k=256)
 
-    values = np.arange(manifold.k)
+values = np.arange(cat_manifold.k)
 
-    barbara = Point(LAMBDA_COORDS, hist1)
-    lena = Point(LAMBDA_COORDS, hist2)
+cute_cat_1 = Point(LAMBDA_COORDS, hist_1)
+cute_cat_2 = Point(LAMBDA_COORDS, hist_2)
 
-    js_centroid = SkewBurbeaRaoBarycenter(manifold, dcoords=DualCoords.ETA)(
-        [barbara, lena], weights=[0.5, 0.5], alphas=[1.0, 1.0]
-    )
-    js_centroid = manifold.convert_coord(LAMBDA_COORDS, js_centroid)
+# Let us work in the discrete mixture manifold space now.
+mix_manifold = cat_manifold.to_discrete_mixture_manifold()
+cute_mix_1 = cat_manifold.point_to_mixture_point(cute_cat_1)
+cute_mix_2 = cat_manifold.point_to_mixture_point(cute_cat_2)
 
-    jef_centroid = SkewBurbeaRaoBarycenter(manifold, dcoords=DualCoords.THETA)(
-        [barbara, lena], weights=[0.5, 0.5], alphas=[1.0, 1.0]
-    )
-    jef_centroid = manifold.convert_coord(LAMBDA_COORDS, jef_centroid)
 
-    plt.plot(values, barbara.data, c="red", label="Image 1 Pixels")
-    plt.plot(values, lena.data, c="blue", label="Image 2 Pixels")
-    plt.plot(values, js_centroid.data, c="black", label="JS Centroid")
-    plt.plot(values, jef_centroid.data, c="grey", label="Jeffreys Centroid")
+from bregman.barycenter.bregman import SkewBurbeaRaoBarycenter
+
+# Define barycenter objects
+js_centroid_obj = SkewBurbeaRaoBarycenter(
+    mix_manifold, dcoords=DualCoords.THETA
+)
+jef_centroid_obj = SkewBurbeaRaoBarycenter(
+    mix_manifold, dcoords=DualCoords.ETA
+)
+
+# Centroids can be calculated
+js_centroid = js_centroid_obj([cute_mix_1, cute_mix_2])
+jef_centroid = jef_centroid_obj([cute_mix_1, cute_mix_2])
+
+# Convert from theta-/eta-parameterization back to histograms (lambda)
+js_cat = mix_manifold.point_to_categorical_point(js_centroid)
+jef_cat = mix_manifold.point_to_categorical_point(jef_centroid)
+
+js_hist = cat_manifold.convert_coord(LAMBDA_COORDS, js_cat).data
+jef_hist = cat_manifold.convert_coord(LAMBDA_COORDS, jef_cat).data
+
+
+# Plot intensity histograms and centroids
+with plt.style.context("bmh"):
+    plt.plot(values, hist_1, c="red", label="Image 1 Pixels")
+    plt.plot(values, hist_2, c="blue", label="Image 2 Pixels")
+    plt.plot(values, js_hist, c="black", label="Jensen-Shannon Centroid")
+    plt.plot(values, jef_hist, c="grey", label="Jeffreys Centroid")
 
     plt.xlabel("Pixel Intensity")
     plt.ylabel("Density")

@@ -17,11 +17,11 @@ class Dissimilarity(Generic[TBregmanManifold], ABC):
         self.manifold = manifold
 
     @abstractmethod
-    def distance(self, point_1: Point, point_2: Point) -> np.ndarray:
+    def dissimilarity(self, point_1: Point, point_2: Point) -> np.ndarray:
         pass
 
     def __call__(self, point_1: Point, point_2: Point) -> np.ndarray:
-        return self.distance(point_1, point_2)
+        return self.dissimilarity(point_1, point_2)
 
 
 class ApproxDissimilarity(
@@ -32,7 +32,7 @@ class ApproxDissimilarity(
         super().__init__(manifold)
 
     @abstractmethod
-    def distance(
+    def dissimilarity(
         self, point_1: Point, point_2: Point, eps: float = EPS
     ) -> np.ndarray:
         pass
@@ -40,4 +40,4 @@ class ApproxDissimilarity(
     def __call__(
         self, point_1: Point, point_2: Point, eps: float = EPS
     ) -> np.ndarray:
-        return self.distance(point_1, point_2, eps=eps)
+        return self.dissimilarity(point_1, point_2, eps=eps)

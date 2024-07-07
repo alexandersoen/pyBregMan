@@ -42,9 +42,9 @@ class GaussianFisherRaoDistance(ApproxDissimilarity[GaussianManifold]):
     def __init__(self, manifold: GaussianManifold) -> None:
         super().__init__(manifold)
 
-        self.jeffery_distance = JeffreysBregmanDivergence(manifold)
+        self.jeffery_dissimilarity = JeffreysBregmanDivergence(manifold)
 
-    def distance(
+    def dissimilarity(
         self, point_1: Point, point_2: Point, eps: float = EPS
     ) -> np.ndarray:
         return self._go(point_1, point_2, eps)
@@ -56,7 +56,7 @@ class GaussianFisherRaoDistance(ApproxDissimilarity[GaussianManifold]):
         return ScaledRiemannianSPDDistance(emb_1, emb_2)
 
     def _upper(self, point_1: Point, point_2: Point) -> np.ndarray:
-        return np.sqrt(self.jeffery_distance(point_1, point_2))
+        return np.sqrt(self.jeffery_dissimilarity(point_1, point_2))
 
     def _go(self, point_1: Point, point_2: Point, eps) -> np.ndarray:
 

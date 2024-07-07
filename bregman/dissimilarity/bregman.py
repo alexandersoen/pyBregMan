@@ -34,7 +34,7 @@ class BregmanDivergence(DualDissimilarity):
     ) -> None:
         super().__init__(manifold, dcoords)
 
-    def distance(self, point_1: Point, point_2: Point) -> np.ndarray:
+    def dissimilarity(self, point_1: Point, point_2: Point) -> np.ndarray:
 
         gen = self.manifold.bregman_generator(self.coord)
 
@@ -56,7 +56,7 @@ class JeffreysBregmanDivergence(Dissimilarity[BregmanManifold]):
             manifold, dcoords=DualCoords.ETA
         )
 
-    def distance(self, point_1: Point, point_2: Point) -> np.ndarray:
+    def dissimilarity(self, point_1: Point, point_2: Point) -> np.ndarray:
         return self.theta_divergence(point_1, point_2) + self.eta_divergence(
             point_1, point_2
         )
@@ -80,7 +80,7 @@ class SkewJensenBregmanDivergence(DualDissimilarity):
 
         self.alpha_mid = sum(w * a for w, a in zip(weight_skews, alpha_skews))
 
-    def distance(self, point_1: Point, point_2: Point) -> np.ndarray:
+    def dissimilarity(self, point_1: Point, point_2: Point) -> np.ndarray:
 
         coord_1 = self.manifold.convert_coord(self.coord.value, point_1)
         coord_2 = self.manifold.convert_coord(self.coord.value, point_2)
@@ -119,7 +119,7 @@ class SkewBurbeaRaoDivergence(DualDissimilarity):
 
         self.alpha = alpha
 
-    def distance(self, point_1: Point, point_2: Point) -> np.ndarray:
+    def dissimilarity(self, point_1: Point, point_2: Point) -> np.ndarray:
         """Note the ordering of interpolation. Different from the typical alphas."""
 
         coord_1 = self.manifold.convert_coord(self.coord.value, point_1)
@@ -149,7 +149,7 @@ class BhattacharyyaDistance(DualDissimilarity):
 
         self.alpha = alpha
 
-    def distance(
+    def dissimilarity(
         self,
         point_1: Point,
         point_2: Point,
@@ -211,12 +211,12 @@ class ChernoffInformation(DualApproxDissimilarity):
 
         return 1 - 0.5 * (alpha_min + alpha_max)
 
-    def distance(
+    def dissimilarity(
         self, point_1: Point, point_2: Point, eps: float = EPS
     ) -> np.ndarray:
         alpha_star = self.chernoff_point(point_1, point_2, eps=eps)
-        bhattacharyya_distance = BhattacharyyaDistance(
+        bhattacharyya_dissimilarity = BhattacharyyaDistance(
             self.manifold, 1 - alpha_star, self.coord
         )
 
-        return bhattacharyya_distance(point_1, point_2)
+        return bhattacharyya_dissimilarity(point_1, point_2)
