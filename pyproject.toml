@@ -2,12 +2,15 @@
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["bregman"]
+[tool.setuptools.packages.find]
+where = ["."]  # list of folders that contain the packages (["."] by default)
+include = ["bregman*"]  # package names should match these glob patterns (["*"] by default)
+exclude = []  # exclude packages matching these glob patterns (empty by default)
+namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
 
 [project]
 name = "pyBregMan"
-version = "0.0.3"
+version = "0.0.2"
 dependencies = [
     "numpy<2.0.0",
     "matplotlib",
@@ -18,7 +21,7 @@ requires-python = ">=3.8"
 authors = [
   { name="alexandersoen", email="alexandersoen@gmail.com" },
 ]
-description = "A Python library for geometric computing on BREGman MANifolds with applications"
+description = "A Python library for geometric computing on BREGman MANifolds with applications."
 readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = [
@@ -30,5 +33,6 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/alexandersoen/pyBregMan"
+Homepage = "https://franknielsen.github.io/pyBregMan/index.html"
+Repository = "https://github.com/alexandersoen/pyBregMan"
 Issues = "https://github.com/alexandersoen/pyBregMan/issues"

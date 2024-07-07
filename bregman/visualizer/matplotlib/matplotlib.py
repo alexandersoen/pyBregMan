@@ -55,6 +55,8 @@ class MatplotlibVisualizer(BregmanVisualizer):
 
         self.fig: Figure
         self.ax: Axes
+
+        plt.style.use("bmh")
         self.fig, self.ax = plt.subplots()
 
         self.update_func_list: list[Callable[[int], Any]] = []
@@ -185,8 +187,6 @@ class MatplotlibVisualizer(BregmanVisualizer):
     def visualize(self, coords: Coords) -> None:
         self.update_func_list = []
 
-        plt.style.use("bmh")
-
         super().visualize(coords)
 
         def update_all(frame: int):
@@ -213,8 +213,6 @@ class MatplotlibVisualizer(BregmanVisualizer):
     def save(self, coords: Coords, path: Path | str) -> None:
         if path is str:
             path = Path(path)
-
-        plt.style.use("bmh")
 
         self.update_func_list = []
         super().visualize(coords)
