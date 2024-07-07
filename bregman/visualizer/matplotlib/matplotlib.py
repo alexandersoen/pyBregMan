@@ -185,38 +185,40 @@ class MatplotlibVisualizer(BregmanVisualizer):
     def visualize(self, coords: Coords) -> None:
         self.update_func_list = []
 
-        with plt.style.context("bmh"):
-            super().visualize(coords)
+        plt.style.use("bmh")
 
-            def update_all(frame: int):
-                res = []
-                for update in self.update_func_list:
-                    res.append(update(frame))
+        super().visualize(coords)
 
-                return res
+        def update_all(frame: int):
+            res = []
+            for update in self.update_func_list:
+                res.append(update(frame))
 
-            ani = animation.FuncAnimation(
-                fig=self.fig,
-                func=update_all,
-                frames=self.frames,
-                interval=self.intervals,
-            )
+            return res
 
-            self.ax.set_xlabel(self.dim_names[0])
-            self.ax.set_ylabel(self.dim_names[1])
+        ani = animation.FuncAnimation(
+            fig=self.fig,
+            func=update_all,
+            frames=self.frames,
+            interval=self.intervals,
+        )
 
-            if len(self.ax.get_legend_handles_labels()[0]) > 0:
-                self.ax.legend()
-            plt.show()
+        self.ax.set_xlabel(self.dim_names[0])
+        self.ax.set_ylabel(self.dim_names[1])
+
+        if len(self.ax.get_legend_handles_labels()[0]) > 0:
+            self.ax.legend()
+        plt.show()
 
     def save(self, coords: Coords, path: Path | str) -> None:
         if path is str:
             path = Path(path)
 
-        self.update_func_list = []
-        with plt.style.context("bmh"):
-            super().visualize(coords)
+        plt.style.use("bmh")
 
-            if len(self.ax.get_legend_handles_labels()[0]) > 0:
-                self.ax.legend()
-            plt.savefig(path)
+        self.update_func_list = []
+        super().visualize(coords)
+
+        if len(self.ax.get_legend_handles_labels()[0]) > 0:
+            self.ax.legend()
+        plt.savefig(path)
