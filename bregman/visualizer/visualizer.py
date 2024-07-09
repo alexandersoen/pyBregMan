@@ -18,14 +18,14 @@ class NoAnimationRoutine(Exception):
 
 class BregmanVisualizer(ABC):
 
-    plot_list: list[tuple[BregmanObject, dict]] = []
-    animate_list: list[tuple[BregmanObject, dict]] = []
-    callback_list: list["VisualizerCallback"] = []
-
     def __init__(self, manifold: BregmanManifold) -> None:
         super().__init__()
 
         self.manifold = manifold
+
+        self.plot_list: list[tuple[BregmanObject, dict]] = []
+        self.animate_list: list[tuple[BregmanObject, dict]] = []
+        self.callback_list: list["VisualizerCallback"] = []
 
     def plot_object(self, obj: BregmanObject, **kwargs) -> None:
         self.plot_list.append((obj, kwargs))

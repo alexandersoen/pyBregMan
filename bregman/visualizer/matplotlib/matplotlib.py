@@ -187,27 +187,33 @@ class MatplotlibVisualizer(BregmanVisualizer):
     def visualize(self, coords: Coords) -> None:
         self.update_func_list = []
 
+        # Static plots
         super().visualize(coords)
 
-        def update_all(frame: int):
-            res = []
-            for update in self.update_func_list:
-                res.append(update(frame))
+        # Animation if specified
+        if self.update_func_list:
 
-            return res
+            def update_all(frame: int):
+                res = []
+                for update in self.update_func_list:
+                    res.append(update(frame))
 
-        ani = animation.FuncAnimation(
-            fig=self.fig,
-            func=update_all,
-            frames=self.frames,
-            interval=self.intervals,
-        )
+                return res
 
+            ani = animation.FuncAnimation(
+                fig=self.fig,
+                func=update_all,
+                frames=self.frames,
+                interval=self.intervals,
+            )
+
+        # Setup figure
         self.ax.set_xlabel(self.dim_names[0])
         self.ax.set_ylabel(self.dim_names[1])
 
         if len(self.ax.get_legend_handles_labels()[0]) > 0:
             self.ax.legend()
+
         plt.show()
 
     def save(self, coords: Coords, path: Path | str) -> None:
@@ -219,4 +225,5 @@ class MatplotlibVisualizer(BregmanVisualizer):
 
         if len(self.ax.get_legend_handles_labels()[0]) > 0:
             self.ax.legend()
+
         plt.savefig(path)
