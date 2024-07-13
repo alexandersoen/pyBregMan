@@ -37,8 +37,8 @@ def image_gray_hist(image_url: str, ratio: float = 1.0) -> np.ndarray:
     return hist
 
 
-image_url_1 = "https://docs.google.com/uc?export=download&id=1l0A34WzilLRknLaCc3iVdE229O8mGO5s"
-image_url_2 = "https://docs.google.com/uc?export=download&id=1coIGtI5za3mz-eIvOeXrlaPsNZxqReh1"
+image_url_1 = "https://raw.githubusercontent.com/alexandersoen/pyBregMan/main/img/coco_1.jpg"
+image_url_2 = "https://raw.githubusercontent.com/alexandersoen/pyBregMan/main/img/coco_2.jpg"
 
 hist_1 = image_gray_hist(image_url_1)
 hist_2 = image_gray_hist(image_url_2)
