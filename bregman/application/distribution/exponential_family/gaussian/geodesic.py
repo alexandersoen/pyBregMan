@@ -8,13 +8,28 @@ from bregman.manifold.geodesic import Geodesic
 
 
 class EriksenIVPGeodesic(Geodesic[GaussianManifold]):
+    """Eriksen Initial value problem (IVP) geodesic from the identity Gaussian
+    distribution (Isotropic centered Gaussian). Doesn't provide a geodesic
+    between source and destination points. Instead the destination point acts
+    as an initial value problem vector.
+
+    Attributes:
+        dest_mu: IVP mean vector.
+        dest_Sigma: IVP covariance matrix.
+        dim: Sample space dimension.
+    """
 
     def __init__(
         self,
         manifold: GaussianManifold,
         dest: Point,
     ) -> None:
+        """Initialize Eriksen IVP geodesic.
 
+        Args:
+            manifold: Gaussian manifold which the geodesic is defined on.
+            dest: IVP vector.
+        """
         dest_point = manifold.convert_to_display(dest)
         self.dest_mu = dest_point.mu
         self.dest_Sigma = dest_point.Sigma
@@ -33,7 +48,7 @@ class EriksenIVPGeodesic(Geodesic[GaussianManifold]):
         A_matrix[self.dim, self.dim + 1 :] = -dest_point.mu
         A_matrix[self.dim + 1 :, self.dim] = -dest_point.mu
 
-        self.A_matrix = A_matrix
+        self._A_matrix = A_matrix
 
         super().__init__(
             manifold,
@@ -42,8 +57,15 @@ class EriksenIVPGeodesic(Geodesic[GaussianManifold]):
         )
 
     def path(self, t: float) -> Point:
+        """Eriksen IVP geodesic calculation.
 
-        Lambda = expm(self.A_matrix * t)
+        Args:
+            t: Value in [0, 1] corresponding to the parameterization of the geodesic.
+
+        Returns:
+            Eriksen IVP geodesic from the centered Isotropic Gaussian.
+        """
+        Lambda = expm(self._A_matrix * t)
 
         Delta = Lambda[: self.dim, : self.dim]
         delta = Lambda[self.dim, : self.dim]
@@ -53,12 +75,17 @@ class EriksenIVPGeodesic(Geodesic[GaussianManifold]):
 
         return Point(LAMBDA_COORDS, np.concatenate([mu, Sigma.flatten()]))
 
-    def __call__(self, t: float) -> Point:
-        assert 0 <= t <= 1
-        return self.path(t)
-
 
 class FisherRaoKobayashiGeodesic(Geodesic[GaussianManifold]):
+    """Fisher-Rao Geodesic on the Gaussian manifold using Kobayashi calculation.
+
+    Attributes:
+        source_mu: Source point's mean value as a Gaussian distribution.
+        source_Sigma: Source point's covariance value as a Gaussian distribution.
+        dest_mu: Destination point's mean value as a Gaussian distribution.
+        dest_Sigma: Destination point's covariance value as a Gaussian distribution.
+        dim: Sample space dimension.
+    """
 
     def __init__(
         self,
@@ -66,7 +93,13 @@ class FisherRaoKobayashiGeodesic(Geodesic[GaussianManifold]):
         source: Point,
         dest: Point,
     ) -> None:
+        """Initialize Kobayashi's Fisher-Rao geodesic.
 
+        Args:
+            manifold: Gaussian manifold which the geodesic is defined on.
+            source: Source point on the manifold which the geodesic starts.
+            dest: Destination point on the manifold which the geodesic ends.
+        """
         # Setup  up data
         source_point = manifold.convert_to_display(source)
         dest_point = manifold.convert_to_display(dest)
@@ -85,16 +118,40 @@ class FisherRaoKobayashiGeodesic(Geodesic[GaussianManifold]):
             manifold.convert_coord(LAMBDA_COORDS, dest),
         )
 
-        self.calculate_matrices()
+        self._calculate_matrices()
 
-    def calculate_matrices(self):
-        self.G0 = self._get_Gi(self.source_mu, self.source_Sigma)
-        self.G1 = self._get_Gi(self.dest_mu, self.dest_Sigma)
+    def path(self, t: float) -> Point:
+        """Evaluate the Fisher-Rao geodesic on the Gaussian manifold using
+        Kobayashi's approach.
 
-        self.G0_pos_sqrt = fractional_matrix_power(self.G0, 0.5)
-        self.G0_neg_sqrt = fractional_matrix_power(self.G0, -0.5)
+        Args:
+            t: Value in [0, 1] corresponding to the parameterization of the geodesic.
 
-        self.Gmix = self.G0_neg_sqrt @ self.G1 @ self.G0_neg_sqrt
+        Returns:
+            Kobayashi's Fisher-Rao geodesic evaluated at t.
+        """
+        Gt = (
+            self._G0_pos_sqrt
+            @ fractional_matrix_power(self._Gmix, t)
+            @ self._G0_pos_sqrt
+        )
+
+        Delta = Gt[: self.dim, : self.dim]
+        delta = Gt[self.dim, : self.dim]
+
+        Sigma = np.linalg.pinv(Delta)
+        mu = Sigma @ delta
+
+        return Point(LAMBDA_COORDS, np.concatenate([mu, Sigma.flatten()]))
+
+    def _calculate_matrices(self):
+        self._G0 = self._get_Gi(self.source_mu, self.source_Sigma)
+        self._G1 = self._get_Gi(self.dest_mu, self.dest_Sigma)
+
+        self._G0_pos_sqrt = fractional_matrix_power(self._G0, 0.5)
+        self._G0_neg_sqrt = fractional_matrix_power(self._G0, -0.5)
+
+        self._Gmix = self._G0_neg_sqrt @ self._G1 @ self._G0_neg_sqrt
 
     def _get_Gi(self, mu: np.ndarray, Sigma: np.ndarray) -> np.ndarray:
 
@@ -138,19 +195,3 @@ class FisherRaoKobayashiGeodesic(Geodesic[GaussianManifold]):
         )
 
         return Mi @ Di @ Mi.T
-
-    def path(self, t: float) -> Point:
-
-        Gt = (
-            self.G0_pos_sqrt
-            @ fractional_matrix_power(self.Gmix, t)
-            @ self.G0_pos_sqrt
-        )
-
-        Delta = Gt[: self.dim, : self.dim]
-        delta = Gt[self.dim, : self.dim]
-
-        Sigma = np.linalg.pinv(Delta)
-        mu = Sigma @ delta
-
-        return Point(LAMBDA_COORDS, np.concatenate([mu, Sigma.flatten()]))

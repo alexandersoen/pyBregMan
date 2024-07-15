@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 import numpy as np
 
 from bregman.application.distribution.exponential_family.gaussian.gaussian import \
@@ -13,8 +11,21 @@ from bregman.visualizer.visualizer import VisualizerCallback
 class VisualizeGaussian2DCovariancePoints(
     VisualizerCallback[MatplotlibVisualizer]
 ):
+    """Callback to visualize the covariance matrix of points in 2D Gaussian
+    manifolds.
+
+    Parameters:
+        scale: Scale of the radius of the covariance ellipsoid being plotted.
+        npoints: Number of points used to generate the covariance ellipsoid.
+    """
 
     def __init__(self, scale: float = 0.2, npoints: int = 1_000) -> None:
+        """Initialize callback for covariance matrix visualizer.
+
+        Args:
+            scale: Scale of the radius of the covariance ellipsoid being plotted.
+            npoints: Number of points used to generate the covariance ellipsoid.
+        """
         super().__init__()
 
         self.scale = scale
@@ -27,7 +38,21 @@ class VisualizeGaussian2DCovariancePoints(
         visualizer: MatplotlibVisualizer,
         **kwargs,
     ) -> None:
+        r"""Plots ellipsoid of the covariance matrix for points in 2D Gaussian
+        manifolds. The callback accepts any type of BregmanObject and only
+        creates this visualization if it is a Point of compatible dimension.
 
+        Visualization only occurs in the :math:`\lambda`-coordinates.
+
+        Args:
+            obj: Objects being plotted.
+            coords: Coordinates the covariance matrix is being evaluated on.
+            visualizer: Visualizer the callback is being called in.
+            **kwargs: Additional kwargs passed to matplotlib plot function.
+
+        Raises:
+            ValueError: Raises exception when visualizer's manifold is incompatible.
+        """
         if type(visualizer.manifold) is not GaussianManifold:
             raise ValueError(
                 f"Visualizer {visualizer}'s manifold type is not compatible with {self}"
@@ -39,7 +64,7 @@ class VisualizeGaussian2DCovariancePoints(
             )
 
         if coords != LAMBDA_COORDS or not isinstance(obj, Point):
-            return None
+            return
 
         # dim = int(0.5 * (np.sqrt(4 * visualizer.manifold.dimension + 1) - 1))
 
@@ -67,8 +92,21 @@ class VisualizeGaussian2DCovariancePoints(
 
 
 class Visualize2DTissotIndicatrix(VisualizerCallback[MatplotlibVisualizer]):
+    """Callback to visualize the Tissot indicatrix for the metric tensor of 2D
+    manifolds.
+
+    Parameters:
+        scale: Scale of the radius of the Tissot indicatrix ellipsoid being plotted.
+        npoints: Number of points used to generate the Tissot indicatrix.
+    """
 
     def __init__(self, scale: float = 0.1, npoints: int = 1_000) -> None:
+        """Initialize callback for Tissot indicatrix visualizer.
+
+        Args:
+            scale: Scale of the radius of the Tissot indicatrix ellipsoid being plotted.
+            npoints: Number of points used to generate the Tissot indicatrix.
+        """
         super().__init__()
 
         self.scale = scale
@@ -81,6 +119,21 @@ class Visualize2DTissotIndicatrix(VisualizerCallback[MatplotlibVisualizer]):
         visualizer: MatplotlibVisualizer,
         **kwargs,
     ) -> None:
+        r"""Plots ellipsoid of the Tissot indicatrix for points in 2D Bregman
+        manifolds. The callback accepts any type of BregmanObject and only
+        creates this visualization if it is a Point of compatible dimension.
+
+        Visualization only occurs in the :math:`\lambda`-coordinates.
+
+        Args:
+            obj: Objects being plotted.
+            coords: Coordinates the Tissot indicatrix is being evaluated on.
+            visualizer: Visualizer the callback is being called in.
+            **kwargs: Additional kwargs passed to matplotlib plot function.
+
+        Raises:
+            ValueError: Raises exception when visualizer's manifold is incompatible.
+        """
 
         if visualizer.manifold.dimension != 2:
             raise ValueError(f"Dimension {visualizer.manifold.dimension} != 2")

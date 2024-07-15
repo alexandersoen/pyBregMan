@@ -7,31 +7,68 @@ from bregman.manifold.manifold import BregmanManifold
 
 
 class DualBarycenter(Barycenter[BregmanManifold]):
+    """Barycenter based on the dual coordinates of Bregman manifolds.
+
+    Parameters:
+        coord: Dual coordinates for the barycenter.
+    """
 
     def __init__(
         self, manifold: BregmanManifold, dcoords: DualCoords = DualCoords.THETA
     ) -> None:
+        """Initialize barycenter on dual coordinates.
+
+        Args:
+            manifold: Bregman manifold which the barycenter is defined on.
+            dcoords: Coordinates in which the barycenter is defined on.
+        """
         super().__init__(manifold)
 
         self.coord = dcoords
 
 
 class DualApproxBarycenter(ApproxBarycenter[BregmanManifold]):
+    """Approximate barycenter based on the dual coordinates of Bregman
+    manifolds.
+
+    Parameters:
+        coord: Dual coordinates for the barycenter.
+    """
 
     def __init__(
         self,
         manifold: BregmanManifold,
         dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
+        """Initialize approximate barycenter on dual coordinates.
+
+        Args:
+            manifold: Bregman manifold which the barycenter is defined on.
+            dcoords: Coordinates in which the barycenter is defined on.
+        """
         super().__init__(manifold)
 
         self.coord = dcoords
 
 
 class BregmanBarycenter(DualBarycenter):
+    """Bregman barycenter on a Bregman manifold."""
 
     def barycenter(self, points: list[Point], weights: list[float]) -> Point:
+        r"""Bregman barycenter of points with weights.
 
+        .. math:: \min_{c} \sum_{i=1}^{n} B_F(p_i : c).
+
+        This corresponds to taking a weighted average on points in the
+        appropriate dual coordinates.
+
+        Args:
+            points: Points which the Bregman barycenter is being calculated for.
+            weights: Weights for each of the points in the Bregman barycenter.
+
+        Returns:
+            Bregman barycenter of points with weights.
+        """
         nweights = [w / sum(weights) for w in weights]
 
         coords_data = [
@@ -45,13 +82,10 @@ class BregmanBarycenter(DualBarycenter):
 
 
 class SkewBurbeaRaoBarycenter(DualApproxBarycenter):
+    r"""Skew Burea-Rao Barycenter on Bregman manifolds.
 
-    def __init__(
-        self,
-        manifold: BregmanManifold,
-        dcoords: DualCoords = DualCoords.THETA,
-    ) -> None:
-        super().__init__(manifold, dcoords)
+    https://arxiv.org/pdf/1004.5049
+    """
 
     def barycenter(
         self,
@@ -60,8 +94,25 @@ class SkewBurbeaRaoBarycenter(DualApproxBarycenter):
         eps: float = EPS,
         alphas: list[float] | None = None,
     ) -> Point:
-        """
-        Use CCCP to calculate barycenter: https://arxiv.org/pdf/1004.5049
+        r"""Calculates the skew Burea-Rao barycenter over a vector of skew
+        parameters. This is equivalent to calculating the barycenter over a
+        list of different (Burea-Rao-type) divergences.
+
+        The barycenter is equivalent to the minimization:
+
+        .. math:: \min_c \left( \sum_{i=1}^n w_i \alpha_i \right) F(c) - \left( \sum_{i=1}^n w_i F(\alpha_i \cdot c + (1-\alpha_i) \cdot p_i) \right).
+
+        This can be approximately solved via a ConCave-Convex Procedure (CCCP).
+        See: https://arxiv.org/pdf/1004.5049
+
+        Args:
+            points: Points which the skew Burbea-Rao barycenter is being calculated for.
+            weights: Weights for each of the points in the skew Burbea-Rao barycenter.
+            eps: CCCP iteration progress tolerance.
+            alphas: Burbea-Rao :math:`\alpha` skew vector.
+
+        Returns:
+            Approximate skew Burea-Rao barycenter calculated using CCCP with eps tolerance.
         """
 
         coord_type = self.coord.value
@@ -119,6 +170,26 @@ class SkewBurbeaRaoBarycenter(DualApproxBarycenter):
         eps: float = EPS,
         alphas: list[float] | None = None,
     ) -> Point:
+        r"""Calculates the skew Burea-Rao barycenter over a vector of skew
+        parameters. This is equivalent to calculating the barycenter over a
+        list of different (Burea-Rao-type) divergences.
+
+        The barycenter is equivalent to the minimization:
+
+        .. math:: \min_c \left( \sum_{i=1}^n w_i \alpha_i \right) F(c) - \left( \sum_{i=1}^n w_i F(\alpha_i \cdot c + (1-\alpha_i) \cdot p_i) \right).
+
+        This can be approximately solved via a ConCave-Convex Procedure (CCCP).
+        See: https://arxiv.org/pdf/1004.5049
+
+        Args:
+            points: Points which the skew Burbea-Rao barycenter is being calculated for.
+            weights: Weights for each of the points in the skew Burbea-Rao barycenter.
+            eps: CCCP iteration progress tolerance.
+            alphas: Burbea-Rao :math:`\alpha` skew vector.
+
+        Returns:
+            Approximate skew Burea-Rao barycenter calculated using CCCP with eps tolerance.
+        """
         if weights is None:
             weights = [1.0] * len(points)
 

@@ -17,6 +17,16 @@ from bregman.visualizer.visualizer import BregmanVisualizer
 
 @dataclass
 class DataLim:
+    """The axis limits of the data being visualizer.
+
+    Parameters:
+        coords: Coordinate the data is being visualized in.
+        xmin: Minimum x-values.
+        xmax: Maximum x-values.
+        ymin: Minimum y-values.
+        ymax: Maximum y-values.
+    """
+
     coords: Coords
     xmin: np.ndarray
     xmax: np.ndarray
@@ -25,6 +35,23 @@ class DataLim:
 
 
 class MatplotlibVisualizer(BregmanVisualizer):
+    """Visualization class using matplotlib as a visualization back-end.
+    Allows the visualization of geometric objects in a Bregman objects over two
+    dimension axis.
+
+    Parameters:
+        dim1: Axis 1 for visualization.
+        dim2: Axis 2 for visualization.
+        dim_names: Tuple of names used to describe visualization axis.
+        resolution: Resolution of calculating curves in the visualizer.
+        frames: Number of frames used in animation.
+        intervals: Delay between frames in milliseconds.
+        rdelta: Resolution time delta for evaluating curves parameterized in [0, 1].
+        delta: Animation time delta for evaluating curves parameterized in [0, 1].
+        fig: Matplotlib figure for plotting.
+        ax: Matplotlib axis for plotting.
+        update_func_list: Update function list for matplotlib animation.
+    """
 
     def __init__(
         self,
@@ -35,6 +62,16 @@ class MatplotlibVisualizer(BregmanVisualizer):
         frames: int = 120,
         intervals: int = 1,
     ) -> None:
+        """Initialize matplotlib visualization class.
+
+        Args:
+            manifold: Bregman manifold in which geometric objects are being plotted in.
+            plot_dims: Dimensions which are being plotted by visualizer.
+            dim_names: Axis labels / names of the dimensions being plotted.
+            resolution: Resolution of calculating curves in the visualizer.
+            frames: Number of frames used in animation.
+            intervals: Delay between frames in milliseconds.
+        """
         super().__init__(manifold)
 
         self.dim1 = plot_dims[0]
@@ -43,8 +80,6 @@ class MatplotlibVisualizer(BregmanVisualizer):
         if dim_names is None:
             dim_names = (f"Dim {plot_dims[0]}", f"Dim {plot_dims[1]}")
         self.dim_names = dim_names
-
-        self.geodesic_rate = 0.1
 
         self.resolution = resolution
         self.frames = frames
@@ -62,6 +97,16 @@ class MatplotlibVisualizer(BregmanVisualizer):
         self.update_func_list: list[Callable[[int], Any]] = []
 
     def calculate_lims(self, coords: Coords, cut: float = 1.0) -> DataLim:
+        """Calculate the data limits (data axis bounds) for the current objects
+        which will be plotted in the visualizer.
+
+        Args:
+            coords: Coordinate for object to be plotted in.
+            cut: Cut percentage to remove from axis bounds being calculated.
+
+        Returns:
+
+        """
         xys_list = []
 
         for obj, _ in self.plot_list:
@@ -87,6 +132,13 @@ class MatplotlibVisualizer(BregmanVisualizer):
         return DataLim(coords, xmin, xmax, ymin, ymax)
 
     def plot_point(self, coords: Coords, point: Point, **kwargs) -> None:
+        """Matplotlib plotting function for Point objects.
+
+        Args:
+            coords: Coordinate for object to be plotted in.
+            point: Point object to be plotted.
+            **kwargs: Additional kwargs passed to matplotlib scatter function.
+        """
         kwargs = kwargs.copy()
 
         edgecolors = None
@@ -114,6 +166,13 @@ class MatplotlibVisualizer(BregmanVisualizer):
     def plot_geodesic(
         self, coords: Coords, geodesic: Geodesic, **kwargs
     ) -> None:
+        """Matplotlib plotting function for Geodesic objects.
+
+        Args:
+            coords: Coordinate for object to be plotted in.
+            geodesic: Geodesic object to be plotted.
+            **kwargs: Additional kwargs passed to matplotlib plot function.
+        """
         geo_vis_kwargs: dict[str, Any] = {
             "ls": "-",
             "linewidth": 1,
@@ -135,6 +194,13 @@ class MatplotlibVisualizer(BregmanVisualizer):
     def plot_bisector(
         self, coords: Coords, bisector: Bisector, **kwargs
     ) -> None:
+        """Matplotlib plotting function for Bisector objects.
+
+        Args:
+            coords: Coordinate for object to be plotted in.
+            bisector: Bisector object to be plotted.
+            **kwargs: Additional kwargs passed to matplotlib plot function.
+        """
 
         bis_vis_kwargs: dict[str, Any] = {
             "ls": "-.",
@@ -165,6 +231,13 @@ class MatplotlibVisualizer(BregmanVisualizer):
     def animate_geodesic(
         self, coords: Coords, geodesic: Geodesic, **kwargs
     ) -> None:
+        """Matplotlib animation function for Geodesic objects.
+
+        Args:
+            coords: Coordinate for object to be animted in.
+            geodesic: Bisector object to be animated.
+            **kwargs: Additional kwargs passed to matplotlib plot function.
+        """
         geodesic_points = [
             self.manifold.convert_coord(coords, geodesic(self.delta * t))
             for t in range(self.frames)
@@ -185,6 +258,12 @@ class MatplotlibVisualizer(BregmanVisualizer):
         self.update_func_list.append(update)
 
     def visualize(self, coords: Coords) -> None:
+        """Visualize all registered plots and animations and then run
+        matplotlib's show function.
+
+        Args:
+            coords: Coordinate the visualization is being made in.
+        """
         self.update_func_list = []
 
         # Static plots
@@ -217,6 +296,13 @@ class MatplotlibVisualizer(BregmanVisualizer):
         plt.show()
 
     def save(self, coords: Coords, path: Path | str) -> None:
+        """Visualize all registered plots and then save the visualization for
+        the designated path.
+
+        Args:
+            coords: Coordinate the visualization is being made in.
+            path: Save path for visualization.
+        """
         if path is str:
             path = Path(path)
 

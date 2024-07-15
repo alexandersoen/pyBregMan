@@ -14,12 +14,22 @@ from bregman.object.distribution import Distribution
 
 
 class MixingDimensionMissMatch(Exception):
+    """Exception when mixing weights do not match the number of distributions
+    provided.
+    """
+
     pass
 
 
 class MixturePoint(DisplayPoint):
+    """Display point for Mixture distributions."""
 
     def display(self) -> str:
+        """Generated pretty printed string on display.
+
+        Returns:
+            String of weights values of Mixture point.
+        """
         return str(self.data)
 
 
@@ -27,12 +37,24 @@ MixedDistribution = TypeVar("MixedDistribution", bound=Distribution)
 
 
 class MixtureDistribution(Distribution, Generic[MixedDistribution]):
+    """Mixture distributions with mixed mixing components.
+
+    Attributes:
+        weights: Mixture weights.
+        distributions: Mixture components.
+    """
 
     def __init__(
         self,
         weights: np.ndarray,
         distributions: Sequence[MixedDistribution],
     ) -> None:
+        """Initialize Mixture distribution.
+
+        Args:
+            weights: Mixture weights.
+            distributions: Mixture components.
+        """
         super().__init__()
 
         if len(weights) != len(distributions) - 1:
@@ -42,6 +64,14 @@ class MixtureDistribution(Distribution, Generic[MixedDistribution]):
         self.distributions = distributions
 
     def pdf(self, x: np.ndarray) -> np.ndarray:
+        """P.d.f. of a mixture distribution.
+
+        Args:
+            x: Sample space input.
+
+        Returns:
+            Mixture distribution's p.d.f. evaluated at x.
+        """
         all_w = np.zeros(len(self.distributions))
         all_w[:-1] = self.weights
         all_w[-1] = 1 - np.sum(self.weights)
@@ -56,11 +86,21 @@ class MixtureManifold(
     Generic[MixedDistribution],
     ABC,
 ):
+    """Abstract Mixture manifold.
+
+    Attributes:
+        distributions: Mixing components.
+    """
 
     def __init__(
         self,
         distributions: Sequence[MixedDistribution],
     ) -> None:
+        """Initialize Mixture manifold.
+
+        Args:
+            distributions: Mixing components.
+        """
         dimension = len(distributions) - 1
 
         super().__init__(
@@ -70,15 +110,28 @@ class MixtureManifold(
             dimension,
         )
 
-        self.distributions = distributions
+        self.set_distributions(distributions)
 
     def set_distributions(
         self, distributions: Sequence[MixedDistribution]
     ) -> None:
-        assert len(distributions) == len(self.distributions)
+        """Set mixing component distributions of the manifold.
+
+        Args:
+            distributions: Mixing components.
+        """
+        assert len(distributions) == (self.dimension + 1)
         self.distributions = distributions
 
     def point_to_distribution(self, point: Point) -> MixtureDistribution:
+        """Converts a point to a Mixture distribution.
+
+        Args:
+            point: Point to be converted.
+
+        Returns:
+            Mixture distribution corresponding to the point.
+        """
         weights = self.convert_coord(LAMBDA_COORDS, point).data
 
         return MixtureDistribution(weights, self.distributions)
@@ -86,6 +139,14 @@ class MixtureManifold(
     def distribution_to_point(
         self, distribution: MixtureDistribution
     ) -> MixturePoint:
+        """Converts a Mixture distribution to a point in the manifold.
+
+        Args:
+            distribution: Mixture distribution to be converted.
+
+        Returns:
+            Point corresponding to the Mixture distribution.
+        """
         return self.convert_to_display(
             Point(
                 coords=LAMBDA_COORDS,
@@ -94,12 +155,30 @@ class MixtureManifold(
         )
 
     def kl_divergence(self, point_1: Point, point_2: Point) -> np.ndarray:
+        """KL-Divergence of two points in a Mixture manifold.
+
+        Args:
+            point_1: Left-sided argument of the KL-Divergence.
+            point_2: Right-sided argument of the KL-Divergence.
+
+        Returns:
+            KL-Divergence between point_1 and point_2 on the Mixture manifold.
+        """
         breg_div = BregmanDivergence(self)
         return breg_div(point_1, point_2)
 
     def jensen_shannon_divergence(
         self, point_1: Point, point_2: Point
     ) -> np.ndarray:
+        """Jensen-Shannon Divergence of two points in a Mixture manifold.
+
+        Args:
+            point_1: Left-sided argument of the Jensen-Shannon Divergence.
+            point_2: Right-sided argument of the Jensen-Shannon Divergence.
+
+        Returns:
+            Jensen-Shannon Divergence between point_1 and point_2 on the Mixture manifold.
+        """
         br_div = SkewBurbeaRaoDivergence(self, alpha=0.5)
         return br_div(point_1, point_2)
 

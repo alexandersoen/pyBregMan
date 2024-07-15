@@ -12,7 +12,12 @@ MyDisplayPoint = TypeVar("MyDisplayPoint", bound=DisplayPoint)
 
 
 class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
-    """Abstract manifold type which has a third coordinate system (ordinary)"""
+    r"""Abstract application manifold type which has a third
+    :math:`\lambda`-coordinate system (ordinary).
+
+    Parameters:
+        display_factory_class: Constructor for display point of the application manifold.
+    """
 
     def __init__(
         self,
@@ -21,6 +26,14 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
         display_factory_class: type[MyDisplayPoint],
         dimension: int,
     ) -> None:
+        r"""Initialize application manifold.
+
+        Args:
+            theta_generator: Primal generator for :math:`\theta`-coordinates.
+            eta_generator: Dual generator for :math:`\eta`-coordinates.
+            display_factory_class: Constructor for display point of the application manifold.
+            dimension: Dimension of canonical parameterizations (:math:`\theta`-or :math:`\eta`-coordinates).
+        """
         super().__init__(theta_generator, eta_generator, dimension)
 
         self.display_factory_class = display_factory_class
@@ -43,22 +56,66 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
             )
 
     def convert_to_display(self, point: Point) -> MyDisplayPoint:
+        """Convert a point to a display point.
+
+        Args:
+            point: Point to be converted.
+
+        Returns:
+            Equivalent point of DisplayPoint type of the specific application manifold.
+        """
         point = self.convert_coord(LAMBDA_COORDS, point)
         dpoint = self.display_factory_class(point)
         return dpoint
 
     @abstractmethod
     def _lambda_to_theta(self, lamb: np.ndarray) -> np.ndarray:
+        r"""Internal method to convert data from :math:`\lambda` to
+        :math:`\theta` coordinates.
+
+        Args:
+            lamb: :math:`\lamba`-coordinate data.
+
+        Returns:
+            Data in :math:`\lamba`-coordinates converted to the :math:`\theta`-coordinates.
+        """
         pass
 
     @abstractmethod
     def _lambda_to_eta(self, lamb: np.ndarray) -> np.ndarray:
+        r"""Internal method to convert data from :math:`\lambda` to
+        :math:`\eta` coordinates.
+
+        Args:
+            lamb: :math:`\lamba`-coordinate data.
+
+        Returns:
+            Data in :math:`\lamba`-coordinates converted to the :math:`\eta`-coordinates.
+        """
         pass
 
     @abstractmethod
     def _theta_to_lambda(self, theta: np.ndarray) -> np.ndarray:
+        r"""Internal method to convert data from :math:`\theta` to
+        :math:`\lambda` coordinates.
+
+        Args:
+            theta: :math:`\theta`-coordinate data.
+
+        Returns:
+            Data in :math:`\theta`-coordinates converted to the :math:`\lambda`-coordinates.
+        """
         pass
 
     @abstractmethod
     def _eta_to_lambda(self, eta: np.ndarray) -> np.ndarray:
+        r"""Internal method to convert data from :math:`\eta` to
+        :math:`\lambda` coordinates.
+
+        Args:
+            eta: :math:`\eta`-coordinate data.
+
+        Returns:
+            Data in :math:`\eta`-coordinates converted to the :math:`\lambda`-coordinates.
+        """
         pass

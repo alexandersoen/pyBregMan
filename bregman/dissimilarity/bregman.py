@@ -8,34 +8,66 @@ from bregman.manifold.manifold import BregmanManifold
 
 
 class DualDissimilarity(Dissimilarity[BregmanManifold]):
+    """Dissimilarity functions based on the dual coordinates of Bregman
+    manifolds.
+
+    Parameters:
+        coord: Dual coordinates for the dissimilarity function.
+    """
+
     def __init__(
         self, manifold: BregmanManifold, dcoords: DualCoords = DualCoords.THETA
     ) -> None:
+        """Initialize dissimilarity function on dual coordinates.
+
+        Args:
+            manifold: Bregman manifold which the dissimilarity function is defined on.
+            dcoords: Coordinates in which the dissimilarity function is defined on.
+        """
         super().__init__(manifold)
 
         self.coord = dcoords
 
 
 class DualApproxDissimilarity(ApproxDissimilarity[BregmanManifold]):
+    """Approximate dissimilarity function based on the dual coordinates of
+    Bregman manifolds.
+
+    Parameters:
+        coord: Dual coordinates for the dissimilarity function.
+    """
+
     def __init__(
         self,
         manifold: BregmanManifold,
         dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
+        """Initialize approximate dissimilarity function on dual coordinates.
+
+        Args:
+            manifold: Bregman manifold which the dissimilarity function is defined on.
+            dcoords: Coordinates in which the dissimilarity function is defined on.
+        """
         super().__init__(manifold)
 
         self.coord = dcoords
 
 
 class BregmanDivergence(DualDissimilarity):
-
-    def __init__(
-        self, manifold: BregmanManifold, dcoords: DualCoords = DualCoords.THETA
-    ) -> None:
-        super().__init__(manifold, dcoords)
+    """Bregman divergence for points on a Bregman manifold."""
 
     def dissimilarity(self, point_1: Point, point_2: Point) -> np.ndarray:
+        r"""Bregman divergence between two points.
 
+        .. math:: B_{F}(p_1 : p_2) = F(p_1) - F(p_2) - \langle \nabla F(p_2), p_1 - p_2 \rangle.
+
+        Args:
+            point_1: Left-sided argument of the Bregman divergence.
+            point_2: Right-sided argument of the Bregman divergence.
+
+        Returns:
+            Bregman divergence between point_1 and point_2.
+        """
         gen = self.manifold.bregman_generator(self.coord)
 
         coord_1 = self.manifold.convert_coord(self.coord.value, point_1)
@@ -44,9 +76,20 @@ class BregmanDivergence(DualDissimilarity):
         return gen.bergman_divergence(coord_1.data, coord_2.data)
 
 
-class JeffreysBregmanDivergence(Dissimilarity[BregmanManifold]):
+class JeffreysDivergence(Dissimilarity[BregmanManifold]):
+    r"""Jeffreys divergence on the Bregman manifold.
+
+    Parameters:
+        theta_divergence: Bregman divergence using :math:`\theta` generator.
+        eta_divergence: Bregman divergence using :math:`\eta` generator.
+    """
 
     def __init__(self, manifold: BregmanManifold) -> None:
+        """Initialize Jeffreys Divergence.
+
+        Args:
+            manifold: Bregman manifold which the Jeffreys divergence is defined on.
+        """
         super().__init__(manifold)
 
         self.theta_divergence = BregmanDivergence(
@@ -57,12 +100,31 @@ class JeffreysBregmanDivergence(Dissimilarity[BregmanManifold]):
         )
 
     def dissimilarity(self, point_1: Point, point_2: Point) -> np.ndarray:
+        r"""Jeffreys divergence between two points.
+
+        .. math:: \mathrm{Jef}(p_1 : p_2) = B_{F}(p_1 : p_2) + B_{F^*}(p_1 : p_2).
+
+        Args:
+            point_1: Left-sided argument of the Jeffreys divergence.
+            point_2: Right-sided argument of the Jeffreys divergence.
+        Returns:
+            Jeffreys divergence between point_1 and point_2.
+        """
         return self.theta_divergence(point_1, point_2) + self.eta_divergence(
             point_1, point_2
         )
 
 
 class SkewJensenBregmanDivergence(DualDissimilarity):
+    r"""Skewed Jensen-Bregman Divergence.
+
+    https://arxiv.org/pdf/1912.00610
+
+    Parameters:
+        alpha_skews: Interpolation parameter for the mean point.
+        weight_skews: Weights on individual divergence terms.
+        alpha_mid: Weighted mean point.
+    """
 
     def __init__(
         self,
@@ -71,6 +133,14 @@ class SkewJensenBregmanDivergence(DualDissimilarity):
         weight_skews: list[float],
         dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
+        """Initialize skewed Jensen-Bregman divergence.
+
+        Args:
+            manifold: Bregman manifold which the skewed Jensen-Bregman divergence is defined on.
+            alpha_skews: Interpolation parameter for the mean point.
+            weight_skews: Weights on individual divergence terms.
+            dcoords: Generator which is being used for the Bregman divergence terms.
+        """
         super().__init__(manifold, dcoords)
 
         assert len(alpha_skews) == len(weight_skews)
@@ -81,7 +151,25 @@ class SkewJensenBregmanDivergence(DualDissimilarity):
         self.alpha_mid = sum(w * a for w, a in zip(weight_skews, alpha_skews))
 
     def dissimilarity(self, point_1: Point, point_2: Point) -> np.ndarray:
+        r"""Skewed Jensen-Bregman divergence between two points.
 
+        .. math:: \mathrm{JBD}(p_1 : p_2) = \sum_{i=1}^k w_i \cdot B_{F}((p_1 p_2)_{\alpha_i} : (p_1 p_2)_{\bar{\alpha}}),
+
+        where
+
+        .. math:: \bar{\alpha} = \frac{1}{k} \sum_{i=1}^k \alpha_i
+
+        and
+
+        .. math:: (p_1 p_2)_{\alpha} = (1-\alpha) \cdot p_1 + \alpha \cdot p_2.
+
+        Args:
+            point_1: Left-sided argument of the skewed Jensen-Bregman divergence.
+            point_2: Right-sided argument of the skewed Jensen-Bregman divergence.
+
+        Returns:
+            Skewed Jensen-Bregman divergence between point_1 and point_2.
+        """
         coord_1 = self.manifold.convert_coord(self.coord.value, point_1)
         coord_2 = self.manifold.convert_coord(self.coord.value, point_2)
 
@@ -108,6 +196,15 @@ class SkewJensenBregmanDivergence(DualDissimilarity):
 
 
 class SkewBurbeaRaoDivergence(DualDissimilarity):
+    r"""Skewed Burbea-Rao Divergence on Bregman manifolds.
+    Equivalent to the Bhattacharyya divergence when the Bregman manifold is an
+    exponential family manifold.
+
+    https://arxiv.org/pdf/1004.5049
+
+    Parameters:
+        alpha: :math:`\alpha`-skew of the Burbea-Rao divergence.
+    """
 
     def __init__(
         self,
@@ -115,13 +212,33 @@ class SkewBurbeaRaoDivergence(DualDissimilarity):
         alpha: float,
         dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
+        """Initialize skewed Burbea-Rao divergence.
+
+        Args:
+            manifold: Bregman manifold which the skewed Burbea-Rao divergence is defined on.
+            alpha: Skew parameter for generator averaging.
+            dcoords: Bregman generator which is being used in the calculation.
+        """
         super().__init__(manifold, dcoords)
 
         self.alpha = alpha
 
     def dissimilarity(self, point_1: Point, point_2: Point) -> np.ndarray:
-        """Note the ordering of interpolation. Different from the typical alphas."""
+        r"""Skewed Burbea-Rao divergence between two points.
 
+        .. math:: \mathrm{sBR}_{\alpha}(p_1 : p_2) = \frac{1}{\alpha(1-\alpha)} \left( \alpha F(p_1) + (1-\alpha)F(p_2) - F(\alpha \cdot p_1 + (1-\alpha) \cdot p_2) \right).
+
+
+        Note the ordering of interpolation which is different form the typical
+        usage (see skew Jensen-Bregman divergence).
+
+        Args:
+            point_1: Left-sided argument of the skewed Burbea-Rao divergence.
+            point_2: Right-sided argument of the skewed Burbea-Rao divergence.
+
+        Returns:
+            Skewed Burbea-Rao divergence between point_1 and point_2.
+        """
         coord_1 = self.manifold.convert_coord(self.coord.value, point_1)
         coord_2 = self.manifold.convert_coord(self.coord.value, point_2)
 
@@ -137,49 +254,25 @@ class SkewBurbeaRaoDivergence(DualDissimilarity):
         )
 
 
-class BhattacharyyaDistance(DualDissimilarity):
-
-    def __init__(
-        self,
-        manifold: BregmanManifold,
-        alpha: float,
-        dcoords: DualCoords = DualCoords.THETA,
-    ) -> None:
-        super().__init__(manifold, dcoords)
-
-        self.alpha = alpha
-
-    def dissimilarity(
-        self,
-        point_1: Point,
-        point_2: Point,
-    ) -> np.ndarray:
-
-        coords_1 = self.manifold.convert_coord(self.coord.value, point_1)
-        coords_2 = self.manifold.convert_coord(self.coord.value, point_2)
-
-        geodesic = BregmanGeodesic(
-            self.manifold, coords_1, coords_2, dcoords=self.coord
-        )
-        coords_alpha = geodesic(self.alpha)
-
-        gen = self.manifold.bregman_generator(self.coord)
-
-        F_1 = gen(coords_1.data)
-        F_2 = gen(coords_2.data)
-        F_alpha = gen(coords_alpha.data)
-
-        # Notice thta the linear interpolation is opposite
-        return (1 - self.alpha) * F_1 + self.alpha * F_2 - F_alpha
-
-
 class ChernoffInformation(DualApproxDissimilarity):
+    r"""Chernoff Information. This is the Chernoff point evaluated at the skew
+    Burea-Rao divergence.
+
+
+    https://www.mdpi.com/1099-4300/24/10/1400
+    """
 
     def __init__(
         self,
         manifold: BregmanManifold,
         dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
+        """Initialize Chernoff information.
+
+        Args:
+            manifold: Bregman manifold which the Chernoff information is defined on.
+            dcoords: Generator which is being used for the Burea-Rao divergence.
+        """
         super().__init__(manifold, dcoords)
 
     def chernoff_point(
@@ -188,6 +281,27 @@ class ChernoffInformation(DualApproxDissimilarity):
         point_2: Point,
         eps: float = EPS,
     ) -> float:
+        r"""Finds the Chernoff point: the skew value which we will evaluate the
+        Burea-Rao divergence to obtain the Chernoff information.
+        This corresponds to the :math:`\alpha` value which maximizes the
+        Burea-Rao divergence between two points.
+
+
+        The Chernoff point can be characterized as a function of the
+        interpolating parameter which makes the divergence between point_1 and
+        point_2.
+
+        This function approximates the Chernoff point in this way through
+        bisection search.
+
+        Args:
+            point_1: Left-sided argument of the Chernoff information.
+            point_2: Right-sided argument of the Chernoff information.
+            eps: Error difference between point_1 and point_2's divergence of the interpolating point.
+
+        Returns:
+            An approximate Chernoff point.
+        """
         coords_1 = self.manifold.convert_coord(self.coord.value, point_1)
         coords_2 = self.manifold.convert_coord(self.coord.value, point_2)
 
@@ -214,8 +328,23 @@ class ChernoffInformation(DualApproxDissimilarity):
     def dissimilarity(
         self, point_1: Point, point_2: Point, eps: float = EPS
     ) -> np.ndarray:
+        r"""Calculate the Chernoff information via an approximate Chernoff point.
+
+        .. math:: \mathrm{CI}(p_1 : p_2) = \max_{\alpha \in (0, 1)} \mathrm{sBR}_{\alpha}(p_1 : p_2),
+
+        where :math:`\mathrm{sBR}_{\alpha}(p_1 : p_2)` is the skewed Burea-Rao divergence.
+        The optimal :math:`\alpha^\star` corresponds to the Chernoff point.
+
+        Args:
+            point_1: Left-sided argument of the Chernoff information.
+            point_2: Right-sided argument of the Chernoff information.
+            eps: Error tolerance for Chernoff point bisection search approximation.
+
+        Returns:
+            Approximate Chernoff information between point_1 and point_2 with eps error tolerance.
+        """
         alpha_star = self.chernoff_point(point_1, point_2, eps=eps)
-        bhattacharyya_dissimilarity = BhattacharyyaDistance(
+        bhattacharyya_dissimilarity = SkewBurbeaRaoDivergence(
             self.manifold, 1 - alpha_star, self.coord
         )
 

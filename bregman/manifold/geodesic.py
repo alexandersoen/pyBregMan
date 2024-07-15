@@ -7,6 +7,15 @@ TBregmanManifold = TypeVar("TBregmanManifold", bound=BregmanManifold)
 
 
 class Geodesic(Generic[TBregmanManifold], Curve):
+    """Abstract class for a geodesic geometric object.
+
+    Parameterization is assumed to be defined for t in [0, 1].
+
+    Parameters:
+        manifold: Bregman manifold which the geodesic is defined on.
+        source: Source point on the manifold which the geodesic starts.
+        dest: Destination point on the manifold which the geodesic ends.
+    """
 
     def __init__(
         self,
@@ -14,6 +23,14 @@ class Geodesic(Generic[TBregmanManifold], Curve):
         source: Point,
         dest: Point,
     ) -> None:
+        """Initialize geodesic.
+
+        Args:
+            manifold: Bregman manifold which the geodesic is defined on.
+            source: Source point on the manifold which the geodesic starts.
+            dest: Destination point on the manifold which the geodesic ends.
+            coords: Coordinates in which the geodesic is defined on.
+        """
 
         super().__init__()
 
@@ -24,6 +41,14 @@ class Geodesic(Generic[TBregmanManifold], Curve):
 
 
 class BregmanGeodesic(Geodesic[BregmanManifold]):
+    r"""Bregman geodesic class calculated with respect to :math:`\theta`-or
+    :math:`\eta`-coordinates.
+
+    Parameterization is assumed to be defined for t in [0, 1].
+
+    Parameters:
+        coords: Coordinates in which the geodesic is defined on.
+    """
 
     def __init__(
         self,
@@ -32,12 +57,29 @@ class BregmanGeodesic(Geodesic[BregmanManifold]):
         dest: Point,
         dcoords: DualCoords = DualCoords.THETA,
     ) -> None:
+        r"""Initialize Bregman geodesic.
+
+        Args:
+            manifold: Bregman manifold which the geodesic is defined on.
+            source: Source point on the manifold which the geodesic starts.
+            dest: Destination point on the manifold which the geodesic ends.
+            dcoords: DualCoords specifying :math:`\theta`-or :math:`\eta`-coordinates of geodesic.
+        """
         super().__init__(manifold, source, dest)
 
         self.coord = dcoords
 
     def path(self, t: float) -> Point:
-        # TODO Should cache these values
+        """Evaluation of Bregman geodesic path parameterized by t. The path is
+        defined on the flat geometric of the dual coordinate.
+
+        Args:
+            t: Value in [0, 1] corresponding to the parameterization of the geodesic.
+
+        Returns:
+            Bregman geodesic evaluated at t.
+        """
+        # TODO Maybe should cache these values
         src_coord_data = self.manifold.convert_coord(
             self.coord.value, self.source
         ).data
