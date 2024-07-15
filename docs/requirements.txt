@@ -33,3 +33,4 @@ scipy==1.14.0
     # via pybregman (pyproject.toml)
 six==1.16.0
     # via python-dateutil
+sphinx-rtd-theme==2.0.0
