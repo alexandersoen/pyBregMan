@@ -7,7 +7,7 @@ The focus of the library is to provide a specialized framework for Bregman
 manifolds: dually flat manifolds which consists of two convex generators
 related via Legendre–Fenchel duality.
 
-**Documentation** is available on [Read the Docs](https://pybregman.readthedocs.io/en/latest/)
+**Documentation** is available on [Read the Docs](https://pybregman.readthedocs.io/en/latest/).
 
 Currently in pre-release.
 

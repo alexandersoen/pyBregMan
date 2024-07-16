@@ -3,17 +3,21 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pyBregMan's documentation!
-=====================================
+Home
+====
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :hidden:
 
+   self
    genindex
    modindex
    search
    bregman
+
+Welcome to pyBregMan's documentation!
+=====================================
 
 .. figure:: ../../img/pyBregMan-LogoDoc.png
    :alt: pyBregMan Logo
@@ -24,6 +28,8 @@ A Python library for geometric computing on BREGman MANifolds with
 applications. The focus of the library is to provide a specialized
 framework for Bregman manifolds: dually flat manifolds which consists of
 two convex generators related via Legendre–Fenchel duality.
+
+**Documentation** is available on `Read the Docs <https://pybregman.readthedocs.io/en/latest/>`_.
 
 Currently in pre-release.
 
