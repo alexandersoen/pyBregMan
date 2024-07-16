@@ -34,5 +34,6 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://franknielsen.github.io/pyBregMan/index.html"
+Documentation = "https://pybregman.readthedocs.io/en/latest"
 Repository = "https://github.com/alexandersoen/pyBregMan"
 Issues = "https://github.com/alexandersoen/pyBregMan/issues"
