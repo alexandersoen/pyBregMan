@@ -73,7 +73,7 @@ class BregmanDivergence(DualDissimilarity):
         coord_1 = self.manifold.convert_coord(self.coord.value, point_1)
         coord_2 = self.manifold.convert_coord(self.coord.value, point_2)
 
-        return gen.bergman_divergence(coord_1.data, coord_2.data)
+        return gen.bregman_divergence(coord_1.data, coord_2.data)
 
 
 class JeffreysDivergence(Dissimilarity[BregmanManifold]):

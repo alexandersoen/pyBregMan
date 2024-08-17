@@ -62,7 +62,7 @@ def bregman_badoiu_clarkson(
     Returns:
         Approximate smallest enclosing Bregman ball.
     """
-    divergence = manifold.bregman_generator(dcoords).bergman_divergence
+    divergence = manifold.bregman_generator(dcoords).bregman_divergence
     primal_gen = manifold.bregman_generator(dcoords)
     dual_gen = manifold.bregman_generator(dcoords.dual())
 

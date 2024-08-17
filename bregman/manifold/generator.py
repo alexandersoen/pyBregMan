@@ -55,7 +55,7 @@ class Generator(ABC):
         """
         pass
 
-    def bergman_divergence(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
+    def bregman_divergence(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         """Bregman divergence on raw data defined by generator.
 
         Args:
