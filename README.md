@@ -9,8 +9,6 @@ related via Legendre–Fenchel duality.
 
 **Documentation** is available on [Read the Docs](https://pybregman.readthedocs.io/en/latest/).
 
-Currently in pre-release.
-
 # Installation
 
 pyBregMan can be installed via `pip3` or `git`.
@@ -135,3 +133,13 @@ visualizer.visualize(LAMBDA_COORDS)  # Display coordinate type
 ![Centroid Example](./img/centroid_example.png)
 
 Code can be found in `examples/centroids.py`.
+
+# Additional Links
+
+## Tutorial: Data Representations on the Bregman Manifold
+
+A tutorial published at the [ICML'24 GRAM workshop is available](https://colab.research.google.com/drive/14nf0w9b-SdgRGBrFstrKfHwToypO3_LP?usp=sharing) which explores different methods for summarizing data on a Bregman manifold.
+
+## Technical Report
+
+A preprint of the [technical report for pyBregMan is available on arXiv](https://arxiv.org/abs/2408.04175).
