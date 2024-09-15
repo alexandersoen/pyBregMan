@@ -113,7 +113,7 @@ class MatplotlibVisualizer(BregmanVisualizer):
             if isinstance(obj, Point):
 
                 point = self.manifold.convert_coord(coords, obj)
-                xys = point.data[[self.dim1, self.dim2]]
+                xys = point.data[np.array([self.dim1, self.dim2])]
                 xys_list.append(xys)
 
         xys_data = np.vstack(xys_list)
@@ -211,7 +211,7 @@ class MatplotlibVisualizer(BregmanVisualizer):
         bis_point = bisector.bisect_proj_point()
         w = bisector.shift()
 
-        x, y = bis_point.data[[self.dim1, self.dim2]]
+        x, y = bis_point.data[np.array([self.dim1, self.dim2])]
         data_lim = self.calculate_lims(bisector.coords, 0.2)
 
         y1 = (-w - x * data_lim.xmin) / y

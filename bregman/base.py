@@ -3,9 +3,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Callable
 
-import numpy as np
+from jax import Array
+from jax.typing import ArrayLike
 
-CoordChange = Callable[[np.ndarray], np.ndarray]
+CoordChange = Callable[[ArrayLike], Array]
 
 Shape = tuple[int, ...]
 
@@ -52,7 +53,7 @@ class Point(CoordObject):
         data: Data of point in the specified coordinate type.
     """
 
-    data: np.ndarray
+    data: ArrayLike
 
 
 class Curve(BregmanObject, ABC):

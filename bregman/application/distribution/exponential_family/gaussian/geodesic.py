@@ -1,8 +1,13 @@
-import numpy as np
+import jax.numpy as jnp
+
+from jax import Array
+from jax.typing import ArrayLike
+
 from scipy.linalg import expm, fractional_matrix_power
 
-from bregman.application.distribution.exponential_family.gaussian.gaussian import \
-    GaussianManifold
+from bregman.application.distribution.exponential_family.gaussian.gaussian import (
+    GaussianManifold,
+)
 from bregman.base import LAMBDA_COORDS, Point
 from bregman.manifold.geodesic import Geodesic
 
@@ -35,12 +40,12 @@ class EriksenIVPGeodesic(Geodesic[GaussianManifold]):
         self.dest_Sigma = dest_point.Sigma
         self.dim = len(self.dest_mu)
 
-        id_lambda_coords = np.concatenate(
-            [np.zeros(self.dim), np.eye(self.dim).flatten()]
+        id_lambda_coords = jnp.concatenate(
+            [jnp.zeros(self.dim), jnp.eye(self.dim).flatten()]
         )
         id_point = Point(LAMBDA_COORDS, id_lambda_coords)
 
-        A_matrix = np.zeros((2 * self.dim + 1, 2 * self.dim + 1))
+        A_matrix = jnp.zeros((2 * self.dim + 1, 2 * self.dim + 1))
         A_matrix[: self.dim, : self.dim] = -dest_point.Sigma
         A_matrix[self.dim + 1 :, self.dim + 1 :] = dest_point.Sigma
         A_matrix[self.dim, : self.dim] = dest_point.mu
@@ -70,10 +75,10 @@ class EriksenIVPGeodesic(Geodesic[GaussianManifold]):
         Delta = Lambda[: self.dim, : self.dim]
         delta = Lambda[self.dim, : self.dim]
 
-        Sigma = np.linalg.inv(Delta)
+        Sigma = jnp.linalg.inv(Delta)
         mu = Sigma @ delta
 
-        return Point(LAMBDA_COORDS, np.concatenate([mu, Sigma.flatten()]))
+        return Point(LAMBDA_COORDS, jnp.concatenate([mu, Sigma.flatten()]))
 
 
 class FisherRaoKobayashiGeodesic(Geodesic[GaussianManifold]):
@@ -139,10 +144,10 @@ class FisherRaoKobayashiGeodesic(Geodesic[GaussianManifold]):
         Delta = Gt[: self.dim, : self.dim]
         delta = Gt[self.dim, : self.dim]
 
-        Sigma = np.linalg.pinv(Delta)
+        Sigma = jnp.linalg.pinv(Delta)
         mu = Sigma @ delta
 
-        return Point(LAMBDA_COORDS, np.concatenate([mu, Sigma.flatten()]))
+        return Point(LAMBDA_COORDS, jnp.concatenate([mu, Sigma.flatten()]))
 
     def _calculate_matrices(self):
         self._G0 = self._get_Gi(self.source_mu, self.source_Sigma)
@@ -153,43 +158,43 @@ class FisherRaoKobayashiGeodesic(Geodesic[GaussianManifold]):
 
         self._Gmix = self._G0_neg_sqrt @ self._G1 @ self._G0_neg_sqrt
 
-    def _get_Gi(self, mu: np.ndarray, Sigma: np.ndarray) -> np.ndarray:
+    def _get_Gi(self, mu: ArrayLike, Sigma: ArrayLike) -> Array:
 
-        Di = np.block(
+        Di = jnp.block(
             [
                 [
-                    np.linalg.inv(Sigma),
-                    np.zeros((self.dim, 1)),
-                    np.zeros((self.dim, self.dim)),
+                    jnp.linalg.inv(Sigma),
+                    jnp.zeros((self.dim, 1)),
+                    jnp.zeros((self.dim, self.dim)),
                 ],
                 [
-                    np.zeros((1, self.dim)),
-                    np.ones((1, 1)),
-                    np.zeros((1, self.dim)),
+                    jnp.zeros((1, self.dim)),
+                    jnp.ones((1, 1)),
+                    jnp.zeros((1, self.dim)),
                 ],
                 [
-                    np.zeros((self.dim, self.dim)),
-                    np.zeros((self.dim, 1)),
+                    jnp.zeros((self.dim, self.dim)),
+                    jnp.zeros((self.dim, 1)),
                     Sigma,
                 ],
             ]
         )
-        Mi = np.block(
+        Mi = jnp.block(
             [
                 [
-                    np.eye(self.dim),
-                    np.zeros((self.dim, 1)),
-                    np.zeros((self.dim, self.dim)),
+                    jnp.eye(self.dim),
+                    jnp.zeros((self.dim, 1)),
+                    jnp.zeros((self.dim, self.dim)),
                 ],
                 [
                     mu.reshape(1, -1),
-                    np.ones((1, 1)),
-                    np.zeros((1, self.dim)),
+                    jnp.ones((1, 1)),
+                    jnp.zeros((1, self.dim)),
                 ],
                 [
-                    np.zeros((self.dim, self.dim)),
+                    jnp.zeros((self.dim, self.dim)),
                     -mu.reshape(-1, 1),
-                    np.eye(self.dim),
+                    jnp.eye(self.dim),
                 ],
             ]
         )

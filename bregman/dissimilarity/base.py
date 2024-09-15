@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-import numpy as np
-
 from bregman.base import Point
 from bregman.constants import EPS
 from bregman.manifold.manifold import BregmanManifold
+
+from jax.typing import ArrayLike
 
 TBregmanManifold = TypeVar("TBregmanManifold", bound=BregmanManifold)
 
@@ -27,7 +27,7 @@ class Dissimilarity(Generic[TBregmanManifold], ABC):
         self.manifold = manifold
 
     @abstractmethod
-    def dissimilarity(self, point_1: Point, point_2: Point) -> np.ndarray:
+    def dissimilarity(self, point_1: Point, point_2: Point) -> ArrayLike:
         """Calculate the dissimilarity between two points.
 
         Args:
@@ -39,7 +39,7 @@ class Dissimilarity(Generic[TBregmanManifold], ABC):
         """
         pass
 
-    def __call__(self, point_1: Point, point_2: Point) -> np.ndarray:
+    def __call__(self, point_1: Point, point_2: Point) -> ArrayLike:
         """Calculate the dissimilarity between two points.
 
         Args:
@@ -72,7 +72,7 @@ class ApproxDissimilarity(
     @abstractmethod
     def dissimilarity(
         self, point_1: Point, point_2: Point, eps: float = EPS
-    ) -> np.ndarray:
+    ) -> ArrayLike:
         """Calculate the approximate dissimilarity between two points.
 
         Args:
@@ -87,7 +87,7 @@ class ApproxDissimilarity(
 
     def __call__(
         self, point_1: Point, point_2: Point, eps: float = EPS
-    ) -> np.ndarray:
+    ) -> ArrayLike:
         """Calculate the approximate dissimilarity between two points.
 
         Args:

@@ -1,10 +1,14 @@
-import autograd.numpy as anp
-import numpy as np
+import jax.numpy as jnp
 
 from bregman.application.distribution.exponential_family.exp_family import (
-    ExponentialFamilyDistribution, ExponentialFamilyManifold)
+    ExponentialFamilyDistribution,
+    ExponentialFamilyManifold,
+)
 from bregman.base import THETA_COORDS, DisplayPoint, Point, Shape
 from bregman.manifold.generator import AutoDiffGenerator
+
+from jax import Array
+from jax.typing import ArrayLike
 
 
 class GaussianPoint(DisplayPoint):
@@ -17,10 +21,10 @@ class GaussianPoint(DisplayPoint):
         Returns:
             Covariance shape dimension (i.e, d in dxd covariance matrix).
         """
-        return int(0.5 * (np.sqrt(4 * len(self.data) + 1) - 1))
+        return int(0.5 * (jnp.sqrt(4 * len(self.data) + 1) - 1))
 
     @property
-    def mu(self) -> np.ndarray:
+    def mu(self) -> Array:
         """Mean value from point data.
 
         Returns:
@@ -29,7 +33,7 @@ class GaussianPoint(DisplayPoint):
         return self.data[: self.dimension]
 
     @property
-    def Sigma(self) -> np.ndarray:
+    def Sigma(self) -> Array:
         """Covariance value from point data.
 
         Returns:
@@ -55,7 +59,7 @@ class GaussianDistribution(ExponentialFamilyDistribution):
         dimension: Covariance shape dimension (i.e, d in dxd covariance matrix).
     """
 
-    def __init__(self, theta: np.ndarray, dimension: int) -> None:
+    def __init__(self, theta: ArrayLike, dimension: int) -> None:
         """Initialize Gaussian distribution.
 
         Args:
@@ -65,7 +69,7 @@ class GaussianDistribution(ExponentialFamilyDistribution):
         super().__init__(theta, (dimension,))
 
     @staticmethod
-    def t(x: np.ndarray) -> np.ndarray:
+    def t(x: ArrayLike) -> Array:
         r""":math:`t(x)` sufficient statistics function of the Gaussian
         distribution.
 
@@ -75,10 +79,10 @@ class GaussianDistribution(ExponentialFamilyDistribution):
         Returns:
             Sufficient statistics function of the Gaussian distribution evaluated at x.
         """
-        return np.concatenate([x, -np.outer(x, x).flatten()])
+        return jnp.concatenate([x, -jnp.outer(x, x).flatten()])
 
     @staticmethod
-    def k(x: np.ndarray) -> np.ndarray:
+    def k(x: ArrayLike) -> Array:
         r""":math:`k(x)` carrier measure of the Gaussian distribution.
 
         Args:
@@ -87,9 +91,9 @@ class GaussianDistribution(ExponentialFamilyDistribution):
         Returns:
             Carries measure of the Gaussian distribution evaluated at x.
         """
-        return np.array(0.0)
+        return jnp.array(0.0)
 
-    def F(self, x: np.ndarray) -> np.ndarray:
+    def F(self, x: ArrayLike) -> Array:
         r""":math:`F(x) = \log \int \exp(\theta^T t(x)) \mathrm{d}x`
         normalizer of the Gaussian distribution.
 
@@ -102,16 +106,16 @@ class GaussianDistribution(ExponentialFamilyDistribution):
         theta_mu, theta_sigma = _flatten_to_mu_Sigma(self.dimension[0], x)
 
         return 0.5 * (
-            0.5 * theta_mu.T @ np.linalg.inv(theta_sigma) @ theta_mu
-            - np.log(np.linalg.det(theta_sigma))
-            + self.dimension[0] * np.log(np.pi)
+            0.5 * theta_mu.T @ jnp.linalg.inv(theta_sigma) @ theta_mu
+            - jnp.log(jnp.linalg.det(theta_sigma))
+            + self.dimension[0] * jnp.log(jnp.pi)
         )
 
 
 class UnivariateGaussianDistribution(GaussianDistribution):
     """Univariate Gaussian distribution as an exponential family distribution."""
 
-    def __init__(self, theta: np.ndarray) -> None:
+    def __init__(self, theta: ArrayLike) -> None:
         """Initialize univariate Gaussian distribution.
 
         Args:
@@ -120,7 +124,7 @@ class UnivariateGaussianDistribution(GaussianDistribution):
         super().__init__(theta, 1)
 
     @staticmethod
-    def t(x: np.ndarray) -> np.ndarray:
+    def t(x: ArrayLike) -> Array:
         r""":math:`t(x)` sufficient statistics function of the univariate
         Gaussian distribution.
 
@@ -130,10 +134,10 @@ class UnivariateGaussianDistribution(GaussianDistribution):
         Returns:
             Sufficient statistics function of the univariate Gaussian distribution evaluated at x.
         """
-        return np.concatenate([x, np.outer(x, x).flatten()])
+        return jnp.concatenate([x, jnp.outer(x, x).flatten()])
 
     @staticmethod
-    def k(x: np.ndarray) -> np.ndarray:
+    def k(x: ArrayLike) -> Array:
         r""":math:`k(x)` carrier measure of the univariate Gaussian
         distribution.
 
@@ -143,9 +147,9 @@ class UnivariateGaussianDistribution(GaussianDistribution):
         Returns:
             Carries measure of the univariate Gaussian distribution evaluated at x.
         """
-        return np.array(0.0)
+        return jnp.array(0.0)
 
-    def F(self, x: np.ndarray) -> np.ndarray:
+    def F(self, x: ArrayLike) -> Array:
         r""":math:`F(x) = \log \int \exp(\theta^T t(x)) \mathrm{d}x` normalizer
         of the univariate Gaussian distribution.
 
@@ -158,15 +162,15 @@ class UnivariateGaussianDistribution(GaussianDistribution):
 
         theta_mu, theta_sigma = x
 
-        return -0.25 * theta_mu * theta_mu / theta_sigma + 0.5 * anp.log(
-            -anp.pi / theta_sigma
+        return -0.25 * theta_mu * theta_mu / theta_sigma + 0.5 * jnp.log(
+            -jnp.pi / theta_sigma
         )
 
 
 class GaussianPrimalGenerator(AutoDiffGenerator):
     """Gaussian manifold primal Bregman generator."""
 
-    def _F(self, x: np.ndarray) -> np.ndarray:
+    def _F(self, x: ArrayLike) -> Array:
         """Gaussian manifold primal Bregman generator function.
 
         Args:
@@ -181,23 +185,23 @@ class GaussianPrimalGenerator(AutoDiffGenerator):
             theta_mu, theta_sigma = _flatten_to_mu_Sigma(self.dimension, x)
 
             return 0.5 * (
-                0.5 * theta_mu.T @ anp.linalg.inv(theta_sigma) @ theta_mu
-                - anp.log(anp.linalg.det(theta_sigma))
-                + self.dimension * anp.log(anp.pi)
+                0.5 * theta_mu.T @ jnp.linalg.inv(theta_sigma) @ theta_mu
+                - jnp.log(jnp.linalg.det(theta_sigma))
+                + self.dimension * jnp.log(jnp.pi)
             )
         else:
 
             theta_mu, theta_sigma = x
 
-            return -0.25 * theta_mu * theta_mu / theta_sigma + 0.5 * anp.log(
-                -anp.pi / theta_sigma
+            return -0.25 * theta_mu * theta_mu / theta_sigma + 0.5 * jnp.log(
+                -jnp.pi / theta_sigma
             )
 
 
 class GaussianDualGenerator(AutoDiffGenerator):
     """Gaussian manifold dual Bregman generator."""
 
-    def _F(self, x: np.ndarray) -> np.ndarray:
+    def _F(self, x: ArrayLike) -> Array:
         """Gaussian manifold dual Bregman generator function.
 
         Args:
@@ -212,14 +216,14 @@ class GaussianDualGenerator(AutoDiffGenerator):
 
             return (
                 -0.5
-                * anp.log(1 + eta_mu.T @ anp.linalg.inv(eta_sigma) @ eta_mu)
-                - 0.5 * anp.log(anp.linalg.det(-eta_sigma))
-                - 0.5 * self.dimension * (1 + anp.log(2 * np.pi))
+                * jnp.log(1 + eta_mu.T @ jnp.linalg.inv(eta_sigma) @ eta_mu)
+                - 0.5 * jnp.log(jnp.linalg.det(-eta_sigma))
+                - 0.5 * self.dimension * (1 + jnp.log(2 * jnp.pi))
             )
         else:
             eta_mu, eta_sigma = x
 
-            return -0.5 * anp.log(anp.abs(eta_mu * eta_mu - eta_sigma))
+            return -0.5 * jnp.log(jnp.abs(eta_mu * eta_mu - eta_sigma))
 
 
 class GaussianManifold(
@@ -285,68 +289,68 @@ class GaussianManifold(
         )
         return self.display_factory_class(opoint)
 
-    def _lambda_to_theta(self, lamb: np.ndarray) -> np.ndarray:
+    def _lambda_to_theta(self, lamb: ArrayLike) -> Array:
         if self.input_dimension > 1:
             mu, Sigma = _flatten_to_mu_Sigma(self.input_dimension, lamb)
-            inv_Sigma = np.linalg.inv(Sigma)
+            inv_Sigma = jnp.linalg.inv(Sigma)
 
             theta_mu = inv_Sigma @ mu
             theta_Sigma = 0.5 * inv_Sigma
 
-            return np.concatenate([theta_mu, theta_Sigma.flatten()])
+            return jnp.concatenate([theta_mu, theta_Sigma.flatten()])
         else:
             mu, sigma = lamb
 
-            return np.array([mu / sigma, -0.5 / sigma])
+            return jnp.array([mu / sigma, -0.5 / sigma])
 
-    def _lambda_to_eta(self, lamb: np.ndarray) -> np.ndarray:
+    def _lambda_to_eta(self, lamb: ArrayLike) -> Array:
         if self.input_dimension > 1:
             mu, Sigma = _flatten_to_mu_Sigma(self.input_dimension, lamb)
 
             eta_mu = mu
-            eta_Sigma = -Sigma - np.outer(mu, mu)
+            eta_Sigma = -Sigma - jnp.outer(mu, mu)
 
-            return np.concatenate([eta_mu, eta_Sigma.flatten()])
+            return jnp.concatenate([eta_mu, eta_Sigma.flatten()])
         else:
             mu, sigma = lamb
 
-            return np.array([mu, mu * mu + sigma])
+            return jnp.array([mu, mu * mu + sigma])
 
-    def _theta_to_lambda(self, theta: np.ndarray) -> np.ndarray:
+    def _theta_to_lambda(self, theta: ArrayLike) -> Array:
         if self.input_dimension > 1:
             theta_mu, theta_Sigma = _flatten_to_mu_Sigma(
                 self.input_dimension, theta
             )
-            inv_theta_Sigma = np.linalg.inv(theta_Sigma)
+            inv_theta_Sigma = jnp.linalg.inv(theta_Sigma)
 
             mu = 0.5 * inv_theta_Sigma @ theta_mu
             var = 0.5 * inv_theta_Sigma
 
-            return np.concatenate([mu, var.flatten()])
+            return jnp.concatenate([mu, var.flatten()])
         else:
             theta_mu, theta_sigma = theta
 
-            return np.array(
+            return jnp.array(
                 [-0.5 * theta_mu / theta_sigma, -0.5 / theta_sigma]
             )
 
-    def _eta_to_lambda(self, eta: np.ndarray) -> np.ndarray:
+    def _eta_to_lambda(self, eta: ArrayLike) -> Array:
         if self.input_dimension > 1:
             eta_mu, eta_Sigma = _flatten_to_mu_Sigma(self.input_dimension, eta)
 
             mu = eta_mu
-            var = -eta_Sigma - np.outer(eta_mu, eta_mu)
+            var = -eta_Sigma - jnp.outer(eta_mu, eta_mu)
 
-            return np.concatenate([mu, var.flatten()])
+            return jnp.concatenate([mu, var.flatten()])
         else:
             eta_mu, eta_sigma = eta
 
-            return np.array([eta_mu, eta_sigma - eta_mu * eta_mu])
+            return jnp.array([eta_mu, eta_sigma - eta_mu * eta_mu])
 
 
 def _flatten_to_mu_Sigma(
-    input_dimension: int, vec: np.ndarray
-) -> tuple[np.ndarray, np.ndarray]:
+    input_dimension: int, vec: ArrayLike
+) -> tuple[Array, Array]:
     mu = vec[:input_dimension]
     sigma = vec[input_dimension:].reshape(input_dimension, input_dimension)
 

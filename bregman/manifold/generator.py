@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 
-import autograd
-import numpy as np
+import jax.numpy as jnp
+from jax import Array, grad, hessian
+from jax.typing import ArrayLike
 
 
 class Generator(ABC):
@@ -20,7 +21,7 @@ class Generator(ABC):
         self.dimension = dimension
 
     @abstractmethod
-    def F(self, x: np.ndarray) -> np.ndarray:
+    def F(self, x: ArrayLike) -> Array:
         """Function of generator.
 
         Args:
@@ -32,7 +33,7 @@ class Generator(ABC):
         pass
 
     @abstractmethod
-    def grad(self, x: np.ndarray) -> np.ndarray:
+    def grad(self, x: ArrayLike) -> Array:
         """Gradient of generator.
 
         Args:
@@ -44,7 +45,7 @@ class Generator(ABC):
         pass
 
     @abstractmethod
-    def hess(self, x: np.ndarray) -> np.ndarray:
+    def hess(self, x: ArrayLike) -> Array:
         """Hessian of generator.
 
         Args:
@@ -55,7 +56,7 @@ class Generator(ABC):
         """
         pass
 
-    def bregman_divergence(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
+    def bregman_divergence(self, x: ArrayLike, y: ArrayLike) -> Array:
         """Bregman divergence on raw data defined by generator.
 
         Args:
@@ -65,9 +66,9 @@ class Generator(ABC):
         Returns:
             Bregman divergence between x and y.
         """
-        return self.F(x) - self.F(y) - np.inner(self.grad(y), x - y)
+        return self.F(x) - self.F(y) - jnp.inner(self.grad(y), x - y)
 
-    def __call__(self, x: np.ndarray) -> np.ndarray:
+    def __call__(self, x: ArrayLike) -> Array:
         """Function of generator.
 
         Args:
@@ -89,7 +90,7 @@ class AutoDiffGenerator(Generator, ABC):
     functions (reshape operations) before and after autograd is utilized.
     """
 
-    def _pre_autodiff(self, x: np.ndarray) -> np.ndarray:
+    def _pre_autodiff(self, x: ArrayLike) -> Array:
         """Pre-wrapper function which transforms x before it
         auto-differentiation.
 
@@ -102,7 +103,7 @@ class AutoDiffGenerator(Generator, ABC):
         return x
 
     @abstractmethod
-    def _F(self, x: np.ndarray) -> np.ndarray:
+    def _F(self, x: ArrayLike) -> Array:
         """Generator function which takes in the transformed x input.
         Assumes that the input of this function is the output of
         self._pre_auto_diff.
@@ -115,7 +116,7 @@ class AutoDiffGenerator(Generator, ABC):
         """
         pass
 
-    def F(self, x: np.ndarray) -> np.ndarray:
+    def F(self, x: ArrayLike) -> Array:
         """Function of generator.
 
         Args:
@@ -127,7 +128,7 @@ class AutoDiffGenerator(Generator, ABC):
         y = self._pre_autodiff(x)
         return self._F(y)
 
-    def _post_grad(self, x: np.ndarray) -> np.ndarray:
+    def _post_grad(self, x: ArrayLike) -> Array:
         """Post-wrapper function which transforms the gradient of the generator
         after auto-grad operations.
 
@@ -139,7 +140,7 @@ class AutoDiffGenerator(Generator, ABC):
         """
         return x
 
-    def grad(self, x: np.ndarray) -> np.ndarray:
+    def grad(self, x: ArrayLike) -> Array:
         """Gradient of generator.
 
         Args:
@@ -149,10 +150,10 @@ class AutoDiffGenerator(Generator, ABC):
             Generator's gradient evaluated at x.
         """
         y = self._pre_autodiff(x)
-        z = autograd.grad(self._F)(y)
+        z = grad(self._F)(y)
         return self._post_grad(z)
 
-    def _post_hess(self, x: np.ndarray) -> np.ndarray:
+    def _post_hess(self, x: ArrayLike) -> Array:
         """Post-wrapper function which transforms the hessian of the generator
         after auto-Hessian calculation.
 
@@ -164,7 +165,7 @@ class AutoDiffGenerator(Generator, ABC):
         """
         return x
 
-    def hess(self, x: np.ndarray) -> np.ndarray:
+    def hess(self, x: ArrayLike) -> Array:
         """Hessian of generator.
 
         Args:
@@ -174,5 +175,5 @@ class AutoDiffGenerator(Generator, ABC):
             Generator's hessian evaluated at x.
         """
         y = self._pre_autodiff(x)
-        z = autograd.hessian(self._F)(y)
+        z = hessian(self._F)(y)
         return self._post_hess(z)

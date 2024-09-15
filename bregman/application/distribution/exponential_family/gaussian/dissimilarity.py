@@ -1,16 +1,20 @@
-import numpy as np
+import jax.numpy as jnp
+from jax import Array
+from jax.typing import ArrayLike
 
-from bregman.application.distribution.exponential_family.gaussian.gaussian import \
-    GaussianManifold
-from bregman.application.distribution.exponential_family.gaussian.geodesic import \
-    FisherRaoKobayashiGeodesic
+from bregman.application.distribution.exponential_family.gaussian.gaussian import (
+    GaussianManifold,
+)
+from bregman.application.distribution.exponential_family.gaussian.geodesic import (
+    FisherRaoKobayashiGeodesic,
+)
 from bregman.base import Point
 from bregman.constants import EPS
 from bregman.dissimilarity.base import ApproxDissimilarity
 from bregman.dissimilarity.bregman import JeffreysDivergence
 
 
-def scaled_riemannian_SPD_distance(P: np.ndarray, Q: np.ndarray) -> np.ndarray:
+def scaled_riemannian_SPD_distance(P: ArrayLike, Q: ArrayLike) -> Array:
     """Calculates the Riemannian distance for PSD matrices.
 
     Args:
@@ -20,15 +24,15 @@ def scaled_riemannian_SPD_distance(P: np.ndarray, Q: np.ndarray) -> np.ndarray:
     Returns:
         PSD Riemannian distance between P and Q.
     """
-    M = np.linalg.inv(P) @ Q
-    evalues, _ = np.linalg.eig(M)
+    M = jnp.linalg.inv(P) @ Q
+    evalues, _ = jnp.linalg.eig(M)
 
-    return np.sqrt(np.sum(np.square(np.log(evalues))) / 2.0)
+    return jnp.sqrt(jnp.sum(jnp.square(jnp.log(evalues))) / 2.0)
 
 
 def isometric_SPD_embedding_calvo_oller(
     manifold: GaussianManifold, point: Point
-) -> np.ndarray:
+) -> Array:
     """Calculates the Calvo-Oller SPD embedding for Gaussian distributions.
 
     Args:
@@ -43,9 +47,9 @@ def isometric_SPD_embedding_calvo_oller(
     Sigma = dpoint.Sigma
 
     d = len(mu)
-    tmp = Sigma + np.outer(mu, mu)
+    tmp = Sigma + jnp.outer(mu, mu)
 
-    res = np.zeros((d + 1, d + 1))
+    res = jnp.zeros((d + 1, d + 1))
     res[:d, :d] = tmp
     res[:d, d] = mu
     res[d, :d] = mu
@@ -73,7 +77,7 @@ class GaussianFisherRaoDistance(ApproxDissimilarity[GaussianManifold]):
 
     def dissimilarity(
         self, point_1: Point, point_2: Point, eps: float = EPS
-    ) -> np.ndarray:
+    ) -> Array:
         """Calculate an approximate Fisher-Rao distance of points in the
         Gaussian manifold.
 
@@ -87,16 +91,16 @@ class GaussianFisherRaoDistance(ApproxDissimilarity[GaussianManifold]):
         """
         return self._go(point_1, point_2, eps)
 
-    def _lower(self, point_1: Point, point_2: Point) -> np.ndarray:
+    def _lower(self, point_1: Point, point_2: Point) -> Array:
         emb_1 = isometric_SPD_embedding_calvo_oller(self.manifold, point_1)
         emb_2 = isometric_SPD_embedding_calvo_oller(self.manifold, point_2)
 
         return scaled_riemannian_SPD_distance(emb_1, emb_2)
 
-    def _upper(self, point_1: Point, point_2: Point) -> np.ndarray:
-        return np.sqrt(self.jeffreys_divergence(point_1, point_2))
+    def _upper(self, point_1: Point, point_2: Point) -> Array:
+        return jnp.sqrt(self.jeffreys_divergence(point_1, point_2))
 
-    def _go(self, point_1: Point, point_2: Point, eps) -> np.ndarray:
+    def _go(self, point_1: Point, point_2: Point, eps) -> Array:
 
         lb = self._lower(point_1, point_2)
         ub = self._upper(point_1, point_2)

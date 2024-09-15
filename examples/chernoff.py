@@ -1,17 +1,25 @@
 # Visualization and calculation of Chernoff information and Chernoff point on
 # the 1D Gaussian distribution.
 
-import numpy as np
+import jax.numpy as jnp
 
-from bregman.application.distribution.exponential_family.gaussian import \
-    GaussianManifold
-from bregman.base import (ETA_COORDS, LAMBDA_COORDS, THETA_COORDS, DualCoords,
-                          Point)
+from bregman.application.distribution.exponential_family.gaussian import (
+    GaussianManifold,
+)
+from bregman.base import (
+    ETA_COORDS,
+    LAMBDA_COORDS,
+    THETA_COORDS,
+    DualCoords,
+    Point,
+)
 from bregman.dissimilarity.bregman import ChernoffInformation
 from bregman.manifold.bisector import BregmanBisector
 from bregman.manifold.geodesic import BregmanGeodesic
-from bregman.visualizer.matplotlib import (MatplotlibVisualizer,
-                                           Visualize2DTissotIndicatrix)
+from bregman.visualizer.matplotlib import (
+    MatplotlibVisualizer,
+    Visualize2DTissotIndicatrix,
+)
 
 if __name__ == "__main__":
 
@@ -25,8 +33,8 @@ if __name__ == "__main__":
     # Define manifold + objects
     manifold = GaussianManifold(1)
 
-    coord1 = Point(LAMBDA_COORDS, np.array([0.0, 1.0]))
-    coord2 = Point(LAMBDA_COORDS, np.array([1.0, 1.5]))
+    coord1 = Point(LAMBDA_COORDS, jnp.array([0.0, 1.0]))
+    coord2 = Point(LAMBDA_COORDS, jnp.array([1.0, 1.5]))
 
     chernoff_point_alpha = ChernoffInformation(manifold).chernoff_point(
         coord1, coord2
@@ -98,8 +106,9 @@ if __name__ == "__main__":
     eta_chernoff = manifold.convert_coord(ETA_COORDS, chernoff_point).data
     eta1 = manifold.convert_coord(ETA_COORDS, coord1).data
     eta2 = manifold.convert_coord(ETA_COORDS, coord2).data
+
     print(
-        np.dot(
+        jnp.dot(
             eta_chernoff,
             manifold.eta_generator.grad(eta1)
             - manifold.eta_generator.grad(eta2),
@@ -107,8 +116,8 @@ if __name__ == "__main__":
         + manifold.eta_generator(eta1)
         - manifold.eta_generator(eta2)
         - (
-            np.dot(eta1.data, manifold.eta_generator.grad(eta1))
-            - np.dot(eta2.data, manifold.eta_generator.grad(eta2))
+            jnp.dot(eta1, manifold.eta_generator.grad(eta1))
+            - jnp.dot(eta2, manifold.eta_generator.grad(eta2))
         )
     )
 

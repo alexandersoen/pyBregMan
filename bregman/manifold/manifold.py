@@ -1,6 +1,7 @@
 from abc import ABC
 
-import numpy as np
+from jax import Array
+from jax.typing import ArrayLike
 
 from bregman.base import ETA_COORDS, THETA_COORDS, Coords, DualCoords, Point
 from bregman.manifold.connection import FlatConnection
@@ -126,7 +127,7 @@ class BregmanManifold(ABC):
 
         return connection
 
-    def _theta_to_eta(self, theta: np.ndarray) -> np.ndarray:
+    def _theta_to_eta(self, theta: ArrayLike) -> Array:
         r"""Internal method to convert data from :math:`\theta` to :math:`\eta`
         coordinates.
 
@@ -138,7 +139,7 @@ class BregmanManifold(ABC):
         """
         return self.theta_generator.grad(theta)
 
-    def _eta_to_theta(self, eta: np.ndarray) -> np.ndarray:
+    def _eta_to_theta(self, eta: ArrayLike) -> Array:
         r"""Internal method to convert data from :math:`\eta` to :math:`\theta`
         coordinates.
 
