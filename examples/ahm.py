@@ -3,12 +3,19 @@
 # However, we can example this algorithm on the Gaussian manifold when
 # we ensure that the points are centered.
 
-import numpy as np
+import jax.numpy as jnp
 
 from bregman.application.distribution.exponential_family.gaussian import (
-    FisherRaoKobayashiGeodesic, GaussianManifold)
-from bregman.base import (ETA_COORDS, LAMBDA_COORDS, THETA_COORDS, DualCoords,
-                          Point)
+    FisherRaoKobayashiGeodesic,
+    GaussianManifold,
+)
+from bregman.base import (
+    ETA_COORDS,
+    LAMBDA_COORDS,
+    THETA_COORDS,
+    DualCoords,
+    Point,
+)
 from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.visualizer.matplotlib import MatplotlibVisualizer
 
@@ -22,8 +29,8 @@ if __name__ == "__main__":
 
     manifold = GaussianManifold(2)
 
-    coord1 = Point(LAMBDA_COORDS, np.array([0, 0, 1, 0.5, 0.5, 2]))
-    coord2 = Point(LAMBDA_COORDS, np.array([0, 0, 1, 0, 0, 0.5]))
+    coord1 = Point(LAMBDA_COORDS, jnp.array([0, 0, 1, 0.5, 0.5, 2]))
+    coord2 = Point(LAMBDA_COORDS, jnp.array([0, 0, 1, 0, 0, 0.5]))
 
     primal_geo = BregmanGeodesic(
         manifold, coord1, coord2, dcoords=DualCoords.THETA

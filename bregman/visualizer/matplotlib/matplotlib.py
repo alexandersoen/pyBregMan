@@ -4,6 +4,7 @@ from typing import Any, Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
+
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure

@@ -1,4 +1,4 @@
-import numpy as np
+import jax.numpy as jnp
 
 from bregman.barycenter.base import ApproxBarycenter, Barycenter
 from bregman.base import DualCoords, Point
@@ -75,8 +75,8 @@ class BregmanBarycenter(DualBarycenter):
             self.manifold.convert_coord(self.coord.value, p).data
             for p in points
         ]
-        coord_avg = np.sum(
-            np.stack([w * t for w, t in zip(nweights, coords_data)]), axis=0
+        coord_avg = jnp.sum(
+            jnp.stack([w * t for w, t in zip(nweights, coords_data)]), axis=0
         )
         return Point(self.coord.value, coord_avg)
 
@@ -131,7 +131,7 @@ class SkewBurbeaRaoBarycenter(DualApproxBarycenter):
             self.manifold.convert_coord(coord_type, p).data for p in points
         ]
 
-        def get_energy(c: np.ndarray) -> float:
+        def get_energy(c: jnp.ndarray) -> float:
             weighted_term = sum(
                 w * primal_gen(a * c + (1 - a) * t)
                 for w, a, t in zip(nweights, alphas, points_data)
@@ -139,18 +139,18 @@ class SkewBurbeaRaoBarycenter(DualApproxBarycenter):
             return float(alpha_mid * primal_gen(c) - weighted_term)
 
         diff = float("inf")
-        barycenter = np.sum(
-            np.stack([w * t for w, t in zip(nweights, points_data)]), axis=0
+        barycenter = jnp.sum(
+            jnp.stack([w * t for w, t in zip(nweights, points_data)]), axis=0
         )
         cur_energy = get_energy(barycenter)
         while diff > eps:
-            aw_grads = np.stack(
+            aw_grads = jnp.stack(
                 [
                     a * w * primal_gen.grad(a * barycenter + (1 - a) * t)
                     for w, a, t in zip(nweights, alphas, points_data)
                 ]
             )
-            avg_grad = np.sum(aw_grads, axis=0) / alpha_mid
+            avg_grad = jnp.sum(aw_grads, axis=0) / alpha_mid
 
             # Update
             barycenter = dual_gen.grad(avg_grad)

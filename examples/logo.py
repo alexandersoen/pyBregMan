@@ -1,12 +1,20 @@
 # Generate pyBregMan logo from different geodesics on the Gaussian
 # manifold.
 
-import numpy as np
+import jax.numpy as jnp
 
 from bregman.application.distribution.exponential_family.gaussian import (
-    FisherRaoKobayashiGeodesic, GaussianFisherRaoDistance, GaussianManifold)
-from bregman.base import (ETA_COORDS, LAMBDA_COORDS, THETA_COORDS, DualCoords,
-                          Point)
+    FisherRaoKobayashiGeodesic,
+    GaussianFisherRaoDistance,
+    GaussianManifold,
+)
+from bregman.base import (
+    ETA_COORDS,
+    LAMBDA_COORDS,
+    THETA_COORDS,
+    DualCoords,
+    Point,
+)
 from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.visualizer.matplotlib import MatplotlibVisualizer
 
@@ -22,8 +30,8 @@ if __name__ == "__main__":
     # Define manifold + objects
     manifold = GaussianManifold(1)
 
-    coord1 = Point(LAMBDA_COORDS, np.array([-1.0, 1.0]))
-    coord2 = Point(LAMBDA_COORDS, np.array([1.0, 1.0]))
+    coord1 = Point(LAMBDA_COORDS, jnp.array([-1.0, 1.0]))
+    coord2 = Point(LAMBDA_COORDS, jnp.array([1.0, 1.0]))
 
     primal_geo = BregmanGeodesic(
         manifold, coord1, coord2, dcoords=DualCoords.THETA

@@ -1,4 +1,4 @@
-import numpy as np
+import jax.numpy as jnp
 
 from bregman.base import LAMBDA_COORDS, Point
 from bregman.manifold.geodesic import Geodesic
@@ -35,9 +35,9 @@ class FisherRaoMultinomialGeodesic(Geodesic[MultinomialManifold]):
         self.src_dest_dist = dist(source, dest)
 
         self.f = (
-            np.sqrt(probs_dest)
-            - np.sqrt(probs_src) * np.cos(0.5 * self.src_dest_dist)
-        ) / np.sin(0.5 * self.src_dest_dist)
+            jnp.sqrt(probs_dest)
+            - jnp.sqrt(probs_src) * jnp.cos(0.5 * self.src_dest_dist)
+        ) / jnp.sin(0.5 * self.src_dest_dist)
 
     def path(self, t: float) -> Point:
         """Fisher-Rao geodesic evaluated at point t in [0, 1].
@@ -56,9 +56,9 @@ class FisherRaoMultinomialGeodesic(Geodesic[MultinomialManifold]):
 
         theta = t * self.src_dest_dist
 
-        spherical_p = np.sqrt(probs_src) * np.cos(
+        spherical_p = jnp.sqrt(probs_src) * jnp.cos(
             0.5 * theta
-        ) + self.f * np.sin(0.5 * theta)
-        prob_p = np.square(spherical_p)
+        ) + self.f * jnp.sin(0.5 * theta)
+        prob_p = jnp.square(spherical_p)
 
         return Point(LAMBDA_COORDS, prob_p)

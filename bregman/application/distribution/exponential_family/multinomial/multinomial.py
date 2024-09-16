@@ -1,10 +1,14 @@
 import math
 
-import autograd.numpy as anp
-import numpy as np
+import jax.numpy as jnp
+
+from jax import Array
+from jax.typing import ArrayLike
 
 from bregman.application.distribution.exponential_family.exp_family import (
-    ExponentialFamilyDistribution, ExponentialFamilyManifold)
+    ExponentialFamilyDistribution,
+    ExponentialFamilyManifold,
+)
 from bregman.base import LAMBDA_COORDS, THETA_COORDS, DisplayPoint, Point
 from bregman.manifold.generator import AutoDiffGenerator
 
@@ -29,7 +33,7 @@ class MultinomialDistribution(ExponentialFamilyDistribution):
         n: Number of total draws.
     """
 
-    def __init__(self, theta: np.ndarray, n: int) -> None:
+    def __init__(self, theta: ArrayLike, n: int) -> None:
         r"""Initialize Multinomial distribution.
 
         Args:
@@ -40,7 +44,7 @@ class MultinomialDistribution(ExponentialFamilyDistribution):
         self.n = n
 
     @staticmethod
-    def t(x: np.ndarray) -> np.ndarray:
+    def t(x: ArrayLike) -> Array:
         r""":math:`t(x)` sufficient statistics function of the Multinomial
         distribution.
 
@@ -53,7 +57,7 @@ class MultinomialDistribution(ExponentialFamilyDistribution):
         return x
 
     @staticmethod
-    def k(x: np.ndarray) -> np.ndarray:
+    def k(x: ArrayLike) -> Array:
         r""":math:`k(x)` carrier measure of the Multinomial distribution.
 
         Args:
@@ -62,9 +66,9 @@ class MultinomialDistribution(ExponentialFamilyDistribution):
         Returns:
             Carries measure of the Multinomial distribution evaluated at x.
         """
-        return -np.sum([np.log(math.factorial(i)) for i in x])
+        return -jnp.sum([jnp.log(math.factorial(i)) for i in x])
 
-    def F(self, x: np.ndarray) -> np.ndarray:
+    def F(self, x: ArrayLike) -> Array:
         r""":math:`F(x) = \log \int \exp(\theta^T t(x)) \mathrm{d}x`
         normalizer of the Multinomial distribution.
 
@@ -74,8 +78,8 @@ class MultinomialDistribution(ExponentialFamilyDistribution):
         Returns:
             Normalizer of the Multinomial distribution evaluated at parameter value x.
         """
-        agg = sum(np.exp(i) for i in x)
-        return self.n * np.log(1 + agg) - np.log(math.factorial(self.n))
+        agg = sum(jnp.exp(i) for i in x)
+        return self.n * jnp.log(1 + agg) - jnp.log(math.factorial(self.n))
 
 
 class MultinomialPrimalGenerator(AutoDiffGenerator):
@@ -98,7 +102,7 @@ class MultinomialPrimalGenerator(AutoDiffGenerator):
         self.n = n
         self.k = k
 
-    def _F(self, x: np.ndarray) -> np.ndarray:
+    def _F(self, x: ArrayLike) -> Array:
         """Multinomial manifold primal Bregman generator function.
 
         Args:
@@ -107,8 +111,8 @@ class MultinomialPrimalGenerator(AutoDiffGenerator):
         Returns:
             Multinomial manifold primal Bregman generator value evaluated at x.
         """
-        agg = anp.exp(x).sum()
-        return self.n * anp.log(1 + agg) - anp.log(
+        agg = jnp.exp(x).sum()
+        return self.n * jnp.log(1 + agg) - jnp.log(
             float(math.factorial(self.n))
         )
 
@@ -133,7 +137,7 @@ class MultinomialDualGenerator(AutoDiffGenerator):
         self.n = n
         self.k = k
 
-    def _F(self, x: np.ndarray) -> np.ndarray:
+    def _F(self, x: ArrayLike) -> Array:
         """Multinomial manifold dual Bregman generator function.
 
         Args:
@@ -142,9 +146,9 @@ class MultinomialDualGenerator(AutoDiffGenerator):
         Returns:
             Multinomial manifold dual Bregman generator value evaluated at x.
         """
-        ent = anp.sum(x * anp.log(x))
-        other = self.n - anp.sum(x)
-        return ent + other * anp.log(other)
+        ent = jnp.sum(x * jnp.log(x))
+        other = self.n - jnp.sum(x)
+        return ent + other * jnp.log(other)
 
 
 class MultinomialManifold(
@@ -209,22 +213,22 @@ class MultinomialManifold(
             )
         )
 
-    def _lambda_to_theta(self, lamb: np.ndarray) -> np.ndarray:
-        return np.log(lamb[:-1] / lamb[-1])
+    def _lambda_to_theta(self, lamb: ArrayLike) -> Array:
+        return jnp.log(lamb[:-1] / lamb[-1])
 
-    def _lambda_to_eta(self, lamb: np.ndarray) -> np.ndarray:
+    def _lambda_to_eta(self, lamb: ArrayLike) -> Array:
         return self.n * lamb[:-1]
 
-    def _theta_to_lambda(self, theta: np.ndarray) -> np.ndarray:
-        norm = 1 + np.exp(theta).sum()
+    def _theta_to_lambda(self, theta: ArrayLike) -> Array:
+        norm = 1 + jnp.exp(theta).sum()
 
-        lamb = np.zeros(self.k)
-        lamb[:-1] = np.exp(theta) / norm
-        lamb[-1] = 1 / norm
+        lamb = jnp.zeros(self.k)
+        lamb = lamb.at[:-1].set(jnp.exp(theta) / norm)
+        lamb = lamb.at[-1].set(1 / norm)
         return lamb
 
-    def _eta_to_lambda(self, eta: np.ndarray) -> np.ndarray:
-        lamb = np.zeros(self.k)
-        lamb[:-1] = eta / self.n
-        lamb[-1] = (self.n - eta.sum()) / self.n
+    def _eta_to_lambda(self, eta: ArrayLike) -> Array:
+        lamb = jnp.zeros(self.k)
+        lamb = lamb.at[:-1].set(eta / self.n)
+        lamb = lamb.at[-1].set((self.n - eta.sum()) / self.n)
         return lamb

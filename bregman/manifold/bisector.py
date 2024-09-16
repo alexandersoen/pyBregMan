@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-import numpy as np
+import jax.numpy as jnp
 
 from bregman.base import CoordObject, Coords, DualCoords, Point
 from bregman.manifold.manifold import BregmanManifold
@@ -118,6 +118,8 @@ class BregmanBisector(Bisector[BregmanManifold]):
         dest_grad = gen.grad(dest.data)
 
         term1 = gen(source.data) - gen(dest.data)
-        term2 = np.dot(source.data, source_grad) - np.dot(dest.data, dest_grad)
+        term2 = jnp.dot(source.data, source_grad) - jnp.dot(
+            dest.data, dest_grad
+        )
 
         return term1 - term2

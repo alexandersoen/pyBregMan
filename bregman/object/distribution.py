@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-import numpy as np
+from jax import Array
+from jax.typing import ArrayLike
 
 from bregman.base import Shape
 
@@ -18,7 +19,7 @@ class Distribution(ABC):
         self.dimension = dimension
 
     @abstractmethod
-    def pdf(self, x: np.ndarray) -> np.ndarray:
+    def pdf(self, x: ArrayLike) -> Array:
         """Probability density function (p.d.f.) of distribution.
 
         Args:

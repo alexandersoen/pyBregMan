@@ -2,15 +2,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import numpy as np
+import jax.numpy as jnp
 
-from bregman.application.distribution.exponential_family.multinomial import \
-    MultinomialManifold
+from jax.typing import ArrayLike
+
+from bregman.application.distribution.exponential_family.multinomial import (
+    MultinomialManifold,
+)
 from bregman.base import ETA_COORDS, THETA_COORDS, Point
 
 if TYPE_CHECKING:
-    from bregman.application.distribution.mixture.discrete_mixture import \
-        DiscreteMixtureManifold
+    from bregman.application.distribution.mixture.discrete_mixture import (
+        DiscreteMixtureManifold,
+    )
 
 
 class NumberOfCategoriesMissMatch(Exception):
@@ -29,7 +33,7 @@ class CategoricalManifold(MultinomialManifold):
     """
 
     def __init__(
-        self, k: int, categories: list[np.ndarray] | None = None
+        self, k: int, categories: list[ArrayLike] | None = None
     ) -> None:
         """Initialize Categorical manifold.
 
@@ -40,11 +44,11 @@ class CategoricalManifold(MultinomialManifold):
         super().__init__(k, n=1)
 
         if categories is None:
-            categories = [v for v in np.eye(k)]
+            categories = [v for v in jnp.eye(k)]
 
         self.set_categories(categories)
 
-    def set_categories(self, categories: list[np.ndarray]) -> None:
+    def set_categories(self, categories: list[ArrayLike]) -> None:
         """Set the categorical indices to specific category vectors.
 
         Args:
@@ -64,8 +68,9 @@ class CategoricalManifold(MultinomialManifold):
         Returns:
             Mixture manifold dual to the Categorical manifold.
         """
-        from bregman.application.distribution.mixture.discrete_mixture import \
-            DiscreteMixtureManifold
+        from bregman.application.distribution.mixture.discrete_mixture import (
+            DiscreteMixtureManifold,
+        )
 
         return DiscreteMixtureManifold(self.categories)
 

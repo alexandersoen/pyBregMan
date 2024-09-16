@@ -1,4 +1,5 @@
-import numpy as np
+import jax.numpy as jnp
+
 from scipy.special import lambertw
 
 from bregman.base import THETA_COORDS, Curve, Point
@@ -21,30 +22,30 @@ class KL2DBregmanBallCurve(Curve):
         if t < 0.25:
             # Top right
             u = (1 - t / 0.25) * self.radius
-            x = -cx * np.real(lambertw(-np.exp(-u / cx - 1), k=-1))
-            y = -cy * np.real(
-                lambertw(-np.exp(-(self.radius - u) / cy - 1), k=-1)
+            x = -cx * jnp.real(lambertw(-jnp.exp(-u / cx - 1), k=-1))
+            y = -cy * jnp.real(
+                lambertw(-jnp.exp(-(self.radius - u) / cy - 1), k=-1)
             )
         elif t < 0.5:
             # Top Left
             u = (t - 0.25) / 0.25 * self.radius
-            x = -cx * np.real(lambertw(-np.exp(-u / cx - 1), k=0))
-            y = -cy * np.real(
-                lambertw(-np.exp(-(self.radius - u) / cy - 1), k=-1)
+            x = -cx * jnp.real(lambertw(-jnp.exp(-u / cx - 1), k=0))
+            y = -cy * jnp.real(
+                lambertw(-jnp.exp(-(self.radius - u) / cy - 1), k=-1)
             )
         elif t < 0.75:
             # Bot Left
             u = (1 - (t - 0.5) / 0.25) * self.radius
-            x = -cx * np.real(lambertw(-np.exp(-u / cx - 1), k=0))
-            y = -cy * np.real(
-                lambertw(-np.exp(-(self.radius - u) / cy - 1), k=0)
+            x = -cx * jnp.real(lambertw(-jnp.exp(-u / cx - 1), k=0))
+            y = -cy * jnp.real(
+                lambertw(-jnp.exp(-(self.radius - u) / cy - 1), k=0)
             )
         else:
             # Bot Right
             u = (t - 0.75) / 0.25 * self.radius
-            x = -cx * np.real(lambertw(-np.exp(-u / cx - 1), k=-1))
-            y = -cy * np.real(
-                lambertw(-np.exp(-(self.radius - u) / cy - 1), k=0)
+            x = -cx * jnp.real(lambertw(-jnp.exp(-u / cx - 1), k=-1))
+            y = -cy * jnp.real(
+                lambertw(-jnp.exp(-(self.radius - u) / cy - 1), k=0)
             )
 
-        return Point(data=np.array([x, y]), coords=THETA_COORDS)
+        return Point(data=jnp.array([x, y]), coords=THETA_COORDS)

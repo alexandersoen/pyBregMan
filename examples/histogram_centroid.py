@@ -9,32 +9,35 @@ except ImportError:
     exit()
 
 import matplotlib.pyplot as plt
-import numpy as np
+import jax.numpy as jnp
+
+from jax import Array
 from PIL import Image
 
 
-def image_gray_hist(image_url: str, ratio: float = 1.0) -> np.ndarray:
+def image_gray_hist(image_url: str, ratio: float = 1.0) -> Array:
     # Get image from url
     image_path = requests.get(image_url, stream=True).raw
     image = Image.open(image_path)
     size = image.size
     image = image.resize((int(size[0] * ratio), int(size[1] * ratio)))
-    im_array = np.array(image)
+    im_array = jnp.array(image)
 
     # Discritize pixel intensity
-    pixel_array = np.mean(im_array.reshape(-1, 3), axis=1)
-    pixel_array = np.rint(pixel_array)
+    pixel_array = jnp.mean(im_array.reshape(-1, 3), axis=1)
+    pixel_array = jnp.rint(pixel_array)
+    pixel_array = pixel_array.astype(int)
 
     # Make intensity array
-    hist = np.zeros(256)
-    for p in pixel_array:
-        hist[int(p)] += 1
+    _hist = [0] * 256
+    for p in pixel_array.tolist():
+        _hist[p] += 1
 
     # Ensures we are in the interiors of the simplex
-    hist += 1e-8
-    hist = hist / np.sum(hist)
+    _hist = jnp.array(_hist)
+    hist = _hist + 1e-8
 
-    return hist
+    return hist / jnp.sum(hist)
 
 
 image_url_1 = "https://raw.githubusercontent.com/alexandersoen/pyBregMan/main/img/coco_1.jpg"
@@ -49,7 +52,7 @@ from bregman.base import LAMBDA_COORDS, DualCoords, Point
 
 cat_manifold = CategoricalManifold(k=256)
 
-values = np.arange(cat_manifold.k)
+values = jnp.arange(cat_manifold.k)
 
 cute_cat_1 = Point(LAMBDA_COORDS, hist_1)
 cute_cat_2 = Point(LAMBDA_COORDS, hist_2)

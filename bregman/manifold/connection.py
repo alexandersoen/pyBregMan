@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 
-import autograd
-import numpy as np
+import jax.numpy as jnp
+
+from jax import Array, jacobian
+from jax.typing import ArrayLike
 
 from bregman.base import Coords
 from bregman.manifold.generator import Generator
@@ -11,7 +13,7 @@ class Connection(ABC):
     """Abstract connection for manifolds."""
 
     @abstractmethod
-    def metric(self, x: np.ndarray) -> np.ndarray:
+    def metric(self, x: ArrayLike) -> Array:
         """Metric tensor corresponding to connection.
 
         Args:
@@ -23,7 +25,7 @@ class Connection(ABC):
         pass
 
     @abstractmethod
-    def christoffel_first_kind(self, x: np.ndarray) -> np.ndarray:
+    def christoffel_first_kind(self, x: ArrayLike) -> Array:
         """Christoffel symbols of the first kind corresponding to connection.
 
         args:
@@ -35,7 +37,7 @@ class Connection(ABC):
         pass
 
     @abstractmethod
-    def cubic(self, x: np.ndarray) -> np.ndarray:
+    def cubic(self, x: ArrayLike) -> Array:
         """Cubic tensor corresponding to connection.
 
         Args:
@@ -65,7 +67,7 @@ class FlatConnection(Connection):
         self.coord = coords
         self.generator = generator
 
-    def metric(self, x: np.ndarray) -> np.ndarray:
+    def metric(self, x: ArrayLike) -> Array:
         """Metric tensor corresponding to a flat connection.
 
         Args:
@@ -76,7 +78,7 @@ class FlatConnection(Connection):
         """
         return self.generator.hess(x)
 
-    def christoffel_first_kind(self, x: np.ndarray) -> np.ndarray:
+    def christoffel_first_kind(self, x: ArrayLike) -> Array:
         """Christoffel symbols of the first kind corresponding to a flat connection.
         This will always to the zero tensor.
 
@@ -86,9 +88,9 @@ class FlatConnection(Connection):
         Returns:
             Christoffel symbols evaluated at point x. Always zero.
         """
-        return np.zeros((self.generator.dimension, self.generator.dimension))
+        return jnp.zeros((self.generator.dimension, self.generator.dimension))
 
-    def cubic(self, x: np.ndarray) -> np.ndarray:
+    def cubic(self, x: ArrayLike) -> Array:
         """Cubic tensor corresponding to flat connection.
         Requires the generator to be defined using autograd.numpy functions
         to allow for auto-differentiation.
@@ -99,4 +101,4 @@ class FlatConnection(Connection):
         Returns:
             Cubic tensor evaluated at point x.
         """
-        return autograd.jacobian(self.generator.hess)(x)
+        return jacobian(self.generator.hess)(x)

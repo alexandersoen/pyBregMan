@@ -1,4 +1,6 @@
-import numpy as np
+import jax.numpy as jnp
+
+from jax import Array
 
 from bregman.base import LAMBDA_COORDS, Point
 from bregman.dissimilarity.base import Dissimilarity
@@ -9,7 +11,7 @@ from .multinomial import MultinomialManifold
 class FisherRaoMultinomialDistance(Dissimilarity[MultinomialManifold]):
     """Fisher-Rao distance on the Multinomial manifold."""
 
-    def dissimilarity(self, point_1: Point, point_2: Point) -> np.ndarray:
+    def dissimilarity(self, point_1: Point, point_2: Point) -> Array:
         """Calculate Fisher-Rao distance for points on the Multinomial manifold.
 
         Args:
@@ -24,6 +26,6 @@ class FisherRaoMultinomialDistance(Dissimilarity[MultinomialManifold]):
 
         return (
             2
-            * np.sqrt(self.manifold.k)
-            * np.arccos(np.sum(np.sqrt(probs_1 * probs_2)))
+            * jnp.sqrt(self.manifold.k)
+            * jnp.arccos(jnp.sum(jnp.sqrt(probs_1 * probs_2)))
         )

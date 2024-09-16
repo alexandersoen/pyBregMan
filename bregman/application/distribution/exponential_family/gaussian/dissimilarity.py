@@ -27,7 +27,7 @@ def scaled_riemannian_SPD_distance(P: ArrayLike, Q: ArrayLike) -> Array:
     M = jnp.linalg.inv(P) @ Q
     evalues, _ = jnp.linalg.eig(M)
 
-    return jnp.sqrt(jnp.sum(jnp.square(jnp.log(evalues))) / 2.0)
+    return jnp.sqrt(jnp.sum(jnp.square(jnp.log(jnp.real(evalues)))) / 2.0)
 
 
 def isometric_SPD_embedding_calvo_oller(
@@ -50,10 +50,10 @@ def isometric_SPD_embedding_calvo_oller(
     tmp = Sigma + jnp.outer(mu, mu)
 
     res = jnp.zeros((d + 1, d + 1))
-    res[:d, :d] = tmp
-    res[:d, d] = mu
-    res[d, :d] = mu
-    res[d, d] = 1
+    res = res.at[:d, :d].set(tmp)
+    res = res.at[:d, d].set(mu)
+    res = res.at[d, :d].set(mu)
+    res = res.at[d, d].set(1)
 
     return res
 
@@ -100,12 +100,11 @@ class GaussianFisherRaoDistance(ApproxDissimilarity[GaussianManifold]):
     def _upper(self, point_1: Point, point_2: Point) -> Array:
         return jnp.sqrt(self.jeffreys_divergence(point_1, point_2))
 
-    def _go(self, point_1: Point, point_2: Point, eps) -> Array:
-
+    def _go(self, point_1: Point, point_2: Point, eps: float) -> Array:
         lb = self._lower(point_1, point_2)
         ub = self._upper(point_1, point_2)
 
-        if ub / lb < 1 + eps:
+        if ub < lb + eps:
             return ub
         else:
             kobayashi_geodesic = FisherRaoKobayashiGeodesic(

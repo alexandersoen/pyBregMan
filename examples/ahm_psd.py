@@ -1,9 +1,14 @@
 # Inductive arithmetic-harmonic-mean converging to the geometric matrix mean.
-import numpy as np
+import jax.numpy as jnp
 
 from bregman.application.psd import PSDManifold
-from bregman.base import (ETA_COORDS, LAMBDA_COORDS, THETA_COORDS, DualCoords,
-                          Point)
+from bregman.base import (
+    ETA_COORDS,
+    LAMBDA_COORDS,
+    THETA_COORDS,
+    DualCoords,
+    Point,
+)
 from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.visualizer.matplotlib import MatplotlibVisualizer
 
@@ -17,8 +22,8 @@ if __name__ == "__main__":
 
     manifold = PSDManifold(2)
 
-    coord1 = Point(LAMBDA_COORDS, np.array([1, 0.5, 2]))
-    coord2 = Point(LAMBDA_COORDS, np.array([1, 0, 0.5]))
+    coord1 = Point(LAMBDA_COORDS, jnp.array([1, 0.5, 2]))
+    coord2 = Point(LAMBDA_COORDS, jnp.array([1, 0, 0.5]))
 
     primal_geo = BregmanGeodesic(
         manifold, coord1, coord2, dcoords=DualCoords.THETA

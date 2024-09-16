@@ -1,12 +1,14 @@
 # Calculate various centroids of two points on the Gaussian manifold. Example
 # from README.md.
 
-import numpy as np
+import jax.numpy as jnp
 
-from bregman.application.distribution.exponential_family.gaussian import \
-    GaussianManifold
-from bregman.application.distribution.exponential_family.gaussian.geodesic import \
-    FisherRaoKobayashiGeodesic
+from bregman.application.distribution.exponential_family.gaussian import (
+    GaussianManifold,
+)
+from bregman.application.distribution.exponential_family.gaussian.geodesic import (
+    FisherRaoKobayashiGeodesic,
+)
 from bregman.base import LAMBDA_COORDS, DualCoords, Point
 
 if __name__ == "__main__":
@@ -15,9 +17,11 @@ if __name__ == "__main__":
     manifold = GaussianManifold(input_dimension=2)
 
     # Define data
-    to_vector = lambda mu, sigma: np.concatenate([mu, sigma.flatten()])
-    mu_1, sigma_1 = np.array([0.0, 1.0]), np.array([[1.0, 0.5], [0.5, 2.0]])
-    mu_2, sigma_2 = np.array([1.0, 2.0]), np.array([[2.0, 1.0], [1.0, 1.0]])
+    def to_vector(mu, sigma):
+        return jnp.concatenate([mu, sigma.flatten()])
+
+    mu_1, sigma_1 = jnp.array([0.0, 1.0]), jnp.array([[1.0, 0.5], [0.5, 2.0]])
+    mu_2, sigma_2 = jnp.array([1.0, 2.0]), jnp.array([[2.0, 1.0], [1.0, 1.0]])
 
     point_1 = Point(LAMBDA_COORDS, to_vector(mu_1, sigma_1))
     point_2 = Point(LAMBDA_COORDS, to_vector(mu_2, sigma_2))
@@ -29,8 +33,10 @@ if __name__ == "__main__":
     print("KL(point_1 || point_2):", kl)
     print("KL(point_2 || point_1):", rkl)
 
-    from bregman.barycenter.bregman import (BregmanBarycenter,
-                                            SkewBurbeaRaoBarycenter)
+    from bregman.barycenter.bregman import (
+        BregmanBarycenter,
+        SkewBurbeaRaoBarycenter,
+    )
 
     # We can define and calculate centroids
     theta_barycenter = BregmanBarycenter(manifold, DualCoords.THETA)
@@ -52,8 +58,9 @@ if __name__ == "__main__":
     print("Bhattacharyya Centroid:", manifold.convert_to_display(br_centroid))
     print("Fisher-Rao Centroid:", manifold.convert_to_display(fr_centroid))
 
-    from bregman.visualizer.matplotlib.callback import \
-        VisualizeGaussian2DCovariancePoints
+    from bregman.visualizer.matplotlib.callback import (
+        VisualizeGaussian2DCovariancePoints,
+    )
     from bregman.visualizer.matplotlib.matplotlib import MatplotlibVisualizer
 
     # These objects can be visualized through matplotlib

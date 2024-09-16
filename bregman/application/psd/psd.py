@@ -1,5 +1,7 @@
-import autograd.numpy as anp
-import numpy as np
+import jax.numpy as jnp
+
+from jax import Array
+from jax.typing import ArrayLike
 
 from bregman.application.application import ApplicationManifold
 from bregman.base import DisplayPoint
@@ -16,10 +18,10 @@ class PSDPoint(DisplayPoint):
         Returns:
             Matrix shape dimension of the PSD data (i.e, d in dxd PSD matrix).
         """
-        return int(0.5 * (np.sqrt(8 * len(self.data) + 1) - 1))
+        return int(0.5 * (jnp.sqrt(8 * len(self.data) + 1) - 1))
 
     @property
-    def m(self) -> np.ndarray:
+    def m(self) -> Array:
         """Calculates matrix representation of PSD data (which is a vector).
 
         Returns:
@@ -51,14 +53,14 @@ class PSDPrimalGenerator(AutoDiffGenerator):
         """
         super().__init__(dimension)
 
-        triu_indices = np.triu_indices(self.dimension)
-        selector = np.arange(self.dimension * self.dimension).reshape(
+        triu_indices = jnp.triu_indices(self.dimension)
+        selector = jnp.arange(self.dimension * self.dimension).reshape(
             self.dimension, self.dimension
         )[triu_indices]
 
         self.selector = selector
 
-    def _pre_autodiff(self, x: np.ndarray) -> np.ndarray:
+    def _pre_autodiff(self, x: ArrayLike) -> Array:
         """Converts vector data into flattened matrix data format.
 
         Args:
@@ -69,7 +71,7 @@ class PSDPrimalGenerator(AutoDiffGenerator):
         """
         return psd_data_to_matrices(x, self.dimension).flatten()
 
-    def _post_grad(self, x: np.ndarray) -> np.ndarray:
+    def _post_grad(self, x: ArrayLike) -> Array:
         """Extracts the gradients corresponding to the original minimal PSD
         vector data format.
 
@@ -81,7 +83,7 @@ class PSDPrimalGenerator(AutoDiffGenerator):
         """
         return x[self.selector]
 
-    def _post_hess(self, x: np.ndarray) -> np.ndarray:
+    def _post_hess(self, x: ArrayLike) -> Array:
         """Extracts the Hessian corresponding to the original minimal PSD
         vector data format.
 
@@ -91,9 +93,9 @@ class PSDPrimalGenerator(AutoDiffGenerator):
         Returns:
             Extracted elements corresponding to the original PSD data's vector format.
         """
-        return x[np.ix_(self.selector, self.selector)]
+        return x[jnp.ix_(self.selector, self.selector)]
 
-    def _F(self, x: np.ndarray) -> np.ndarray:
+    def _F(self, x: ArrayLike) -> Array:
         """PSD primal Bregman generator function.
 
         Args:
@@ -103,7 +105,7 @@ class PSDPrimalGenerator(AutoDiffGenerator):
             PSD manifold primal Bregman generator value.
         """
         m = x.reshape(self.dimension, self.dimension)
-        return -anp.log(anp.linalg.det(m))
+        return -jnp.log(jnp.linalg.det(m))
 
 
 class PSDDualGenerator(AutoDiffGenerator):
@@ -116,14 +118,14 @@ class PSDDualGenerator(AutoDiffGenerator):
     def __init__(self, dimension: int):
         super().__init__(dimension)
 
-        triu_indices = np.triu_indices(self.dimension)
-        selector = np.arange(self.dimension * self.dimension).reshape(
+        triu_indices = jnp.triu_indices(self.dimension)
+        selector = jnp.arange(self.dimension * self.dimension).reshape(
             self.dimension, self.dimension
         )[triu_indices]
 
         self.selector = selector
 
-    def _pre_autodiff(self, x: np.ndarray) -> np.ndarray:
+    def _pre_autodiff(self, x: ArrayLike) -> Array:
         """Converts vector data into flattened matrix data format.
 
         Args:
@@ -134,7 +136,7 @@ class PSDDualGenerator(AutoDiffGenerator):
         """
         return psd_data_to_matrices(x, self.dimension).flatten()
 
-    def _post_grad(self, x: np.ndarray) -> np.ndarray:
+    def _post_grad(self, x: ArrayLike) -> Array:
         """Extracts the gradients corresponding to the original minimal PSD
         vector data format.
 
@@ -146,7 +148,7 @@ class PSDDualGenerator(AutoDiffGenerator):
         """
         return x[self.selector]
 
-    def _post_hess(self, x: np.ndarray) -> np.ndarray:
+    def _post_hess(self, x: ArrayLike) -> Array:
         """Extracts the Hessian corresponding to the original minimal PSD
         vector data format.
 
@@ -156,9 +158,9 @@ class PSDDualGenerator(AutoDiffGenerator):
         Returns:
             Extracted elements corresponding to the original PSD data's vector format.
         """
-        return x[np.ix_(self.selector, self.selector)]
+        return x[jnp.ix_(self.selector, self.selector)]
 
-    def _F(self, x: np.ndarray) -> np.ndarray:
+    def _F(self, x: ArrayLike) -> Array:
         """PSD dual Bregman generator function.
 
         Args:
@@ -168,7 +170,7 @@ class PSDDualGenerator(AutoDiffGenerator):
             PSD manifold dual Bregman generator value.
         """
         m = x.reshape(self.dimension, self.dimension)
-        return anp.log(anp.linalg.det(anp.linalg.inv(m))) - self.dimension
+        return jnp.log(jnp.linalg.det(jnp.linalg.inv(m))) - self.dimension
 
 
 class PSDManifold(ApplicationManifold[PSDPoint]):
@@ -196,20 +198,20 @@ class PSDManifold(ApplicationManifold[PSDPoint]):
 
         self.eta_generator = G_gen  # Fix typing
 
-    def _lambda_to_theta(self, lamb: np.ndarray) -> np.ndarray:
+    def _lambda_to_theta(self, lamb: ArrayLike) -> Array:
         return lamb
 
-    def _lambda_to_eta(self, lamb: np.ndarray) -> np.ndarray:
+    def _lambda_to_eta(self, lamb: ArrayLike) -> Array:
         return self._theta_to_eta(lamb)
 
-    def _theta_to_lambda(self, theta: np.ndarray) -> np.ndarray:
+    def _theta_to_lambda(self, theta: ArrayLike) -> Array:
         return theta
 
-    def _eta_to_lambda(self, eta: np.ndarray) -> np.ndarray:
+    def _eta_to_lambda(self, eta: ArrayLike) -> Array:
         return self._eta_to_theta(eta)
 
 
-def psd_data_from_matrices(m: np.ndarray, dimension: int) -> np.ndarray:
+def psd_data_from_matrices(m: ArrayLike, dimension: int) -> Array:
     """Function to convert a PSD matrix into a minimal vector PSD data format.
 
     Args:
@@ -219,10 +221,10 @@ def psd_data_from_matrices(m: np.ndarray, dimension: int) -> np.ndarray:
     Returns:
         Minimal vector represented a PSD matrix.
     """
-    return m[np.triu_indices(dimension)]
+    return m[jnp.triu_indices(dimension)]
 
 
-def psd_data_to_matrices(d: np.ndarray, dimension: int) -> np.ndarray:
+def psd_data_to_matrices(d: ArrayLike, dimension: int) -> Array:
     """Function to convert minimal vector PSD data format into a PSD matrix.
 
     Args:
@@ -232,8 +234,8 @@ def psd_data_to_matrices(d: np.ndarray, dimension: int) -> np.ndarray:
     Returns:
         PSD matrix constructed from minimal data.
     """
-    m = np.empty((dimension, dimension))
-    m[np.triu_indices(dimension)] = d
-    m[np.tril_indices(dimension)] = d
+    m = jnp.empty((dimension, dimension))
+    m = m.at[jnp.triu_indices(dimension)].set(d)
+    m = m.at[jnp.tril_indices(dimension)].set(d)
 
     return m

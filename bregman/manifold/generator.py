@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 import jax.numpy as jnp
+
 from jax import Array, grad, hessian
 from jax.typing import ArrayLike
 
