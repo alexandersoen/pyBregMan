@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -14,6 +15,8 @@ from bregman.manifold.bisector import Bisector
 from bregman.manifold.geodesic import BregmanGeodesic, Geodesic
 from bregman.manifold.manifold import BregmanManifold
 from bregman.visualizer.visualizer import BregmanVisualizer
+
+matplotlib.use("TkAgg")
 
 
 @dataclass
