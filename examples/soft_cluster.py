@@ -57,11 +57,12 @@ if __name__ == "__main__":
             LAMBDA_COORDS, mixing_point
         ).data
         for w, d in zip(weights, dist_points):
-            total += w * np.apply_along_axis(
+            change = w * np.apply_along_axis(
                 ef_mixture_manifold.ef_manifold.point_to_distribution(d).pdf,
                 1,
                 data,
             )
+            total += np.asarray(change)
         return np.sum(np.log(total))
 
     # For plotting
@@ -100,7 +101,7 @@ if __name__ == "__main__":
         for i, (w, d) in enumerate(zip(cur_weights, cur_dist_points)):
 
             div_values = np.stack(
-                [eta_gaussian_div(x, d) for x in embedded_data]
+                [np.asarray(eta_gaussian_div(x, d)) for x in embedded_data]
             )
             div_weights[:, i] += w * np.exp(-div_values)
 

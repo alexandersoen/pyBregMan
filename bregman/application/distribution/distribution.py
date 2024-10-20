@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-import numpy as np
+from jax import Array
 
 from bregman.application.application import ApplicationManifold
 from bregman.base import DisplayPoint, Point
@@ -44,7 +44,7 @@ class DistributionManifold(
         """
         pass
 
-    def kl_divergence(self, point_1: Point, point_2: Point) -> np.ndarray:
+    def kl_divergence(self, point_1: Point, point_2: Point) -> Array:
         """KL-Divergence between two points (their distributions) in the
         manifold.
 
@@ -59,7 +59,7 @@ class DistributionManifold(
 
     def jensen_shannon_divergence(
         self, point_1: Point, point_2: Point
-    ) -> np.ndarray:
+    ) -> Array:
         """Jensen-Shannon-Divergence between two points (their distributions)
         in the manifold.
 

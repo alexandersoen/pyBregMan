@@ -1,10 +1,16 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-import numpy as np
+from jax import Array
+from jax.typing import ArrayLike
 
-from bregman.base import (ETA_COORDS, LAMBDA_COORDS, THETA_COORDS,
-                          DisplayPoint, Point)
+from bregman.base import (
+    ETA_COORDS,
+    LAMBDA_COORDS,
+    THETA_COORDS,
+    DisplayPoint,
+    Point,
+)
 from bregman.manifold.generator import Generator
 from bregman.manifold.manifold import BregmanManifold
 
@@ -69,7 +75,7 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
         return dpoint
 
     @abstractmethod
-    def _lambda_to_theta(self, lamb: np.ndarray) -> np.ndarray:
+    def _lambda_to_theta(self, lamb: ArrayLike) -> Array:
         r"""Internal method to convert data from :math:`\lambda` to
         :math:`\theta` coordinates.
 
@@ -82,7 +88,7 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
         pass
 
     @abstractmethod
-    def _lambda_to_eta(self, lamb: np.ndarray) -> np.ndarray:
+    def _lambda_to_eta(self, lamb: ArrayLike) -> Array:
         r"""Internal method to convert data from :math:`\lambda` to
         :math:`\eta` coordinates.
 
@@ -95,7 +101,7 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
         pass
 
     @abstractmethod
-    def _theta_to_lambda(self, theta: np.ndarray) -> np.ndarray:
+    def _theta_to_lambda(self, theta: ArrayLike) -> Array:
         r"""Internal method to convert data from :math:`\theta` to
         :math:`\lambda` coordinates.
 
@@ -108,7 +114,7 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
         pass
 
     @abstractmethod
-    def _eta_to_lambda(self, eta: np.ndarray) -> np.ndarray:
+    def _eta_to_lambda(self, eta: ArrayLike) -> Array:
         r"""Internal method to convert data from :math:`\eta` to
         :math:`\lambda` coordinates.
 

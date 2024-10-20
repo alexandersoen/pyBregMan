@@ -1,15 +1,22 @@
 from abc import ABC
 from typing import Generic, Sequence, TypeVar
 
-import numpy as np
+import jax.numpy as jnp
+
+from jax import Array
+from jax.typing import ArrayLike
 
 from bregman.application.application import LAMBDA_COORDS
 from bregman.application.distribution.distribution import DistributionManifold
 from bregman.application.distribution.exponential_family.multinomial import (
-    MultinomialDualGenerator, MultinomialPrimalGenerator)
+    MultinomialDualGenerator,
+    MultinomialPrimalGenerator,
+)
 from bregman.base import DisplayPoint, Point
-from bregman.dissimilarity.bregman import (BregmanDivergence,
-                                           SkewBurbeaRaoDivergence)
+from bregman.dissimilarity.bregman import (
+    BregmanDivergence,
+    SkewBurbeaRaoDivergence,
+)
 from bregman.object.distribution import Distribution
 
 
@@ -46,7 +53,7 @@ class MixtureDistribution(Distribution, Generic[MixedDistribution]):
 
     def __init__(
         self,
-        weights: np.ndarray,
+        weights: ArrayLike,
         distributions: Sequence[MixedDistribution],
     ) -> None:
         """Initialize Mixture distribution.
@@ -63,7 +70,7 @@ class MixtureDistribution(Distribution, Generic[MixedDistribution]):
         self.weights = weights
         self.distributions = distributions
 
-    def pdf(self, x: np.ndarray) -> np.ndarray:
+    def pdf(self, x: ArrayLike) -> Array:
         """P.d.f. of a mixture distribution.
 
         Args:
@@ -72,11 +79,11 @@ class MixtureDistribution(Distribution, Generic[MixedDistribution]):
         Returns:
             Mixture distribution's p.d.f. evaluated at x.
         """
-        all_w = np.zeros(len(self.distributions))
-        all_w[:-1] = self.weights
-        all_w[-1] = 1 - np.sum(self.weights)
+        all_w = jnp.zeros(len(self.distributions))
+        all_w = all_w.at[:-1].set(self.weights)
+        all_w = all_w.at[-1].set(1 - jnp.sum(self.weights))
 
-        return np.sum(
+        return jnp.sum(
             [w * float(p.pdf(x)) for w, p in zip(all_w, self.distributions)]
         )
 
@@ -154,7 +161,7 @@ class MixtureManifold(
             )
         )
 
-    def kl_divergence(self, point_1: Point, point_2: Point) -> np.ndarray:
+    def kl_divergence(self, point_1: Point, point_2: Point) -> Array:
         """KL-Divergence of two points in a Mixture manifold.
 
         Args:
@@ -169,7 +176,7 @@ class MixtureManifold(
 
     def jensen_shannon_divergence(
         self, point_1: Point, point_2: Point
-    ) -> np.ndarray:
+    ) -> Array:
         """Jensen-Shannon Divergence of two points in a Mixture manifold.
 
         Args:
@@ -182,14 +189,14 @@ class MixtureManifold(
         br_div = SkewBurbeaRaoDivergence(self, alpha=0.5)
         return br_div(point_1, point_2)
 
-    def _lambda_to_theta(self, lamb: np.ndarray) -> np.ndarray:
+    def _lambda_to_theta(self, lamb: ArrayLike) -> Array:
         return lamb
 
-    def _lambda_to_eta(self, lamb: np.ndarray) -> np.ndarray:
+    def _lambda_to_eta(self, lamb: ArrayLike) -> Array:
         return self._theta_to_eta(lamb)
 
-    def _theta_to_lambda(self, theta: np.ndarray) -> np.ndarray:
+    def _theta_to_lambda(self, theta: ArrayLike) -> Array:
         return theta
 
-    def _eta_to_lambda(self, eta: np.ndarray) -> np.ndarray:
+    def _eta_to_lambda(self, eta: ArrayLike) -> Array:
         return self._eta_to_theta(eta)

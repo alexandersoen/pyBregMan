@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-import numpy as np
+import jax.numpy as jnp
+
+from jax import Array
+from jax.typing import ArrayLike
 
 from bregman.application.application import MyDisplayPoint
 from bregman.application.distribution.distribution import DistributionManifold
@@ -18,7 +21,7 @@ class ExponentialFamilyDistribution(Distribution, ABC):
         theta: Natural parameters of the exponential family distribution.
     """
 
-    def __init__(self, theta: np.ndarray, dimension: Shape) -> None:
+    def __init__(self, theta: ArrayLike, dimension: Shape) -> None:
         """Initialize exponential family distribution.
 
         Args:
@@ -30,7 +33,7 @@ class ExponentialFamilyDistribution(Distribution, ABC):
 
     @staticmethod
     @abstractmethod
-    def t(x: np.ndarray) -> np.ndarray:
+    def t(x: ArrayLike) -> Array:
         r""":math:`t(x)` sufficient statistics function.
 
         Args:
@@ -43,7 +46,7 @@ class ExponentialFamilyDistribution(Distribution, ABC):
 
     @staticmethod
     @abstractmethod
-    def k(x: np.ndarray) -> np.ndarray:
+    def k(x: ArrayLike) -> Array:
         r""":math:`k(x)` carrier measure.
 
         Args:
@@ -55,7 +58,7 @@ class ExponentialFamilyDistribution(Distribution, ABC):
         pass
 
     @abstractmethod
-    def F(self, x: np.ndarray) -> np.ndarray:
+    def F(self, x: ArrayLike) -> Array:
         r""":math:`F(x) = \log \int \exp(\theta^T t(x)) \mathrm{d}x` normalizer.
 
         Args:
@@ -66,7 +69,7 @@ class ExponentialFamilyDistribution(Distribution, ABC):
         """
         pass
 
-    def pdf(self, x: np.ndarray) -> np.ndarray:
+    def pdf(self, x: ArrayLike) -> Array:
         """P.d.f. of exponential family distribution.
 
         Args:
@@ -75,8 +78,8 @@ class ExponentialFamilyDistribution(Distribution, ABC):
         Returns:
             P.d.f. of exponential family distribution evaluated at x.
         """
-        inner = np.dot(self.theta, self.t(x))
-        return np.exp(inner - self.F(self.theta) + self.k(x))
+        inner = jnp.dot(self.theta, self.t(x))
+        return jnp.exp(inner - self.F(self.theta) + self.k(x))
 
 
 MyExpFamDistribution = TypeVar(
@@ -122,7 +125,7 @@ class ExponentialFamilyManifold(
         self.eta_generator = expected_generator  # Fix typing
         self.distribution_class = distribution_class
 
-    def t(self, x: np.ndarray) -> np.ndarray:
+    def t(self, x: ArrayLike) -> Array:
         r""":math:`t(x)` sufficient statistics function.
 
         Args:
@@ -133,7 +136,7 @@ class ExponentialFamilyManifold(
         """
         return self.distribution_class.t(x)
 
-    def kl_divergence(self, point_1: Point, point_2: Point) -> np.ndarray:
+    def kl_divergence(self, point_1: Point, point_2: Point) -> Array:
         """KL-Divergence of two points in an exponential family manifold.
 
         This is equivalent to the Bregman divergence of natural or expected

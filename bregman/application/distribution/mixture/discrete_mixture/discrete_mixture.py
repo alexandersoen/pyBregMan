@@ -2,15 +2,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import numpy as np
+from jax import Array
+from jax.typing import ArrayLike
 
 from bregman.application.distribution.mixture.mixture import MixtureManifold
 from bregman.base import ETA_COORDS, THETA_COORDS, Point
 from bregman.object.distribution import Distribution
 
 if TYPE_CHECKING:
-    from bregman.application.distribution.exponential_family.categorical import \
-        CategoricalManifold
+    from bregman.application.distribution.exponential_family.categorical import (
+        CategoricalManifold,
+    )
 
 
 class DeltaDistribution(Distribution):
@@ -20,7 +22,7 @@ class DeltaDistribution(Distribution):
         x: Point at Indicator.
     """
 
-    def __init__(self, x: np.ndarray) -> None:
+    def __init__(self, x: ArrayLike) -> None:
         """Initialize Indicator distribution.
 
         Args:
@@ -29,7 +31,7 @@ class DeltaDistribution(Distribution):
         super().__init__((1,))
         self.x = x
 
-    def pdf(self, x: np.ndarray) -> np.ndarray:
+    def pdf(self, x: ArrayLike) -> Array:
         """Evaluate p.d.f. of Indicator distribution.
 
         Args:
@@ -46,7 +48,7 @@ class DiscreteMixtureManifold(MixtureManifold[DeltaDistribution]):
     Dirac distributions.
     """
 
-    def __init__(self, xs: list[np.ndarray]) -> None:
+    def __init__(self, xs: list[ArrayLike]) -> None:
         """Initialize Discrete Mixture manifold.
 
         Args:
@@ -62,8 +64,9 @@ class DiscreteMixtureManifold(MixtureManifold[DeltaDistribution]):
         Returns:
             Categorical manifold dual to the Mixture manifold.
         """
-        from bregman.application.distribution.exponential_family.categorical import \
-            CategoricalManifold
+        from bregman.application.distribution.exponential_family.categorical import (
+            CategoricalManifold,
+        )
 
         return CategoricalManifold(
             len(self.distributions), [d.x for d in self.distributions]
