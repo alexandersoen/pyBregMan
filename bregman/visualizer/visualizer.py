@@ -94,9 +94,7 @@ class BregmanVisualizer(ABC):
         pass
 
     @abstractmethod
-    def plot_geodesic(
-        self, coords: Coords, geodesic: Geodesic, **kwargs
-    ) -> None:
+    def plot_geodesic(self, coords: Coords, geodesic: Geodesic, **kwargs) -> None:
         """Back-end plotting function for Geodesic objects.
 
         Args:
@@ -107,9 +105,7 @@ class BregmanVisualizer(ABC):
         pass
 
     @abstractmethod
-    def plot_bisector(
-        self, coords: Coords, bisector: Bisector, **kwargs
-    ) -> None:
+    def plot_bisector(self, coords: Coords, bisector: Bisector, **kwargs) -> None:
         """Back-end plotting function for Bisector objects.
 
         Args:
@@ -120,9 +116,7 @@ class BregmanVisualizer(ABC):
         pass
 
     @abstractmethod
-    def animate_geodesic(
-        self, coords: Coords, geodesic: Geodesic, **kwargs
-    ) -> None:
+    def animate_geodesic(self, coords: Coords, geodesic: Geodesic, **kwargs) -> None:
         """Back-end animation function for Geodesic objects.
 
         Args:
@@ -132,9 +126,7 @@ class BregmanVisualizer(ABC):
         """
         pass
 
-    def run_callbacks(
-        self, obj: BregmanObject, coords: Coords, **kwarg
-    ) -> None:
+    def run_callbacks(self, obj: BregmanObject, coords: Coords, **kwarg) -> None:
         """Run all callback function on specific object.
 
         Args:
@@ -184,6 +176,74 @@ class BregmanVisualizer(ABC):
 
 
 TVisualizer = TypeVar("TVisualizer", bound=BregmanVisualizer)
+
+
+class MultiBregmanVisualizer(ABC, Generic[TVisualizer]):
+    """Abstract visualization class to manage multiple BregmanVisualizers."""
+
+    def __init__(self, row_size: int, col_size: int) -> None:
+        """Initialize multi-visualizer of size row_size by col_size.
+
+        Args:
+            row_size: Row size of multi-visualizer.
+            col_size: Column size of multi-visualizer.
+        """
+        self.visualizations: list[list[tuple[Coords, TVisualizer] | None]] = [
+            [None] * col_size
+        ] * row_size
+
+    @abstractmethod
+    def new_visualizer(
+        self,
+        row_idx: int,
+        col_idx: int,
+        manifold: BregmanManifold,
+        coord: Coords,
+        **kwargs,
+    ) -> None:
+        """Set new visualizer at position (row_idx, col_idx).
+
+        Args:
+            row_idx: Row index.
+            col_idx: Col index.
+            manifold: Bregman manifold in which geometric objects are being plotted in.
+            coords: Coordinates the visualizer is plotting at.
+            kwargs: Any other optional argument.
+        """
+        pass
+
+    def get_visualizer(self, row_idx: int, col_idx: int) -> TVisualizer | None:
+        """Get visualizer at position (row_idx, col_idx).
+
+        Args:
+            row_idx: Row index.
+            col_idx: Col index.
+
+        Returns:
+            Optional visualizer at position (row_idx, col_idx) if exists.
+        """
+        vis = self.visualizations[row_idx][col_idx]
+        if vis is None:
+            return None
+        return vis[1]
+
+    @abstractmethod
+    def visualize_all(self) -> None:
+        """Visualize all visualizers in class."""
+        pass
+
+    def __getitem__(self, index) -> TVisualizer | None:
+        """Get visualizer at position (row_idx, col_idx).
+
+        Args:
+            row_idx: Row index.
+            col_idx: Col index.
+
+        Returns:
+            Optional visualizer at position (row_idx, col_idx) if exists.
+        """
+        row_idx, col_idx = index
+        return self.get_visualizer(row_idx, col_idx)
 
 
 class VisualizerCallback(ABC, Generic[TVisualizer]):
