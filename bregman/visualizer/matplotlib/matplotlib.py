@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
+import copy
+import itertools
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -317,12 +319,29 @@ class MatplotlibVisualizer(BregmanVisualizer):
 
 class MultiMatplotlibVisualizer(MultiBregmanVisualizer[MatplotlibVisualizer]):
 
-    def __init__(self, row_size: int, col_size: int):
+    def __init__(
+        self,
+        nrows: int,
+        ncols: int,
+        resolution: int = 120,
+        frames: int = 120,
+        intervals: int = 1,
+    ):
 
-        super().__init__(row_size, col_size)
+        super().__init__(nrows, ncols)
 
         plt.style.use("bmh")
-        self.fig, self.axes = plt.subplots(nrows=row_size, ncols=col_size)
+        self.fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+
+        self.axes = [[None] * ncols] * nrows
+        for i in range(nrows):
+            for j in range(ncols):
+                self.axes[i][j] = axes.flatten()[j * nrows + i]
+        self.axes: list[list[Axes]]
+
+        self.resolution = resolution
+        self.frames = frames
+        self.intervals = intervals
 
     def new_visualizer(
         self,
@@ -331,7 +350,7 @@ class MultiMatplotlibVisualizer(MultiBregmanVisualizer[MatplotlibVisualizer]):
         manifold: BregmanManifold,
         coord: Coords,
         **kwargs,
-    ) -> None:
+    ) -> MatplotlibVisualizer:
         """Set new visualizer at position (row_idx, col_idx).
 
         Args:
@@ -343,7 +362,70 @@ class MultiMatplotlibVisualizer(MultiBregmanVisualizer[MatplotlibVisualizer]):
         """
 
         visualizer = MatplotlibVisualizer(
-            manifold, fig=self.fig, ax=self.axes[row_idx, col_idx], **kwargs
+            manifold,
+            fig=self.fig,
+            ax=self.axes[row_idx][col_idx],
+            resolution=self.resolution,
+            frames=self.frames,
+            intervals=self.intervals,
+            **kwargs,
         )
 
         self.visualizations[row_idx][col_idx] = (coord, visualizer)
+        return visualizer
+
+    def copy_visualizer(
+        self,
+        from_row_idx: int,
+        from_col_idx: int,
+        to_row_idx: int,
+        to_col_idx: int,
+        coord: Coords | None = None,
+    ) -> None:
+        maybe_vis = self.visualizations[from_row_idx][from_col_idx]
+        if maybe_vis is None:
+            new_vis = None
+        else:
+            old_coord, vis = maybe_vis
+            vis = copy.copy(vis)
+            if coord is None:
+                coord = old_coord
+            vis.ax = self.axes[to_row_idx][to_col_idx]
+
+            new_vis = (coord, vis)
+
+        self.visualizations[to_row_idx][to_col_idx] = new_vis
+
+    def visualize_all(self) -> None:
+        """Visualize all visualizers in class."""
+
+        combined_update_func_list = []
+        for maybe_vis in itertools.chain.from_iterable(self.visualizations):
+            if maybe_vis is None:
+                continue
+
+            coord, vis = maybe_vis
+
+            vis._plot(coord)
+
+            if vis.update_func_list:
+                combined_update_func_list += vis.update_func_list
+
+        # Animation if specified
+        if combined_update_func_list:
+
+            def update_all(frame: int):
+                res = []
+                for update in combined_update_func_list:
+                    res.append(update(frame))
+
+                return res
+
+            ani = animation.FuncAnimation(
+                fig=self.fig,
+                func=update_all,
+                frames=self.frames,
+                interval=self.intervals,
+            )
+
+        plt.show()

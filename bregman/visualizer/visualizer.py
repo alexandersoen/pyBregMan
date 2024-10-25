@@ -1,3 +1,4 @@
+import copy
 import warnings
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
@@ -181,16 +182,16 @@ TVisualizer = TypeVar("TVisualizer", bound=BregmanVisualizer)
 class MultiBregmanVisualizer(ABC, Generic[TVisualizer]):
     """Abstract visualization class to manage multiple BregmanVisualizers."""
 
-    def __init__(self, row_size: int, col_size: int) -> None:
+    def __init__(self, nrows: int, ncols: int) -> None:
         """Initialize multi-visualizer of size row_size by col_size.
 
         Args:
-            row_size: Row size of multi-visualizer.
-            col_size: Column size of multi-visualizer.
+            nrows: Number of row of the multi-visualizer.
+            ncols: Number of columns of the multi-visualizer.
         """
         self.visualizations: list[list[tuple[Coords, TVisualizer] | None]] = [
-            [None] * col_size
-        ] * row_size
+            [None] * ncols
+        ] * nrows
 
     @abstractmethod
     def new_visualizer(
@@ -200,7 +201,7 @@ class MultiBregmanVisualizer(ABC, Generic[TVisualizer]):
         manifold: BregmanManifold,
         coord: Coords,
         **kwargs,
-    ) -> None:
+    ) -> TVisualizer:
         """Set new visualizer at position (row_idx, col_idx).
 
         Args:
@@ -226,6 +227,17 @@ class MultiBregmanVisualizer(ABC, Generic[TVisualizer]):
         if vis is None:
             return None
         return vis[1]
+
+    @abstractmethod
+    def copy_visualizer(
+        self,
+        from_row_idx: int,
+        from_col_idx: int,
+        to_row_idx: int,
+        to_col_idx: int,
+        coord: Coords | None = None,
+    ) -> None:
+        pass
 
     @abstractmethod
     def visualize_all(self) -> None:

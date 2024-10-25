@@ -17,12 +17,14 @@ from bregman.base import (
     Point,
 )
 from bregman.manifold.geodesic import BregmanGeodesic
-from bregman.visualizer.matplotlib import MatplotlibVisualizer
+from bregman.visualizer.matplotlib import MultiMatplotlibVisualizer
 
 if __name__ == "__main__":
 
     DISPLAY_TYPE = LAMBDA_COORDS
     VISUALIZE_INDEX = (2, 3)
+
+    coords = [LAMBDA_COORDS, ETA_COORDS, THETA_COORDS]
 
     num_frames = 120
     resolution = 120
@@ -32,17 +34,18 @@ if __name__ == "__main__":
     coord1 = Point(LAMBDA_COORDS, jnp.array([0, 0, 1, 0.5, 0.5, 2]))
     coord2 = Point(LAMBDA_COORDS, jnp.array([0, 0, 1, 0, 0, 0.5]))
 
-    primal_geo = BregmanGeodesic(
-        manifold, coord1, coord2, dcoords=DualCoords.THETA
-    )
-    dual_geo = BregmanGeodesic(
-        manifold, coord1, coord2, dcoords=DualCoords.ETA
-    )
+    primal_geo = BregmanGeodesic(manifold, coord1, coord2, dcoords=DualCoords.THETA)
+    dual_geo = BregmanGeodesic(manifold, coord1, coord2, dcoords=DualCoords.ETA)
     kobayashi = FisherRaoKobayashiGeodesic(manifold, coord1, coord2)
 
+    # manifold, VISUALIZE_INDEX, resolution=resolution, frames=num_frames
+
     # Define visualizer
-    visualizer = MatplotlibVisualizer(
-        manifold, VISUALIZE_INDEX, resolution=resolution, frames=num_frames
+    multivisualizer = MultiMatplotlibVisualizer(
+        nrows=1, ncols=3, resolution=resolution, frames=num_frames
+    )
+    visualizer = multivisualizer.new_visualizer(
+        0, 0, manifold, coords[0], plot_dims=VISUALIZE_INDEX
     )
 
     # Add objects to visualize
@@ -53,7 +56,7 @@ if __name__ == "__main__":
     visualizer.plot_object(dual_geo, c="blue")
 
     p, q = coord1, coord2
-    ITERS = 5
+    ITERS = 2
     for i in range(ITERS):
         primal_geo = BregmanGeodesic(manifold, p, q, dcoords=DualCoords.THETA)
         dual_geo = BregmanGeodesic(manifold, p, q, dcoords=DualCoords.ETA)
@@ -72,4 +75,7 @@ if __name__ == "__main__":
         kobayashi(0.5), marker="x", c="purple", zorder=99, label="FR Centroid"
     )
 
-    visualizer.visualize(DISPLAY_TYPE)
+    multivisualizer.copy_visualizer(0, 0, 0, 1, coords[1])
+    multivisualizer.copy_visualizer(0, 0, 0, 2, coords[2])
+
+    multivisualizer.visualize_all()
