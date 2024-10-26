@@ -326,12 +326,13 @@ class MultiMatplotlibVisualizer(MultiBregmanVisualizer[MatplotlibVisualizer]):
         resolution: int = 120,
         frames: int = 120,
         intervals: int = 1,
+        **kwargs,
     ):
 
         super().__init__(nrows, ncols)
 
         plt.style.use("bmh")
-        self.fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+        self.fig, axes = plt.subplots(nrows=nrows, ncols=ncols, **kwargs)
 
         self.axes = [[None] * ncols] * nrows
         for i in range(nrows):
@@ -349,6 +350,7 @@ class MultiMatplotlibVisualizer(MultiBregmanVisualizer[MatplotlibVisualizer]):
         col_idx: int,
         manifold: BregmanManifold,
         coord: Coords,
+        name: str = "",
         **kwargs,
     ) -> MatplotlibVisualizer:
         """Set new visualizer at position (row_idx, col_idx).
@@ -371,7 +373,7 @@ class MultiMatplotlibVisualizer(MultiBregmanVisualizer[MatplotlibVisualizer]):
             **kwargs,
         )
 
-        self.visualizations[row_idx][col_idx] = (coord, visualizer)
+        self.visualizations[row_idx][col_idx] = (coord, visualizer, name)
         return visualizer
 
     def copy_visualizer(
@@ -381,18 +383,24 @@ class MultiMatplotlibVisualizer(MultiBregmanVisualizer[MatplotlibVisualizer]):
         to_row_idx: int,
         to_col_idx: int,
         coord: Coords | None = None,
+        name: str | None = None,
     ) -> None:
         maybe_vis = self.visualizations[from_row_idx][from_col_idx]
         if maybe_vis is None:
             new_vis = None
         else:
-            old_coord, vis = maybe_vis
+            old_coord, vis, old_name = maybe_vis
             vis = copy.copy(vis)
+
             if coord is None:
                 coord = old_coord
+
+            if name is None:
+                name = old_name
+
             vis.ax = self.axes[to_row_idx][to_col_idx]
 
-            new_vis = (coord, vis)
+            new_vis = (coord, vis, name)
 
         self.visualizations[to_row_idx][to_col_idx] = new_vis
 
@@ -404,9 +412,10 @@ class MultiMatplotlibVisualizer(MultiBregmanVisualizer[MatplotlibVisualizer]):
             if maybe_vis is None:
                 continue
 
-            coord, vis = maybe_vis
+            coord, vis, name = maybe_vis
 
             vis._plot(coord)
+            vis.ax.set_title(name)
 
             if vis.update_func_list:
                 combined_update_func_list += vis.update_func_list

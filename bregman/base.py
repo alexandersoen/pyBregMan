@@ -23,6 +23,16 @@ class Coords:
     """
 
     coords_name: str
+    latex_name: str | None = None
+
+    def __str__(self) -> str:
+        return self.coords_name
+
+    def latex_str(self) -> str:
+        if self.latex_name is None:
+            return str(self)
+
+        return self.latex_name
 
 
 class BregmanObject:
@@ -118,9 +128,9 @@ class DisplayPoint(ABC, Point):
         return self.display()
 
 
-THETA_COORDS = Coords("theta")
-ETA_COORDS = Coords("eta")
-LAMBDA_COORDS = Coords("lambda")
+THETA_COORDS = Coords("theta", latex_name=r"\theta")
+ETA_COORDS = Coords("eta", latex_name=r"\eta")
+LAMBDA_COORDS = Coords("lambda", latex_name=r"\lambda")
 
 
 class DualCoords(Enum):

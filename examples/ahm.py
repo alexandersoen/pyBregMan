@@ -15,9 +15,15 @@ from bregman.base import (
     THETA_COORDS,
     DualCoords,
     Point,
+    Coords,
 )
 from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.visualizer.matplotlib import MultiMatplotlibVisualizer
+
+
+def coord_subtitle(coord: Coords) -> str:
+    return f"${coord.latex_str()}$-Coords"
+
 
 if __name__ == "__main__":
 
@@ -45,7 +51,12 @@ if __name__ == "__main__":
         nrows=1, ncols=3, resolution=resolution, frames=num_frames
     )
     visualizer = multivisualizer.new_visualizer(
-        0, 0, manifold, coords[0], plot_dims=VISUALIZE_INDEX
+        0,
+        0,
+        manifold,
+        coords[0],
+        name=coord_subtitle(coords[0]),
+        plot_dims=VISUALIZE_INDEX,
     )
 
     # Add objects to visualize
@@ -75,7 +86,11 @@ if __name__ == "__main__":
         kobayashi(0.5), marker="x", c="purple", zorder=99, label="FR Centroid"
     )
 
-    multivisualizer.copy_visualizer(0, 0, 0, 1, coords[1])
-    multivisualizer.copy_visualizer(0, 0, 0, 2, coords[2])
+    multivisualizer.copy_visualizer(
+        0, 0, 0, 1, coords[1], name=coord_subtitle(coords[1])
+    )
+    multivisualizer.copy_visualizer(
+        0, 0, 0, 2, coords[2], name=coord_subtitle(coords[2])
+    )
 
     multivisualizer.visualize_all()

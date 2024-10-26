@@ -189,7 +189,7 @@ class MultiBregmanVisualizer(ABC, Generic[TVisualizer]):
             nrows: Number of row of the multi-visualizer.
             ncols: Number of columns of the multi-visualizer.
         """
-        self.visualizations: list[list[tuple[Coords, TVisualizer] | None]] = [
+        self.visualizations: list[list[tuple[Coords, TVisualizer, str] | None]] = [
             [None] * ncols
         ] * nrows
 
@@ -200,6 +200,7 @@ class MultiBregmanVisualizer(ABC, Generic[TVisualizer]):
         col_idx: int,
         manifold: BregmanManifold,
         coord: Coords,
+        name: str = "",
         **kwargs,
     ) -> TVisualizer:
         """Set new visualizer at position (row_idx, col_idx).
@@ -209,6 +210,7 @@ class MultiBregmanVisualizer(ABC, Generic[TVisualizer]):
             col_idx: Col index.
             manifold: Bregman manifold in which geometric objects are being plotted in.
             coords: Coordinates the visualizer is plotting at.
+            name: Name of sub-visualization.
             kwargs: Any other optional argument.
         """
         pass
@@ -227,6 +229,14 @@ class MultiBregmanVisualizer(ABC, Generic[TVisualizer]):
         if vis is None:
             return None
         return vis[1]
+
+    def set_name(self, row_idx: int, col_idx: int, name: str) -> None:
+        vis_vals = self.visualizations[row_idx][col_idx]
+        if vis_vals is None:
+            raise ValueError(f"No visualizer to name at ({row_idx}, {col_idx})")
+
+        coord, vis, _ = vis_vals
+        self.visualizations[row_idx][col_idx] = (coord, vis, name)
 
     @abstractmethod
     def copy_visualizer(
