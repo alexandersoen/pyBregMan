@@ -55,8 +55,16 @@ class BregmanVisualizer(ABC):
         self.plot_list: list[tuple[BregmanObject, dict]] = []
         self.animate_list: list[tuple[BregmanObject, dict]] = []
         self.callback_list: list["VisualizerCallback"] = []
+        self.per_obj_callback: list[
+            tuple[BregmanObject, "VisualizerCallback", dict]
+        ] = []
 
-    def plot_object(self, obj: BregmanObject, **kwargs) -> None:
+    def plot_object(
+        self,
+        obj: BregmanObject,
+        callbacks: "VisualizerCallback | list[VisualizerCallback] | None" = None,
+        **kwargs,
+    ) -> None:
         """Add object to be plotted.
 
         Args:
@@ -64,6 +72,13 @@ class BregmanVisualizer(ABC):
             **kwargs: Additional arguments to be passed into the plotting back-end.
         """
         self.plot_list.append((obj, kwargs))
+
+        # Add per element call backs
+        if isinstance(callbacks, VisualizerCallback):
+            self.per_obj_callback.append((obj, callbacks, kwargs))
+        elif type(callbacks) is list:
+            for c in callbacks:
+                self.per_obj_callback.append((obj, c, kwargs))
 
     def animate_object(self, obj: BregmanObject, **kwargs) -> None:
         """Add object to be animated.
@@ -148,32 +163,36 @@ class BregmanVisualizer(ABC):
         Args:
             coords: Coordinate the visualization is being made in.
         """
-        for obj, kwarg in self.plot_list:
+        for obj, kwargs in self.plot_list:
             match obj:
                 case Point():
-                    self.plot_point(coords, obj, **kwarg)
+                    self.plot_point(coords, obj, **kwargs)
                 case Geodesic():
-                    self.plot_geodesic(coords, obj, **kwarg)
+                    self.plot_geodesic(coords, obj, **kwargs)
                 case Bisector():
                     if self.manifold.dimension != 2:
                         warnings.warn(
-                            f"Bisector {obj} cannot be visualized due to non-unique projection."
+                            f"Bisector {obj} cannot be visualized due to non-unique "
+                            "projection."
                         )
                     else:
-                        self.plot_bisector(coords, obj, **kwarg)
+                        self.plot_bisector(coords, obj, **kwargs)
                 case _:
                     raise NoPlottingRoutine
 
-        for obj, kwarg in self.animate_list:
+        for obj, kwargs in self.animate_list:
             match obj:
                 case Geodesic():
-                    self.animate_geodesic(coords, obj, **kwarg)
+                    self.animate_geodesic(coords, obj, **kwargs)
                 case _:
                     raise NoAnimationRoutine
 
-        for obj, kwarg in self.plot_list:
+        for obj, c, kwargs in self.per_obj_callback:
+            c.call(obj, coords, self, **kwargs)
+
+        for obj, kwargs in self.plot_list:
             for c in self.callback_list:
-                c.call(obj, coords, self, **kwarg)
+                c.call(obj, coords, self, **kwargs)
 
 
 TVisualizer = TypeVar("TVisualizer", bound=BregmanVisualizer)

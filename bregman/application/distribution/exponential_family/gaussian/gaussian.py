@@ -39,9 +39,7 @@ class GaussianPoint(DisplayPoint):
         Returns:
             Covariance of Gaussian distribution corresponding to the point.
         """
-        return self.data[self.dimension :].reshape(
-            self.dimension, self.dimension
-        )
+        return self.data[self.dimension :].reshape(self.dimension, self.dimension)
 
     def display(self) -> str:
         """Generated pretty printed string on display.
@@ -193,8 +191,10 @@ class GaussianPrimalGenerator(AutoDiffGenerator):
 
             theta_mu, theta_sigma = x
 
-            return -0.25 * theta_mu * theta_mu / theta_sigma + 0.5 * jnp.log(
-                -jnp.pi / theta_sigma
+            return (
+                -0.25 * theta_mu * theta_mu / theta_sigma
+                + 0.5 * jnp.log(jnp.pi)
+                - 0.5 * jnp.log(-theta_sigma)
             )
 
 
@@ -215,8 +215,7 @@ class GaussianDualGenerator(AutoDiffGenerator):
             eta_mu, eta_sigma = _flatten_to_mu_Sigma(self.dimension, x)
 
             return (
-                -0.5
-                * jnp.log(1 + eta_mu.T @ jnp.linalg.inv(eta_sigma) @ eta_mu)
+                -0.5 * jnp.log(1 + eta_mu.T @ jnp.linalg.inv(eta_sigma) @ eta_mu)
                 - 0.5 * jnp.log(jnp.linalg.det(-eta_sigma))
                 - 0.5 * self.dimension * (1 + jnp.log(2 * jnp.pi))
             )
@@ -226,9 +225,7 @@ class GaussianDualGenerator(AutoDiffGenerator):
             return -0.5 * jnp.log(jnp.abs(eta_mu * eta_mu - eta_sigma))
 
 
-class GaussianManifold(
-    ExponentialFamilyManifold[GaussianPoint, GaussianDistribution]
-):
+class GaussianManifold(ExponentialFamilyManifold[GaussianPoint, GaussianDistribution]):
     """Gaussian exponential family manifold.
 
     Attributes:
@@ -318,9 +315,7 @@ class GaussianManifold(
 
     def _theta_to_lambda(self, theta: ArrayLike) -> Array:
         if self.input_dimension > 1:
-            theta_mu, theta_Sigma = _flatten_to_mu_Sigma(
-                self.input_dimension, theta
-            )
+            theta_mu, theta_Sigma = _flatten_to_mu_Sigma(self.input_dimension, theta)
             inv_theta_Sigma = jnp.linalg.inv(theta_Sigma)
 
             mu = 0.5 * inv_theta_Sigma @ theta_mu
@@ -330,9 +325,7 @@ class GaussianManifold(
         else:
             theta_mu, theta_sigma = theta
 
-            return jnp.array(
-                [-0.5 * theta_mu / theta_sigma, -0.5 / theta_sigma]
-            )
+            return jnp.array([-0.5 * theta_mu / theta_sigma, -0.5 / theta_sigma])
 
     def _eta_to_lambda(self, eta: ArrayLike) -> Array:
         if self.input_dimension > 1:
@@ -348,9 +341,7 @@ class GaussianManifold(
             return jnp.array([eta_mu, eta_sigma - eta_mu * eta_mu])
 
 
-def _flatten_to_mu_Sigma(
-    input_dimension: int, vec: ArrayLike
-) -> tuple[Array, Array]:
+def _flatten_to_mu_Sigma(input_dimension: int, vec: ArrayLike) -> tuple[Array, Array]:
     mu = vec[:input_dimension]
     sigma = vec[input_dimension:].reshape(input_dimension, input_dimension)
 

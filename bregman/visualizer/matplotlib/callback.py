@@ -29,20 +29,19 @@ def draw_ellipse(
     scale: float,
     **kwargs,
 ) -> None:
-    L = np.linalg.cholesky(cov).T
+    _cov = scale * cov
+    L = np.linalg.cholesky(np.array(_cov)).T
 
     p = np.arange(npoints + 1)
     thetas = 2 * np.pi * p / npoints
 
-    v = scale * np.column_stack([np.cos(thetas), np.sin(thetas)]).dot(L.T)
+    v = np.column_stack([np.cos(thetas), np.sin(thetas)]).dot(L.T)
     v = v + mu
 
     visualizer.ax.plot(v[:, 0], v[:, 1], **kwargs)
 
 
-class VisualizeGaussian2DCovariancePoints(
-    VisualizerCallback[MatplotlibVisualizer]
-):
+class VisualizeGaussian2DCovariancePoints(VisualizerCallback[MatplotlibVisualizer]):
     """Callback to visualize the covariance matrix of points in 2D Gaussian
     manifolds.
 
@@ -126,7 +125,9 @@ class Visualize2DTissotIndicatrix(VisualizerCallback[MatplotlibVisualizer]):
         npoints: Number of points used to generate the Tissot indicatrix.
     """
 
-    def __init__(self, scale: float = 1.0, npoints: int = 1_000) -> None:
+    def __init__(
+        self, scale: float = 1.0, npoints: int = 1_000, inverse: bool = False
+    ) -> None:
         """Initialize callback for Tissot indicatrix visualizer.
 
         Args:
@@ -135,6 +136,111 @@ class Visualize2DTissotIndicatrix(VisualizerCallback[MatplotlibVisualizer]):
         """
         super().__init__()
 
+        self.scale = scale
+        self.npoints = npoints
+        self.inverse = inverse
+
+    def call(
+        self,
+        obj: BregmanObject,
+        coords: Coords,
+        visualizer: MatplotlibVisualizer,
+        **kwargs,
+    ) -> None:
+        r"""Plots ellipsoid of the Tissot indicatrix for points in 2D Bregman
+        manifolds. The callback accepts any type of BregmanObject and only
+        creates this visualization if it is a Point of compatible dimension.
+
+        Visualization only occurs in the :math:`\lambda`-coordinates.
+
+        Args:
+            obj: Objects being plotted.
+            coords: Coordinates the Tissot indicatrix is being evaluated on.
+            visualizer: Visualizer the callback is being called in.
+            **kwargs: Additional kwargs passed to matplotlib plot function.
+
+        Raises:
+            ValueError: Raises exception when visualizer's manifold is incompatible.
+        """
+
+        if visualizer.manifold.dimension != 2:
+            raise ValueError(f"Dimension {visualizer.manifold.dimension} != 2")
+
+        if not isinstance(obj, Point):
+            return None
+
+        # For non-dual coordinates, we use the change of measure
+        # calculation on the metric tensor.
+        if coords != THETA_COORDS or coords != ETA_COORDS:
+            tmp_coord = THETA_COORDS
+            _point = visualizer.manifold.convert_coord(tmp_coord, obj)
+            point = visualizer.manifold.convert_coord(coords, obj)
+
+            _metric = visualizer.manifold.bregman_connection(
+                DualCoords(tmp_coord)
+            ).metric(_point.data)
+
+            # Calculate change of measure Jacobian
+            change_of_coords = visualizer.manifold.atlas.transitions[
+                (coords, tmp_coord)
+            ]
+            change_jac = jax.jacobian(change_of_coords)(point.data)
+            metric = jnp.einsum("ai,bj,ab->ij", change_jac, change_jac, _metric)
+
+        else:
+            point = visualizer.manifold.convert_coord(coords, obj)
+
+            metric = visualizer.manifold.bregman_connection(DualCoords(coords)).metric(
+                point.data
+            )
+
+        if self.inverse:
+            metric = jnp.linalg.inv(metric)
+
+        tissot_kwargs = {
+            "c": kwargs["c"] if "c" in kwargs else None,
+            "alpha": kwargs["alpha"] if "alpha" in kwargs else None,
+            "ls": kwargs["ls"] if "ls" in kwargs else "--",
+            "zorder": 0,
+        }
+
+        draw_ellipse(
+            visualizer,
+            point.data,
+            metric,
+            self.npoints,
+            self.scale,
+            **tissot_kwargs,
+        )
+
+
+class EllipseAtPoint(VisualizerCallback[MatplotlibVisualizer]):
+    """Callback to visualize ellipse at points with fixed covariance.
+
+    Parameters:
+        cov: Covariance matrix being used.
+        scale: Scale of the radius of the Tissot indicatrix ellipsoid being plotted.
+        npoints: Number of points used to generate the Tissot indicatrix.
+    """
+
+    def __init__(
+        self,
+        cov: ArrayLike,
+        cov_coord: Coords,
+        scale: float = 1.0,
+        npoints: int = 1_000,
+    ) -> None:
+        """Initialize callback for Tissot indicatrix visualizer.
+
+        Args:
+            cov: Covariance matrix being used.
+            scale: Scale of the radius of the Tissot indicatrix ellipsoid being plotted.
+            npoints: Number of points used to generate the Tissot indicatrix.
+        """
+        super().__init__()
+
+        self.cov = cov
+        self.cov_coord = cov_coord
         self.scale = scale
         self.npoints = npoints
 
@@ -167,37 +273,18 @@ class Visualize2DTissotIndicatrix(VisualizerCallback[MatplotlibVisualizer]):
         if not isinstance(obj, Point):
             return None
 
-        obj: Point
-
-        # For non-dual coordinates, we use the change of measure
-        # calculation on the metric tensor.
-        if coords != THETA_COORDS or coords != ETA_COORDS:
-            tmp_coord = THETA_COORDS
-            _point = visualizer.manifold.convert_coord(tmp_coord, obj)
-
-            _metric = visualizer.manifold.bregman_connection(
-                DualCoords(tmp_coord)
-            ).metric(_point.data)
-
-            # Calculate change of measure Jacobian
+        # Calculate change of measure Jacobian
+        point = visualizer.manifold.convert_coord(coords, obj)
+        if self.cov_coord != coords:
             change_of_coords = visualizer.manifold.atlas.transitions[
-                (_point.coords, coords)
+                (coords, self.cov_coord)
             ]
-            change_grad = jax.jacobian(change_of_coords)(_point.data)
-            metric = jnp.einsum(
-                "ai,bj,ab->ij", change_grad, change_grad, _metric
-            )
-
-            point = visualizer.manifold.convert_coord(coords, obj)
-
+            change_jac = jax.jacobian(change_of_coords)(point.data)
+            cov = jnp.einsum("ai,bj,ab->ij", change_jac, change_jac, self.cov)
         else:
-            point = visualizer.manifold.convert_coord(coords, obj)
+            cov = self.cov
 
-            metric = visualizer.manifold.bregman_connection(
-                DualCoords(coords)
-            ).metric(point.data)
-
-        tissot_kwargs = {
+        cov_kwargs = {
             "c": kwargs["c"] if "c" in kwargs else None,
             "alpha": kwargs["alpha"] if "alpha" in kwargs else None,
             "ls": kwargs["ls"] if "ls" in kwargs else "--",
@@ -207,8 +294,8 @@ class Visualize2DTissotIndicatrix(VisualizerCallback[MatplotlibVisualizer]):
         draw_ellipse(
             visualizer,
             point.data,
-            metric,
+            cov,
             self.npoints,
             self.scale,
-            **tissot_kwargs,
+            **cov_kwargs,
         )

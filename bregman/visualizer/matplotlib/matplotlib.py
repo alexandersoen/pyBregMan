@@ -314,6 +314,7 @@ class MatplotlibVisualizer(BregmanVisualizer):
         if type(path) is str:
             path = Path(path)
 
+        plt.tight_layout()
         plt.savefig(path)
 
 
