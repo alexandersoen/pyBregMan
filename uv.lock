@@ -8,18 +8,6 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "autograd"
-version = "1.7.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "numpy" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/28/ed/67975d75c0fe71220c8df2370c6c1390805790a641359b502f39c042c0c1/autograd-1.7.0.tar.gz", hash = "sha256:de743fd368d6df523cd37305dcd171861a9752a144493677d2c9f5a56983ff2f", size = 2564855 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/6d/90/d13cf396989052cadd8511c1878b0913bbce28eeef5feb95710a92e03076/autograd-1.7.0-py3-none-any.whl", hash = "sha256:49680300f842f3a8722b060ac0d3ed7aca071d1ad4d3d38c9fdadafdcc73c30b", size = 52522 },
-]
-
-[[package]]
 name = "contourpy"
 version = "1.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -233,7 +221,7 @@ name = "importlib-metadata"
 version = "8.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "zipp" },
+    { name = "zipp", marker = "python_full_version < '3.10'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/cd/12/33e59336dca5be0c398a7482335911a33aa0e20776128f038019f1a95f1b/importlib_metadata-8.5.0.tar.gz", hash = "sha256:71522656f0abace1d072b9e5481a48f07c138e00f079c38c8f883823f9c26bd7", size = 55304 }
 wheels = [
@@ -652,7 +640,6 @@ name = "pybregman"
 version = "0.1.1"
 source = { editable = "." }
 dependencies = [
-    { name = "autograd" },
     { name = "jax" },
     { name = "jaxlib" },
     { name = "matplotlib" },
@@ -662,11 +649,11 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "autograd" },
     { name = "jax" },
     { name = "jaxlib", specifier = ">=0.4.13" },
     { name = "matplotlib" },
     { name = "numpy", specifier = "<2.0.0" },
+    { name = "pybregman", editable = "." },
     { name = "scipy" },
 ]
 

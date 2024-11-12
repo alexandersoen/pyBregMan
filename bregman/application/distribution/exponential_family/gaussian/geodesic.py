@@ -1,8 +1,5 @@
 import jax.numpy as jnp
-
 from jax import Array
-from jax.typing import ArrayLike
-
 from scipy.linalg import expm, fractional_matrix_power
 
 from bregman.application.distribution.exponential_family.gaussian.gaussian import (
@@ -158,7 +155,7 @@ class FisherRaoKobayashiGeodesic(Geodesic[GaussianManifold]):
 
         self._Gmix = self._G0_neg_sqrt @ self._G1 @ self._G0_neg_sqrt
 
-    def _get_Gi(self, mu: ArrayLike, Sigma: ArrayLike) -> Array:
+    def _get_Gi(self, mu: Array, Sigma: Array) -> Array:
 
         Di = jnp.block(
             [

@@ -1,14 +1,12 @@
 import jax.numpy as jnp
+from jax import Array
 
 from bregman.application.distribution.exponential_family.exp_family import (
     ExponentialFamilyDistribution,
     ExponentialFamilyManifold,
 )
-from bregman.base import THETA_COORDS, DisplayPoint, Point, Shape
+from bregman.base import THETA_COORDS, DisplayPoint, Point
 from bregman.manifold.generator import AutoDiffGenerator
-
-from jax import Array
-from jax.typing import ArrayLike
 
 
 class GaussianPoint(DisplayPoint):
@@ -57,7 +55,7 @@ class GaussianDistribution(ExponentialFamilyDistribution):
         dimension: Covariance shape dimension (i.e, d in dxd covariance matrix).
     """
 
-    def __init__(self, theta: ArrayLike, dimension: int) -> None:
+    def __init__(self, theta: Array, dimension: int) -> None:
         """Initialize Gaussian distribution.
 
         Args:
@@ -67,7 +65,7 @@ class GaussianDistribution(ExponentialFamilyDistribution):
         super().__init__(theta, (dimension,))
 
     @staticmethod
-    def t(x: ArrayLike) -> Array:
+    def t(x: Array) -> Array:
         r""":math:`t(x)` sufficient statistics function of the Gaussian
         distribution.
 
@@ -80,7 +78,7 @@ class GaussianDistribution(ExponentialFamilyDistribution):
         return jnp.concatenate([x, -jnp.outer(x, x).flatten()])
 
     @staticmethod
-    def k(x: ArrayLike) -> Array:
+    def k(x: Array) -> Array:
         r""":math:`k(x)` carrier measure of the Gaussian distribution.
 
         Args:
@@ -91,7 +89,7 @@ class GaussianDistribution(ExponentialFamilyDistribution):
         """
         return jnp.array(0.0)
 
-    def F(self, x: ArrayLike) -> Array:
+    def F(self, x: Array) -> Array:
         r""":math:`F(x) = \log \int \exp(\theta^T t(x)) \mathrm{d}x`
         normalizer of the Gaussian distribution.
 
@@ -113,7 +111,7 @@ class GaussianDistribution(ExponentialFamilyDistribution):
 class UnivariateGaussianDistribution(GaussianDistribution):
     """Univariate Gaussian distribution as an exponential family distribution."""
 
-    def __init__(self, theta: ArrayLike) -> None:
+    def __init__(self, theta: Array) -> None:
         """Initialize univariate Gaussian distribution.
 
         Args:
@@ -122,7 +120,7 @@ class UnivariateGaussianDistribution(GaussianDistribution):
         super().__init__(theta, 1)
 
     @staticmethod
-    def t(x: ArrayLike) -> Array:
+    def t(x: Array) -> Array:
         r""":math:`t(x)` sufficient statistics function of the univariate
         Gaussian distribution.
 
@@ -135,7 +133,7 @@ class UnivariateGaussianDistribution(GaussianDistribution):
         return jnp.concatenate([x, jnp.outer(x, x).flatten()])
 
     @staticmethod
-    def k(x: ArrayLike) -> Array:
+    def k(x: Array) -> Array:
         r""":math:`k(x)` carrier measure of the univariate Gaussian
         distribution.
 
@@ -147,7 +145,7 @@ class UnivariateGaussianDistribution(GaussianDistribution):
         """
         return jnp.array(0.0)
 
-    def F(self, x: ArrayLike) -> Array:
+    def F(self, x: Array) -> Array:
         r""":math:`F(x) = \log \int \exp(\theta^T t(x)) \mathrm{d}x` normalizer
         of the univariate Gaussian distribution.
 
@@ -168,7 +166,7 @@ class UnivariateGaussianDistribution(GaussianDistribution):
 class GaussianPrimalGenerator(AutoDiffGenerator):
     """Gaussian manifold primal Bregman generator."""
 
-    def _F(self, x: ArrayLike) -> Array:
+    def _F(self, x: Array) -> Array:
         """Gaussian manifold primal Bregman generator function.
 
         Args:
@@ -201,7 +199,7 @@ class GaussianPrimalGenerator(AutoDiffGenerator):
 class GaussianDualGenerator(AutoDiffGenerator):
     """Gaussian manifold dual Bregman generator."""
 
-    def _F(self, x: ArrayLike) -> Array:
+    def _F(self, x: Array) -> Array:
         """Gaussian manifold dual Bregman generator function.
 
         Args:
@@ -286,7 +284,7 @@ class GaussianManifold(ExponentialFamilyManifold[GaussianPoint, GaussianDistribu
         )
         return self.display_factory_class(opoint)
 
-    def _lambda_to_theta(self, lamb: ArrayLike) -> Array:
+    def _lambda_to_theta(self, lamb: Array) -> Array:
         if self.input_dimension > 1:
             mu, Sigma = _flatten_to_mu_Sigma(self.input_dimension, lamb)
             inv_Sigma = jnp.linalg.inv(Sigma)
@@ -300,7 +298,7 @@ class GaussianManifold(ExponentialFamilyManifold[GaussianPoint, GaussianDistribu
 
             return jnp.array([mu / sigma, -0.5 / sigma])
 
-    def _lambda_to_eta(self, lamb: ArrayLike) -> Array:
+    def _lambda_to_eta(self, lamb: Array) -> Array:
         if self.input_dimension > 1:
             mu, Sigma = _flatten_to_mu_Sigma(self.input_dimension, lamb)
 
@@ -313,7 +311,7 @@ class GaussianManifold(ExponentialFamilyManifold[GaussianPoint, GaussianDistribu
 
             return jnp.array([mu, mu * mu + sigma])
 
-    def _theta_to_lambda(self, theta: ArrayLike) -> Array:
+    def _theta_to_lambda(self, theta: Array) -> Array:
         if self.input_dimension > 1:
             theta_mu, theta_Sigma = _flatten_to_mu_Sigma(self.input_dimension, theta)
             inv_theta_Sigma = jnp.linalg.inv(theta_Sigma)
@@ -327,7 +325,7 @@ class GaussianManifold(ExponentialFamilyManifold[GaussianPoint, GaussianDistribu
 
             return jnp.array([-0.5 * theta_mu / theta_sigma, -0.5 / theta_sigma])
 
-    def _eta_to_lambda(self, eta: ArrayLike) -> Array:
+    def _eta_to_lambda(self, eta: Array) -> Array:
         if self.input_dimension > 1:
             eta_mu, eta_Sigma = _flatten_to_mu_Sigma(self.input_dimension, eta)
 
@@ -341,7 +339,7 @@ class GaussianManifold(ExponentialFamilyManifold[GaussianPoint, GaussianDistribu
             return jnp.array([eta_mu, eta_sigma - eta_mu * eta_mu])
 
 
-def _flatten_to_mu_Sigma(input_dimension: int, vec: ArrayLike) -> tuple[Array, Array]:
+def _flatten_to_mu_Sigma(input_dimension: int, vec: Array) -> tuple[Array, Array]:
     mu = vec[:input_dimension]
     sigma = vec[input_dimension:].reshape(input_dimension, input_dimension)
 

@@ -3,8 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import jax.numpy as jnp
-
-from jax.typing import ArrayLike
+from jax import Array
 
 from bregman.application.distribution.exponential_family.multinomial import (
     MultinomialManifold,
@@ -32,9 +31,7 @@ class CategoricalManifold(MultinomialManifold):
         categories: Categorical choices for the distributions.
     """
 
-    def __init__(
-        self, k: int, categories: list[ArrayLike] | None = None
-    ) -> None:
+    def __init__(self, k: int, categories: list[Array] | None = None) -> None:
         """Initialize Categorical manifold.
 
         Args:
@@ -48,7 +45,7 @@ class CategoricalManifold(MultinomialManifold):
 
         self.set_categories(categories)
 
-    def set_categories(self, categories: list[ArrayLike]) -> None:
+    def set_categories(self, categories: list[Array]) -> None:
         """Set the categorical indices to specific category vectors.
 
         Args:

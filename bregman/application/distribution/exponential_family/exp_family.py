@@ -4,7 +4,6 @@ from typing import Generic, TypeVar
 import jax.numpy as jnp
 
 from jax import Array
-from jax.typing import ArrayLike
 
 from bregman.application.application import MyDisplayPoint
 from bregman.application.distribution.distribution import DistributionManifold
@@ -21,7 +20,7 @@ class ExponentialFamilyDistribution(Distribution, ABC):
         theta: Natural parameters of the exponential family distribution.
     """
 
-    def __init__(self, theta: ArrayLike, dimension: Shape) -> None:
+    def __init__(self, theta: Array, dimension: Shape) -> None:
         """Initialize exponential family distribution.
 
         Args:
@@ -33,7 +32,7 @@ class ExponentialFamilyDistribution(Distribution, ABC):
 
     @staticmethod
     @abstractmethod
-    def t(x: ArrayLike) -> Array:
+    def t(x: Array) -> Array:
         r""":math:`t(x)` sufficient statistics function.
 
         Args:
@@ -46,7 +45,7 @@ class ExponentialFamilyDistribution(Distribution, ABC):
 
     @staticmethod
     @abstractmethod
-    def k(x: ArrayLike) -> Array:
+    def k(x: Array) -> Array:
         r""":math:`k(x)` carrier measure.
 
         Args:
@@ -58,7 +57,7 @@ class ExponentialFamilyDistribution(Distribution, ABC):
         pass
 
     @abstractmethod
-    def F(self, x: ArrayLike) -> Array:
+    def F(self, x: Array) -> Array:
         r""":math:`F(x) = \log \int \exp(\theta^T t(x)) \mathrm{d}x` normalizer.
 
         Args:
@@ -69,7 +68,7 @@ class ExponentialFamilyDistribution(Distribution, ABC):
         """
         pass
 
-    def pdf(self, x: ArrayLike) -> Array:
+    def pdf(self, x: Array) -> Array:
         """P.d.f. of exponential family distribution.
 
         Args:
@@ -125,7 +124,7 @@ class ExponentialFamilyManifold(
         self.eta_generator = expected_generator  # Fix typing
         self.distribution_class = distribution_class
 
-    def t(self, x: ArrayLike) -> Array:
+    def t(self, x: Array) -> Array:
         r""":math:`t(x)` sufficient statistics function.
 
         Args:

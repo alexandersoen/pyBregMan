@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 
+import jax
 import jax.numpy as jnp
-
-from jax import Array, grad, hessian
-from jax.typing import ArrayLike
+from jax import Array
 
 
 class Generator(ABC):
@@ -22,7 +21,7 @@ class Generator(ABC):
         self.dimension = dimension
 
     @abstractmethod
-    def F(self, x: ArrayLike) -> Array:
+    def F(self, x: Array) -> Array:
         """Function of generator.
 
         Args:
@@ -34,7 +33,7 @@ class Generator(ABC):
         pass
 
     @abstractmethod
-    def grad(self, x: ArrayLike) -> Array:
+    def grad(self, x: Array) -> Array:
         """Gradient of generator.
 
         Args:
@@ -46,7 +45,7 @@ class Generator(ABC):
         pass
 
     @abstractmethod
-    def hess(self, x: ArrayLike) -> Array:
+    def hess(self, x: Array) -> Array:
         """Hessian of generator.
 
         Args:
@@ -57,7 +56,7 @@ class Generator(ABC):
         """
         pass
 
-    def bregman_divergence(self, x: ArrayLike, y: ArrayLike) -> Array:
+    def bregman_divergence(self, x: Array, y: Array) -> Array:
         """Bregman divergence on raw data defined by generator.
 
         Args:
@@ -69,7 +68,7 @@ class Generator(ABC):
         """
         return self.F(x) - self.F(y) - jnp.inner(self.grad(y), x - y)
 
-    def __call__(self, x: ArrayLike) -> Array:
+    def __call__(self, x: Array) -> Array:
         """Function of generator.
 
         Args:
@@ -91,7 +90,7 @@ class AutoDiffGenerator(Generator, ABC):
     functions (reshape operations) before and after autograd is utilized.
     """
 
-    def _pre_autodiff(self, x: ArrayLike) -> Array:
+    def _pre_autodiff(self, x: Array) -> Array:
         """Pre-wrapper function which transforms x before it
         auto-differentiation.
 
@@ -101,10 +100,10 @@ class AutoDiffGenerator(Generator, ABC):
         Returns:
             Transformed x which the generator will take as an input.
         """
-        return x
+        return jnp.array(x)
 
     @abstractmethod
-    def _F(self, x: ArrayLike) -> Array:
+    def _F(self, x: Array) -> Array:
         """Generator function which takes in the transformed x input.
         Assumes that the input of this function is the output of
         self._pre_auto_diff.
@@ -117,7 +116,7 @@ class AutoDiffGenerator(Generator, ABC):
         """
         pass
 
-    def F(self, x: ArrayLike) -> Array:
+    def F(self, x: Array) -> Array:
         """Function of generator.
 
         Args:
@@ -129,7 +128,7 @@ class AutoDiffGenerator(Generator, ABC):
         y = self._pre_autodiff(x)
         return self._F(y)
 
-    def _post_grad(self, x: ArrayLike) -> Array:
+    def _post_grad(self, x: Array) -> Array:
         """Post-wrapper function which transforms the gradient of the generator
         after auto-grad operations.
 
@@ -139,9 +138,9 @@ class AutoDiffGenerator(Generator, ABC):
         Returns:
             Transformed gradient to align with original input.
         """
-        return x
+        return jnp.array(x)
 
-    def grad(self, x: ArrayLike) -> Array:
+    def grad(self, x: Array) -> Array:
         """Gradient of generator.
 
         Args:
@@ -151,10 +150,10 @@ class AutoDiffGenerator(Generator, ABC):
             Generator's gradient evaluated at x.
         """
         y = self._pre_autodiff(x)
-        z = grad(self._F)(y)
+        z = jax.grad(self._F)(y)
         return self._post_grad(z)
 
-    def _post_hess(self, x: ArrayLike) -> Array:
+    def _post_hess(self, x: Array) -> Array:
         """Post-wrapper function which transforms the hessian of the generator
         after auto-Hessian calculation.
 
@@ -164,9 +163,9 @@ class AutoDiffGenerator(Generator, ABC):
         Returns:
             Transformed hessian to align with original input.
         """
-        return x
+        return jnp.array(x)
 
-    def hess(self, x: ArrayLike) -> Array:
+    def hess(self, x: Array) -> Array:
         """Hessian of generator.
 
         Args:
@@ -176,5 +175,5 @@ class AutoDiffGenerator(Generator, ABC):
             Generator's hessian evaluated at x.
         """
         y = self._pre_autodiff(x)
-        z = hessian(self._F)(y)
+        z = jax.hessian(self._F)(y)
         return self._post_hess(z)

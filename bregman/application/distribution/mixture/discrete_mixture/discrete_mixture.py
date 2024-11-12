@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from jax import Array
-from jax.typing import ArrayLike
 
 from bregman.application.distribution.mixture.mixture import MixtureManifold
 from bregman.base import ETA_COORDS, THETA_COORDS, Point
@@ -22,7 +21,7 @@ class DeltaDistribution(Distribution):
         x: Point at Indicator.
     """
 
-    def __init__(self, x: ArrayLike) -> None:
+    def __init__(self, x: Array) -> None:
         """Initialize Indicator distribution.
 
         Args:
@@ -31,7 +30,7 @@ class DeltaDistribution(Distribution):
         super().__init__((1,))
         self.x = x
 
-    def pdf(self, x: ArrayLike) -> Array:
+    def pdf(self, x: Array) -> Array:
         """Evaluate p.d.f. of Indicator distribution.
 
         Args:
@@ -48,7 +47,7 @@ class DiscreteMixtureManifold(MixtureManifold[DeltaDistribution]):
     Dirac distributions.
     """
 
-    def __init__(self, xs: list[ArrayLike]) -> None:
+    def __init__(self, xs: list[Array]) -> None:
         """Initialize Discrete Mixture manifold.
 
         Args:

@@ -80,12 +80,8 @@ class BregmanGeodesic(Geodesic[BregmanManifold]):
             Bregman geodesic evaluated at t.
         """
         # TODO Maybe should cache these values
-        src_coord_data = self.manifold.convert_coord(
-            self.coord.value, self.source
-        ).data
-        dst_coord_data = self.manifold.convert_coord(
-            self.coord.value, self.dest
-        ).data
+        src_coord_data = self.manifold.convert_coord(self.coord.value, self.source).data
+        dst_coord_data = self.manifold.convert_coord(self.coord.value, self.dest).data
 
         # As flat in its own coordinate
         return Point(

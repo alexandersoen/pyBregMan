@@ -2,19 +2,18 @@
 # Based on visualization from:
 # "An Elementary Introduction to Information Geometry", Frank Nielsen
 
+from itertools import product
+
 import jax
 import jax.numpy as jnp
-
-from itertools import product
 
 from bregman.application.distribution.exponential_family.gaussian import (
     GaussianManifold,
 )
 from bregman.base import LAMBDA_COORDS, Point
-
 from bregman.visualizer.matplotlib.callback import (
-    Visualize2DTissotIndicatrix,
     EllipseAtPoint,
+    Visualize2DTissotIndicatrix,
 )
 from bregman.visualizer.matplotlib.matplotlib import (
     MatplotlibVisualizer,
@@ -113,5 +112,5 @@ if __name__ == "__main__":
             s=40,
         )
 
-    visualizer.save(VISUAL_COORD, "img/crlb.png")
-    # visualizer.visualize(VISUAL_COORD)  # Display coordinate type
+    # visualizer.save(VISUAL_COORD, "img/crlb.png")
+    visualizer.visualize(VISUAL_COORD)  # Display coordinate type

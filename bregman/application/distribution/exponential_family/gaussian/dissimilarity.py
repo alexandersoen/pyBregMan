@@ -1,6 +1,5 @@
 import jax.numpy as jnp
 from jax import Array
-from jax.typing import ArrayLike
 
 from bregman.application.distribution.exponential_family.gaussian.gaussian import (
     GaussianManifold,
@@ -14,7 +13,7 @@ from bregman.dissimilarity.base import ApproxDissimilarity
 from bregman.dissimilarity.bregman import JeffreysDivergence
 
 
-def scaled_riemannian_SPD_distance(P: ArrayLike, Q: ArrayLike) -> Array:
+def scaled_riemannian_SPD_distance(P: Array, Q: Array) -> Array:
     """Calculates the Riemannian distance for PSD matrices.
 
     Args:
@@ -75,9 +74,7 @@ class GaussianFisherRaoDistance(ApproxDissimilarity[GaussianManifold]):
 
         self.jeffreys_divergence = JeffreysDivergence(manifold)
 
-    def dissimilarity(
-        self, point_1: Point, point_2: Point, eps: float = EPS
-    ) -> Array:
+    def dissimilarity(self, point_1: Point, point_2: Point, eps: float = EPS) -> Array:
         """Calculate an approximate Fisher-Rao distance of points in the
         Gaussian manifold.
 

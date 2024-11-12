@@ -1,8 +1,7 @@
 import jax
 import jax.numpy as jnp
 import numpy as np
-
-from jax.typing import ArrayLike
+from jax import Array
 
 from bregman.application.distribution.exponential_family.gaussian.gaussian import (
     GaussianManifold,
@@ -10,8 +9,8 @@ from bregman.application.distribution.exponential_family.gaussian.gaussian impor
 )
 from bregman.base import (
     ETA_COORDS,
-    THETA_COORDS,
     LAMBDA_COORDS,
+    THETA_COORDS,
     BregmanObject,
     Coords,
     DualCoords,
@@ -23,8 +22,8 @@ from bregman.visualizer.visualizer import VisualizerCallback
 
 def draw_ellipse(
     visualizer: MatplotlibVisualizer,
-    mu: ArrayLike,
-    cov: ArrayLike,
+    mu: Array,
+    cov: Array,
     npoints: int,
     scale: float,
     **kwargs,
@@ -225,7 +224,7 @@ class EllipseAtPoint(VisualizerCallback[MatplotlibVisualizer]):
 
     def __init__(
         self,
-        cov: ArrayLike,
+        cov: Array,
         cov_coord: Coords,
         scale: float = 1.0,
         npoints: int = 1_000,

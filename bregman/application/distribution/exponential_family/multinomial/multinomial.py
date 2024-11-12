@@ -1,9 +1,7 @@
 import math
 
 import jax.numpy as jnp
-
 from jax import Array
-from jax.typing import ArrayLike
 
 from bregman.application.distribution.exponential_family.exp_family import (
     ExponentialFamilyDistribution,
@@ -33,7 +31,7 @@ class MultinomialDistribution(ExponentialFamilyDistribution):
         n: Number of total draws.
     """
 
-    def __init__(self, theta: ArrayLike, n: int) -> None:
+    def __init__(self, theta: Array, n: int) -> None:
         r"""Initialize Multinomial distribution.
 
         Args:
@@ -44,7 +42,7 @@ class MultinomialDistribution(ExponentialFamilyDistribution):
         self.n = n
 
     @staticmethod
-    def t(x: ArrayLike) -> Array:
+    def t(x: Array) -> Array:
         r""":math:`t(x)` sufficient statistics function of the Multinomial
         distribution.
 
@@ -57,7 +55,7 @@ class MultinomialDistribution(ExponentialFamilyDistribution):
         return x
 
     @staticmethod
-    def k(x: ArrayLike) -> Array:
+    def k(x: Array) -> Array:
         r""":math:`k(x)` carrier measure of the Multinomial distribution.
 
         Args:
@@ -66,9 +64,9 @@ class MultinomialDistribution(ExponentialFamilyDistribution):
         Returns:
             Carries measure of the Multinomial distribution evaluated at x.
         """
-        return -jnp.sum([jnp.log(math.factorial(i)) for i in x])
+        return -jnp.sum(jnp.array([jnp.log(math.factorial(i)) for i in x]))
 
-    def F(self, x: ArrayLike) -> Array:
+    def F(self, x: Array) -> Array:
         r""":math:`F(x) = \log \int \exp(\theta^T t(x)) \mathrm{d}x`
         normalizer of the Multinomial distribution.
 
@@ -102,7 +100,7 @@ class MultinomialPrimalGenerator(AutoDiffGenerator):
         self.n = n
         self.k = k
 
-    def _F(self, x: ArrayLike) -> Array:
+    def _F(self, x: Array) -> Array:
         """Multinomial manifold primal Bregman generator function.
 
         Args:
@@ -112,9 +110,7 @@ class MultinomialPrimalGenerator(AutoDiffGenerator):
             Multinomial manifold primal Bregman generator value evaluated at x.
         """
         agg = jnp.exp(x).sum()
-        return self.n * jnp.log(1 + agg) - jnp.log(
-            float(math.factorial(self.n))
-        )
+        return self.n * jnp.log(1 + agg) - jnp.log(float(math.factorial(self.n)))
 
 
 class MultinomialDualGenerator(AutoDiffGenerator):
@@ -137,7 +133,7 @@ class MultinomialDualGenerator(AutoDiffGenerator):
         self.n = n
         self.k = k
 
-    def _F(self, x: ArrayLike) -> Array:
+    def _F(self, x: Array) -> Array:
         """Multinomial manifold dual Bregman generator function.
 
         Args:
@@ -213,13 +209,13 @@ class MultinomialManifold(
             )
         )
 
-    def _lambda_to_theta(self, lamb: ArrayLike) -> Array:
+    def _lambda_to_theta(self, lamb: Array) -> Array:
         return jnp.log(lamb[:-1] / lamb[-1])
 
-    def _lambda_to_eta(self, lamb: ArrayLike) -> Array:
+    def _lambda_to_eta(self, lamb: Array) -> Array:
         return self.n * lamb[:-1]
 
-    def _theta_to_lambda(self, theta: ArrayLike) -> Array:
+    def _theta_to_lambda(self, theta: Array) -> Array:
         norm = 1 + jnp.exp(theta).sum()
 
         lamb = jnp.zeros(self.k)
@@ -227,7 +223,7 @@ class MultinomialManifold(
         lamb = lamb.at[-1].set(1 / norm)
         return lamb
 
-    def _eta_to_lambda(self, eta: ArrayLike) -> Array:
+    def _eta_to_lambda(self, eta: Array) -> Array:
         lamb = jnp.zeros(self.k)
         lamb = lamb.at[:-1].set(eta / self.n)
         lamb = lamb.at[-1].set((self.n - eta.sum()) / self.n)

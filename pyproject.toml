@@ -3,35 +3,38 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["."]  # list of folders that contain the packages (["."] by default)
-include = ["bregman*"]  # package names should match these glob patterns (["*"] by default)
-exclude = []  # exclude packages matching these glob patterns (empty by default)
-namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
+where = ["."] # list of folders that contain the packages (["."] by default)
+include = [
+  "bregman*",
+] # package names should match these glob patterns (["*"] by default)
+exclude = [] # exclude packages matching these glob patterns (empty by default)
+namespaces = false # to disable scanning PEP 420 namespaces (true by default)
+
+[tool.uv.sources]
+pybregman = { workspace = true }
 
 [project]
 name = "pyBregMan"
 version = "0.1.1"
 dependencies = [
-    "numpy<2.0.0",
-    "jax",
-    "matplotlib",
-    "scipy",
-    "autograd",
-    "jaxlib>=0.4.13",
+  "numpy<2.0.0",
+  "jax",
+  "matplotlib",
+  "scipy",
+  "jaxlib>=0.4.13",
+  "pybregman",
 ]
 requires-python = ">=3.8"
-authors = [
-  { name="alexandersoen", email="alexandersoen@gmail.com" },
-]
+authors = [{ name = "alexandersoen", email = "alexandersoen@gmail.com" }]
 description = "A Python library for geometric computing on BREGman MANifolds with applications."
 readme = "README.md"
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "Development Status :: 3 - Alpha",
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: OS Independent",
-    "Topic :: Scientific/Engineering :: Mathematics",
+  "Programming Language :: Python :: 3",
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Mathematics",
 ]
 
 [project.urls]

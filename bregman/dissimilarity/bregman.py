@@ -1,13 +1,11 @@
 import jax.numpy as jnp
+from jax import Array
 
 from bregman.base import DualCoords, Point
 from bregman.constants import EPS
 from bregman.dissimilarity.base import ApproxDissimilarity, Dissimilarity
 from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.manifold.manifold import BregmanManifold
-
-
-from jax.typing import ArrayLike
 
 
 class DualDissimilarity(Dissimilarity[BregmanManifold]):
@@ -59,7 +57,7 @@ class DualApproxDissimilarity(ApproxDissimilarity[BregmanManifold]):
 class BregmanDivergence(DualDissimilarity):
     """Bregman divergence for points on a Bregman manifold."""
 
-    def dissimilarity(self, point_1: Point, point_2: Point) -> ArrayLike:
+    def dissimilarity(self, point_1: Point, point_2: Point) -> Array:
         r"""Bregman divergence between two points.
 
         .. math:: B_{F}(p_1 : p_2) = F(p_1) - F(p_2) - \langle \nabla F(p_2), p_1 - p_2 \rangle.
@@ -95,14 +93,10 @@ class JeffreysDivergence(Dissimilarity[BregmanManifold]):
         """
         super().__init__(manifold)
 
-        self.theta_divergence = BregmanDivergence(
-            manifold, dcoords=DualCoords.THETA
-        )
-        self.eta_divergence = BregmanDivergence(
-            manifold, dcoords=DualCoords.ETA
-        )
+        self.theta_divergence = BregmanDivergence(manifold, dcoords=DualCoords.THETA)
+        self.eta_divergence = BregmanDivergence(manifold, dcoords=DualCoords.ETA)
 
-    def dissimilarity(self, point_1: Point, point_2: Point) -> ArrayLike:
+    def dissimilarity(self, point_1: Point, point_2: Point) -> Array:
         r"""Jeffreys divergence between two points.
 
         .. math:: \mathrm{Jef}(p_1 : p_2) = B_{F}(p_1 : p_2) + B_{F^*}(p_1 : p_2).
@@ -153,7 +147,7 @@ class SkewJensenBregmanDivergence(DualDissimilarity):
 
         self.alpha_mid = sum(w * a for w, a in zip(weight_skews, alpha_skews))
 
-    def dissimilarity(self, point_1: Point, point_2: Point) -> ArrayLike:
+    def dissimilarity(self, point_1: Point, point_2: Point) -> Array:
         r"""Skewed Jensen-Bregman divergence between two points.
 
         .. math:: \mathrm{JBD}(p_1 : p_2) = \sum_{i=1}^k w_i \cdot B_{F}((p_1 p_2)_{\alpha_i} : (p_1 p_2)_{\bar{\alpha}}),
@@ -184,15 +178,11 @@ class SkewJensenBregmanDivergence(DualDissimilarity):
         ]
         alpha_mid = Point(
             self.coord.value,
-            (1 - self.alpha_mid) * coord_1.data
-            + self.alpha_mid * coord_2.data,
+            (1 - self.alpha_mid) * coord_1.data + self.alpha_mid * coord_2.data,
         )
 
         breg_terms = jnp.stack(
-            [
-                w * breg(mix, alpha_mid)
-                for w, mix in zip(self.weight_skews, alpha_mixes)
-            ]
+            [w * breg(mix, alpha_mid) for w, mix in zip(self.weight_skews, alpha_mixes)]
         )
 
         return jnp.sum(breg_terms, axis=0)
@@ -226,7 +216,7 @@ class SkewBurbeaRaoDivergence(DualDissimilarity):
 
         self.alpha = alpha
 
-    def dissimilarity(self, point_1: Point, point_2: Point) -> ArrayLike:
+    def dissimilarity(self, point_1: Point, point_2: Point) -> Array:
         r"""Skewed Burbea-Rao divergence between two points.
 
         .. math:: \mathrm{sBR}_{\alpha}(p_1 : p_2) = \frac{1}{\alpha(1-\alpha)} \left( \alpha F(p_1) + (1-\alpha)F(p_2) - F(\alpha \cdot p_1 + (1-\alpha) \cdot p_2) \right).
@@ -328,9 +318,7 @@ class ChernoffInformation(DualApproxDissimilarity):
 
         return 1 - 0.5 * (alpha_min + alpha_max)
 
-    def dissimilarity(
-        self, point_1: Point, point_2: Point, eps: float = EPS
-    ) -> ArrayLike:
+    def dissimilarity(self, point_1: Point, point_2: Point, eps: float = EPS) -> Array:
         r"""Calculate the Chernoff information via an approximate Chernoff point.
 
         .. math:: \mathrm{CI}(p_1 : p_2) = \max_{\alpha \in (0, 1)} \mathrm{sBR}_{\alpha}(p_1 : p_2),

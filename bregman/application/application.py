@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
 from jax import Array
-from jax.typing import ArrayLike
 
 from bregman.base import (
     ETA_COORDS,
@@ -46,20 +45,12 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
 
         self.atlas.add_coords(LAMBDA_COORDS)
 
-        self.atlas.add_transition(
-            LAMBDA_COORDS, THETA_COORDS, self._lambda_to_theta
-        )
-        self.atlas.add_transition(
-            THETA_COORDS, LAMBDA_COORDS, self._theta_to_lambda
-        )
+        self.atlas.add_transition(LAMBDA_COORDS, THETA_COORDS, self._lambda_to_theta)
+        self.atlas.add_transition(THETA_COORDS, LAMBDA_COORDS, self._theta_to_lambda)
 
         if eta_generator is not None:
-            self.atlas.add_transition(
-                LAMBDA_COORDS, ETA_COORDS, self._lambda_to_eta
-            )
-            self.atlas.add_transition(
-                ETA_COORDS, LAMBDA_COORDS, self._eta_to_lambda
-            )
+            self.atlas.add_transition(LAMBDA_COORDS, ETA_COORDS, self._lambda_to_eta)
+            self.atlas.add_transition(ETA_COORDS, LAMBDA_COORDS, self._eta_to_lambda)
 
     def convert_to_display(self, point: Point) -> MyDisplayPoint:
         """Convert a point to a display point.
@@ -75,7 +66,7 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
         return dpoint
 
     @abstractmethod
-    def _lambda_to_theta(self, lamb: ArrayLike) -> Array:
+    def _lambda_to_theta(self, lamb: Array) -> Array:
         r"""Internal method to convert data from :math:`\lambda` to
         :math:`\theta` coordinates.
 
@@ -88,7 +79,7 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
         pass
 
     @abstractmethod
-    def _lambda_to_eta(self, lamb: ArrayLike) -> Array:
+    def _lambda_to_eta(self, lamb: Array) -> Array:
         r"""Internal method to convert data from :math:`\lambda` to
         :math:`\eta` coordinates.
 
@@ -101,7 +92,7 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
         pass
 
     @abstractmethod
-    def _theta_to_lambda(self, theta: ArrayLike) -> Array:
+    def _theta_to_lambda(self, theta: Array) -> Array:
         r"""Internal method to convert data from :math:`\theta` to
         :math:`\lambda` coordinates.
 
@@ -114,7 +105,7 @@ class ApplicationManifold(BregmanManifold, Generic[MyDisplayPoint], ABC):
         pass
 
     @abstractmethod
-    def _eta_to_lambda(self, eta: ArrayLike) -> Array:
+    def _eta_to_lambda(self, eta: Array) -> Array:
         r"""Internal method to convert data from :math:`\eta` to
         :math:`\lambda` coordinates.
 

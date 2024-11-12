@@ -2,9 +2,7 @@ from abc import ABC
 from typing import Generic, Sequence, TypeVar
 
 import jax.numpy as jnp
-
 from jax import Array
-from jax.typing import ArrayLike
 
 from bregman.application.application import LAMBDA_COORDS
 from bregman.application.distribution.distribution import DistributionManifold
@@ -53,7 +51,7 @@ class MixtureDistribution(Distribution, Generic[MixedDistribution]):
 
     def __init__(
         self,
-        weights: ArrayLike,
+        weights: Array,
         distributions: Sequence[MixedDistribution],
     ) -> None:
         """Initialize Mixture distribution.
@@ -62,15 +60,15 @@ class MixtureDistribution(Distribution, Generic[MixedDistribution]):
             weights: Mixture weights.
             distributions: Mixture components.
         """
-        super().__init__()
-
         if len(weights) != len(distributions) - 1:
             raise MixingDimensionMissMatch
+
+        super().__init__(distributions[0].dimension)
 
         self.weights = weights
         self.distributions = distributions
 
-    def pdf(self, x: ArrayLike) -> Array:
+    def pdf(self, x: Array) -> Array:
         """P.d.f. of a mixture distribution.
 
         Args:
@@ -84,7 +82,7 @@ class MixtureDistribution(Distribution, Generic[MixedDistribution]):
         all_w = all_w.at[-1].set(1 - jnp.sum(self.weights))
 
         return jnp.sum(
-            [w * float(p.pdf(x)) for w, p in zip(all_w, self.distributions)]
+            jnp.array([w * float(p.pdf(x)) for w, p in zip(all_w, self.distributions)])
         )
 
 
@@ -119,9 +117,7 @@ class MixtureManifold(
 
         self.set_distributions(distributions)
 
-    def set_distributions(
-        self, distributions: Sequence[MixedDistribution]
-    ) -> None:
+    def set_distributions(self, distributions: Sequence[MixedDistribution]) -> None:
         """Set mixing component distributions of the manifold.
 
         Args:
@@ -143,9 +139,7 @@ class MixtureManifold(
 
         return MixtureDistribution(weights, self.distributions)
 
-    def distribution_to_point(
-        self, distribution: MixtureDistribution
-    ) -> MixturePoint:
+    def distribution_to_point(self, distribution: MixtureDistribution) -> MixturePoint:
         """Converts a Mixture distribution to a point in the manifold.
 
         Args:
@@ -174,9 +168,7 @@ class MixtureManifold(
         breg_div = BregmanDivergence(self)
         return breg_div(point_1, point_2)
 
-    def jensen_shannon_divergence(
-        self, point_1: Point, point_2: Point
-    ) -> Array:
+    def jensen_shannon_divergence(self, point_1: Point, point_2: Point) -> Array:
         """Jensen-Shannon Divergence of two points in a Mixture manifold.
 
         Args:
@@ -189,14 +181,14 @@ class MixtureManifold(
         br_div = SkewBurbeaRaoDivergence(self, alpha=0.5)
         return br_div(point_1, point_2)
 
-    def _lambda_to_theta(self, lamb: ArrayLike) -> Array:
+    def _lambda_to_theta(self, lamb: Array) -> Array:
         return lamb
 
-    def _lambda_to_eta(self, lamb: ArrayLike) -> Array:
+    def _lambda_to_eta(self, lamb: Array) -> Array:
         return self._theta_to_eta(lamb)
 
-    def _theta_to_lambda(self, theta: ArrayLike) -> Array:
+    def _theta_to_lambda(self, theta: Array) -> Array:
         return theta
 
-    def _eta_to_lambda(self, eta: ArrayLike) -> Array:
+    def _eta_to_lambda(self, eta: Array) -> Array:
         return self._eta_to_theta(eta)

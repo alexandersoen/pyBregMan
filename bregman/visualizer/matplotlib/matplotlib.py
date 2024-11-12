@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 import copy
 import itertools
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation
@@ -16,8 +15,6 @@ from bregman.manifold.bisector import Bisector
 from bregman.manifold.geodesic import BregmanGeodesic, Geodesic
 from bregman.manifold.manifold import BregmanManifold
 from bregman.visualizer.visualizer import BregmanVisualizer, MultiBregmanVisualizer
-
-matplotlib.use("TkAgg")
 
 
 @dataclass
@@ -94,7 +91,7 @@ class MatplotlibVisualizer(BregmanVisualizer):
             self.ax = ax
         else:
             plt.style.use("bmh")
-            self.fig, self.ax = plt.subplots()
+            self.fig, self.ax = plt.subplots()  # pyright: ignore
 
             self.fig: FigureBase
             self.ax: Axes

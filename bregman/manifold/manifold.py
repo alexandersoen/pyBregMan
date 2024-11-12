@@ -1,7 +1,6 @@
 from abc import ABC
 
 from jax import Array
-from jax.typing import ArrayLike
 
 from bregman.base import ETA_COORDS, THETA_COORDS, Coords, DualCoords, Point
 from bregman.manifold.connection import FlatConnection
@@ -60,12 +59,8 @@ class BregmanManifold(ABC):
         self.atlas.add_coords(THETA_COORDS)
         if eta_generator is not None:
             self.atlas.add_coords(ETA_COORDS)
-            self.atlas.add_transition(
-                THETA_COORDS, ETA_COORDS, self._theta_to_eta
-            )
-            self.atlas.add_transition(
-                ETA_COORDS, THETA_COORDS, self._eta_to_theta
-            )
+            self.atlas.add_transition(THETA_COORDS, ETA_COORDS, self._theta_to_eta)
+            self.atlas.add_transition(ETA_COORDS, THETA_COORDS, self._eta_to_theta)
 
     def convert_coord(self, target_coords: Coords, point: Point) -> Point:
         r"""Converts coordinates of Point objects.
@@ -93,9 +88,7 @@ class BregmanManifold(ABC):
             Generator corresponding to specified dual coordinates.
         """
         generator = (
-            self.theta_generator
-            if dcoords == DualCoords.THETA
-            else self.eta_generator
+            self.theta_generator if dcoords == DualCoords.THETA else self.eta_generator
         )
 
         if generator is None:
@@ -127,7 +120,7 @@ class BregmanManifold(ABC):
 
         return connection
 
-    def _theta_to_eta(self, theta: ArrayLike) -> Array:
+    def _theta_to_eta(self, theta: Array) -> Array:
         r"""Internal method to convert data from :math:`\theta` to :math:`\eta`
         coordinates.
 
@@ -139,7 +132,7 @@ class BregmanManifold(ABC):
         """
         return self.theta_generator.grad(theta)
 
-    def _eta_to_theta(self, eta: ArrayLike) -> Array:
+    def _eta_to_theta(self, eta: Array) -> Array:
         r"""Internal method to convert data from :math:`\eta` to :math:`\theta`
         coordinates.
 
