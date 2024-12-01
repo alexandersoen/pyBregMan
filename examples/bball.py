@@ -1,9 +1,10 @@
 # Ad-hoc method for viewing Bregman balls.
 
-import numpy as np
+import jax.numpy as jnp
 
-from bregman.application.distribution.exponential_family.categorical import \
-    CategoricalManifold
+from bregman.application.distribution.exponential_family.categorical import (
+    CategoricalManifold,
+)
 from bregman.base import LAMBDA_COORDS, THETA_COORDS, DualCoords, Point
 from bregman.dissimilarity.bregman import BregmanDivergence
 
@@ -17,14 +18,14 @@ if __name__ == "__main__":
     # Define manifold + objects
     manifold = CategoricalManifold(3)
 
-    c1 = np.array([0.2, 0.4, 0.4])
+    c1 = jnp.array([0.2, 0.4, 0.4])
     c1 = Point(LAMBDA_COORDS, c1)
 
     r = 0.2
     eps = 1e-3
 
-    xs = np.arange(0, 1, 1 / 200)[1:-1]
-    ys = np.arange(0, 1, 1 / 200)[1:-1]
+    xs = jnp.arange(0, 1, 1 / 200)[1:-1]
+    ys = jnp.arange(0, 1, 1 / 200)[1:-1]
 
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import axes3d
@@ -32,11 +33,11 @@ if __name__ == "__main__":
 
     ax = plt.figure().add_subplot(projection="3d")
 
-    xs, ys = np.meshgrid(xs, ys)
+    xs, ys = jnp.meshgrid(xs, ys)
 
-    zs = np.zeros_like(xs)
-    ws = np.zeros_like(xs)
-    bds = np.zeros_like(xs)
+    zs = jnp.zeros_like(xs)
+    ws = jnp.zeros_like(xs)
+    bds = jnp.zeros_like(xs)
 
     lines = []
 
@@ -52,7 +53,7 @@ if __name__ == "__main__":
                 bds[i, j] = None
                 continue
 
-            test_point = Point(LAMBDA_COORDS, np.array([x, y, 1 - x - y]))
+            test_point = Point(LAMBDA_COORDS, jnp.array([x, y, 1 - x - y]))
             test_f = manifold.bregman_generator(dcoords=DualCoords.THETA)(
                 manifold.convert_coord(THETA_COORDS, test_point).data
             )

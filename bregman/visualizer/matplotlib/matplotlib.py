@@ -1,9 +1,10 @@
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Callable, cast
-
 import copy
 import itertools
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Callable
+
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation
@@ -217,8 +218,8 @@ class MatplotlibVisualizer(BregmanVisualizer):
         y1 = (-w - x * data_lim.xmin) / y
         y2 = (-w - x * data_lim.xmax) / y
 
-        p1_data = np.array([data_lim.xmin, y1])
-        p2_data = np.array([data_lim.xmax, y2])
+        p1_data = jnp.array([data_lim.xmin, y1])
+        p2_data = jnp.array([data_lim.xmax, y2])
 
         plot_geo = BregmanGeodesic(
             self.manifold,

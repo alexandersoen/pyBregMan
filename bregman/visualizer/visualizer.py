@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import warnings
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
+from typing import Callable, Generic, TypeVar
 
 from bregman.base import BregmanObject, Coords, Point
 from bregman.manifold.bisector import Bisector
@@ -51,17 +53,16 @@ class BregmanVisualizer(ABC):
 
         self.manifold = manifold
 
+        self.preprocess_list: list[Callable[[BregmanVisualizer], None]] = []
         self.plot_list: list[tuple[BregmanObject, dict]] = []
         self.animate_list: list[tuple[BregmanObject, dict]] = []
-        self.callback_list: list["VisualizerCallback"] = []
-        self.per_obj_callback: list[
-            tuple[BregmanObject, "VisualizerCallback", dict]
-        ] = []
+        self.callback_list: list[VisualizerCallback] = []
+        self.per_obj_callback: list[tuple[BregmanObject, VisualizerCallback, dict]] = []
 
     def plot_object(
         self,
         obj: BregmanObject,
-        callbacks: "VisualizerCallback | list[VisualizerCallback] | None" = None,
+        callbacks: VisualizerCallback | list[VisualizerCallback] | None = None,
         **kwargs,
     ) -> None:
         """Add object to be plotted.
@@ -88,7 +89,10 @@ class BregmanVisualizer(ABC):
         """
         self.animate_list.append((obj, kwargs))
 
-    def add_callback(self, callback: "VisualizerCallback") -> None:
+    def add_preprocess(self, preprocess: Callable[[BregmanVisualizer], None]) -> None:
+        self.preprocess_list.append(preprocess)
+
+    def add_callback(self, callback: VisualizerCallback) -> None:
         """Add callback function. These are run after plotting and animation
         routines.
 
@@ -162,6 +166,9 @@ class BregmanVisualizer(ABC):
         Args:
             coords: Coordinate the visualization is being made in.
         """
+        for preprocess in self.preprocess_list:
+            preprocess(self)
+
         for obj, kwargs in self.plot_list:
             match obj:
                 case Point():

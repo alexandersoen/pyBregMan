@@ -164,8 +164,8 @@ class MultinomialManifold(
             n: Number of total draws.
             k: Number of categories.
         """
-        self.k = k
         self.n = n
+        self.k = k
 
         F_gen = MultinomialPrimalGenerator(n, k)
         G_gen = MultinomialDualGenerator(n, k)
