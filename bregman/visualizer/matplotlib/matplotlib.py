@@ -15,7 +15,10 @@ from bregman.base import Coords, DualCoords, Point
 from bregman.manifold.bisector import Bisector
 from bregman.manifold.geodesic import BregmanGeodesic, Geodesic
 from bregman.manifold.manifold import BregmanManifold
-from bregman.visualizer.visualizer import BregmanVisualizer, MultiBregmanVisualizer
+from bregman.visualizer.visualizer import (
+    BregmanVisualizer,
+    MultiBregmanVisualizer,
+)
 
 
 @dataclass
@@ -114,7 +117,6 @@ class MatplotlibVisualizer(BregmanVisualizer):
 
         for obj, _ in self.plot_list:
             if isinstance(obj, Point):
-
                 point = self.manifold.convert_coord(coords, obj)
                 xys = point.data[np.array([self.dim1, self.dim2])]
                 xys_list.append(xys)
@@ -166,7 +168,9 @@ class MatplotlibVisualizer(BregmanVisualizer):
             point.data[self.dim1], point.data[self.dim2], **point_vis_kwargs
         )
 
-    def plot_geodesic(self, coords: Coords, geodesic: Geodesic, **kwargs) -> None:
+    def plot_geodesic(
+        self, coords: Coords, geodesic: Geodesic, **kwargs
+    ) -> None:
         """Matplotlib plotting function for Geodesic objects.
 
         Args:
@@ -194,7 +198,9 @@ class MatplotlibVisualizer(BregmanVisualizer):
             **geo_vis_kwargs,
         )
 
-    def plot_bisector(self, coords: Coords, bisector: Bisector, **kwargs) -> None:
+    def plot_bisector(
+        self, coords: Coords, bisector: Bisector, **kwargs
+    ) -> None:
         """Matplotlib plotting function for Bisector objects.
 
         Args:
@@ -229,7 +235,9 @@ class MatplotlibVisualizer(BregmanVisualizer):
         )
         self.plot_geodesic(coords, plot_geo, **bis_vis_kwargs)
 
-    def animate_geodesic(self, coords: Coords, geodesic: Geodesic, **kwargs) -> None:
+    def animate_geodesic(
+        self, coords: Coords, geodesic: Geodesic, **kwargs
+    ) -> None:
         """Matplotlib animation function for Geodesic objects.
 
         Args:
@@ -249,8 +257,9 @@ class MatplotlibVisualizer(BregmanVisualizer):
         )
 
         def update(frame: int):
-
-            geodesic_pt.set_offsets(geodesic_data[frame, [self.dim1, self.dim2]])
+            geodesic_pt.set_offsets(
+                geodesic_data[frame, [self.dim1, self.dim2]]
+            )
             return geodesic_pt
 
         self.update_func_list.append(update)
@@ -269,6 +278,23 @@ class MatplotlibVisualizer(BregmanVisualizer):
         if len(self.ax.get_legend_handles_labels()[0]) > 0:
             self.ax.legend()
 
+    def _animate(self, coords: Coords) -> animation.FuncAnimation:
+        def update_all(frame: int):
+            res = []
+            for update in self.update_func_list:
+                res.append(update(frame))
+
+            return res
+
+        ani = animation.FuncAnimation(
+            fig=self.fig,
+            func=update_all,
+            frames=self.frames,
+            interval=self.intervals,
+        )
+
+        return ani
+
     def visualize(self, coords: Coords) -> None:
         """Visualize all registered plots and animations and then run
         matplotlib's show function.
@@ -276,25 +302,15 @@ class MatplotlibVisualizer(BregmanVisualizer):
         Args:
             coords: Coordinate the visualization is being made in.
         """
+        # Clear already visualized stuff on ax
+        self.ax.clear()
+
         # Plot
         self._plot(coords)
 
         # Animation if specified
         if self.update_func_list:
-
-            def update_all(frame: int):
-                res = []
-                for update in self.update_func_list:
-                    res.append(update(frame))
-
-                return res
-
-            ani = animation.FuncAnimation(
-                fig=self.fig,
-                func=update_all,
-                frames=self.frames,
-                interval=self.intervals,
-            )
+            _ = self._animate(coords)
 
         plt.show()
 
@@ -306,6 +322,9 @@ class MatplotlibVisualizer(BregmanVisualizer):
             coords: Coordinate the visualization is being made in.
             path: Save path for visualization.
         """
+        # Clear already visualized stuff on ax
+        self.ax.clear()
+
         # Plot
         self._plot(coords)
 
@@ -315,9 +334,29 @@ class MatplotlibVisualizer(BregmanVisualizer):
         plt.tight_layout()
         plt.savefig(path)
 
+    def save_gif(self, coords: Coords, path: Path | str) -> None:
+        """Visualize all registered plots and then save the animation for
+        the designated path.
+
+        Args:
+            coords: Coordinate the visualization is being made in.
+            path: Save path for animation.
+        """
+        # Clear already visualized stuff on ax
+        self.ax.clear()
+
+        # Plot
+        self._plot(coords)
+        ani = self._animate(coords)
+
+        if type(path) is str:
+            path = Path(path)
+
+        plt.tight_layout()
+        ani.save(path, dpi=300, writer=animation.PillowWriter(fps=25))
+
 
 class MultiMatplotlibVisualizer(MultiBregmanVisualizer[MatplotlibVisualizer]):
-
     def __init__(
         self,
         nrows: int,
@@ -327,7 +366,6 @@ class MultiMatplotlibVisualizer(MultiBregmanVisualizer[MatplotlibVisualizer]):
         intervals: int = 1,
         **kwargs,
     ):
-
         super().__init__(nrows, ncols)
 
         plt.style.use("bmh")

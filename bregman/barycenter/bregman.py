@@ -1,3 +1,4 @@
+from jax import Array
 import jax.numpy as jnp
 
 from bregman.barycenter.base import ApproxBarycenter, Barycenter
@@ -72,8 +73,7 @@ class BregmanBarycenter(DualBarycenter):
         nweights = [w / sum(weights) for w in weights]
 
         coords_data = [
-            self.manifold.convert_coord(self.coord.value, p).data
-            for p in points
+            self.manifold.convert_coord(self.coord.value, p).data for p in points
         ]
         coord_avg = jnp.sum(
             jnp.stack([w * t for w, t in zip(nweights, coords_data)]), axis=0
@@ -127,11 +127,9 @@ class SkewBurbeaRaoBarycenter(DualApproxBarycenter):
         nweights = [w / sum(weights) for w in weights]
 
         alpha_mid = sum(w * a for w, a in zip(nweights, alphas))
-        points_data = [
-            self.manifold.convert_coord(coord_type, p).data for p in points
-        ]
+        points_data = [self.manifold.convert_coord(coord_type, p).data for p in points]
 
-        def get_energy(c: jnp.ndarray) -> float:
+        def get_energy(c: Array) -> float:
             weighted_term = sum(
                 w * primal_gen(a * c + (1 - a) * t)
                 for w, a, t in zip(nweights, alphas, points_data)

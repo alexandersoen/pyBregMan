@@ -1,5 +1,4 @@
 import jax.numpy as jnp
-
 from jax import Array
 
 from bregman.base import LAMBDA_COORDS, Point
@@ -26,6 +25,6 @@ class FisherRaoMultinomialDistance(Dissimilarity[MultinomialManifold]):
 
         return (
             2
-            * jnp.sqrt(self.manifold.k)
+            * jnp.sqrt(self.manifold.n)
             * jnp.arccos(jnp.sum(jnp.sqrt(probs_1 * probs_2)))
         )

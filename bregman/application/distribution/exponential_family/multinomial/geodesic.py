@@ -50,9 +50,7 @@ class FisherRaoMultinomialGeodesic(Geodesic[MultinomialManifold]):
         Returns:
             Fisher-Rao geodesic on the Multinomial manifold at t.
         """
-        probs_src = self.manifold.convert_coord(
-            LAMBDA_COORDS, self.source
-        ).data
+        probs_src = self.manifold.convert_coord(LAMBDA_COORDS, self.source).data
 
         theta = t * self.src_dest_dist
 
