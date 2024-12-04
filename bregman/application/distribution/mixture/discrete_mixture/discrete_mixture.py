@@ -4,8 +4,12 @@ from typing import TYPE_CHECKING
 
 from jax import Array
 
+from bregman.application.distribution.mixture.discrete_mixture.geodesic import (
+    FisherRaoDiscreteMixtureManifoldGeodesic,
+)
 from bregman.application.distribution.mixture.mixture import MixtureManifold
 from bregman.base import ETA_COORDS, THETA_COORDS, Point
+from bregman.manifold.geodesic import Geodesic
 from bregman.object.distribution import Distribution
 
 if TYPE_CHECKING:
@@ -83,3 +87,6 @@ class DiscreteMixtureManifold(MixtureManifold[DeltaDistribution]):
         """
         eta_point = self.convert_coord(ETA_COORDS, point)
         return Point(THETA_COORDS, eta_point.data)
+
+    def fisher_rao_geodesic(self, source: Point, dest: Point) -> Geodesic:
+        return FisherRaoDiscreteMixtureManifoldGeodesic(self, source, dest)

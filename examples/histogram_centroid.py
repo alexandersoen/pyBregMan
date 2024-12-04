@@ -8,9 +8,8 @@ except ImportError:
     print("This example requires `requests` library to be installed.")
     exit()
 
-import matplotlib.pyplot as plt
 import jax.numpy as jnp
-
+import matplotlib.pyplot as plt
 from jax import Array
 from PIL import Image
 
@@ -46,11 +45,13 @@ image_url_2 = "https://raw.githubusercontent.com/alexandersoen/pyBregMan/main/im
 hist_1 = image_gray_hist(image_url_1)
 hist_2 = image_gray_hist(image_url_2)
 
-from bregman.application.distribution.exponential_family.categorical import \
-    CategoricalManifold
+from bregman.application.distribution.exponential_family.categorical import (
+    CategoricalManifold,
+)
 from bregman.base import LAMBDA_COORDS, DualCoords, Point
 
 cat_manifold = CategoricalManifold(k=256)
+
 
 values = jnp.arange(cat_manifold.k)
 
@@ -63,37 +64,59 @@ cute_mix_1 = cat_manifold.point_to_mixture_point(cute_cat_1)
 cute_mix_2 = cat_manifold.point_to_mixture_point(cute_cat_2)
 
 
-from bregman.barycenter.bregman import SkewBurbeaRaoBarycenter
+from bregman.barycenter.bregman import (
+    GaussBregmanCentroid,
+    JeffreysFisherRaoCentroid,
+    SkewBurbeaRaoBarycenter,
+)
 
 # Define barycenter objects
 js_centroid_obj = SkewBurbeaRaoBarycenter(
     mix_manifold, dcoords=DualCoords.THETA
 )
-jef_centroid_obj = SkewBurbeaRaoBarycenter(
-    mix_manifold, dcoords=DualCoords.ETA
+jef_centroid_obj = SkewBurbeaRaoBarycenter(mix_manifold, dcoords=DualCoords.ETA)
+gb_centroid_obj = GaussBregmanCentroid(mix_manifold, dcoords=DualCoords.THETA)
+jfr_centroid_obj = JeffreysFisherRaoCentroid(
+    mix_manifold, dcoords=DualCoords.THETA
 )
 
 # Centroids can be calculated
 js_centroid = js_centroid_obj([cute_mix_1, cute_mix_2])
 jef_centroid = jef_centroid_obj([cute_mix_1, cute_mix_2])
+gb_centroid = gb_centroid_obj([cute_mix_1, cute_mix_2])
+jfr_centroid = jfr_centroid_obj([cute_mix_1, cute_mix_2])
 
 # Convert from theta-/eta-parameterization back to histograms (lambda)
 js_cat = mix_manifold.point_to_categorical_point(js_centroid)
 jef_cat = mix_manifold.point_to_categorical_point(jef_centroid)
+gb_cat = mix_manifold.point_to_categorical_point(gb_centroid)
+jfr_cat = mix_manifold.point_to_categorical_point(jfr_centroid)
 
 js_hist = cat_manifold.convert_coord(LAMBDA_COORDS, js_cat).data
 jef_hist = cat_manifold.convert_coord(LAMBDA_COORDS, jef_cat).data
+gb_hist = cat_manifold.convert_coord(LAMBDA_COORDS, gb_cat).data
+jfr_hist = cat_manifold.convert_coord(LAMBDA_COORDS, jfr_cat).data
+
+arithmetic_hist = 0.5 * (hist_1 + hist_2)
+geometric_hist = jnp.sqrt(hist_1 + hist_2)
+geometric_hist = geometric_hist / geometric_hist.sum()
 
 
 # Plot intensity histograms and centroids
 with plt.style.context("bmh"):
-    plt.plot(values, hist_1, c="red", label="Image 1 Pixels")
-    plt.plot(values, hist_2, c="blue", label="Image 2 Pixels")
-    plt.plot(values, js_hist, c="black", label="Jensen-Shannon Centroid")
-    plt.plot(values, jef_hist, c="grey", label="Jeffreys Centroid")
+    plt.plot(values, hist_1, c="black", label="Image 1 Pixels")
+    plt.plot(values, hist_2, c="black", label="Image 2 Pixels")
+    plt.plot(values, arithmetic_hist, c="red", label="Arithmetic Mean")
+    plt.plot(values, geometric_hist, c="blue", label="Geometric Mean")
+    plt.plot(values, js_hist, c="orange", label="Jensen-Shannon Centroid")
+    plt.plot(values, jef_hist, c="yellow", label="Jeffreys Centroid")
+    plt.plot(values, gb_hist, c="green", label="Gauss-Bregman Centroid")
+    # plt.plot(values, jfr_hist, c="purple", label="Jeffreys-Fisher-Rao Centroid")
 
     plt.xlabel("Pixel Intensity")
     plt.ylabel("Density")
 
     plt.legend()
+    plt.tight_layout()
+    plt.savefig("results/many_centroids.png")
     plt.show()

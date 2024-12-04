@@ -7,8 +7,12 @@ from bregman.application.distribution.exponential_family.exp_family import (
     ExponentialFamilyDistribution,
     ExponentialFamilyManifold,
 )
+from bregman.application.distribution.exponential_family.multinomial.geodesic import (
+    FisherRaoMultinomialGeodesic,
+)
 from bregman.base import LAMBDA_COORDS, THETA_COORDS, DisplayPoint, Point
 from bregman.manifold.generator import AutoDiffGenerator
+from bregman.manifold.geodesic import Geodesic
 
 
 class MultinomialPoint(DisplayPoint):
@@ -110,7 +114,9 @@ class MultinomialPrimalGenerator(AutoDiffGenerator):
             Multinomial manifold primal Bregman generator value evaluated at x.
         """
         agg = jnp.exp(x).sum()
-        return self.n * jnp.log(1 + agg) - jnp.log(float(math.factorial(self.n)))
+        return self.n * jnp.log(1 + agg) - jnp.log(
+            float(math.factorial(self.n))
+        )
 
 
 class MultinomialDualGenerator(AutoDiffGenerator):
@@ -228,3 +234,6 @@ class MultinomialManifold(
         lamb = lamb.at[:-1].set(eta / self.n)
         lamb = lamb.at[-1].set((self.n - eta.sum()) / self.n)
         return lamb
+
+    def fisher_rao_geodesic(self, source: Point, dest: Point) -> Geodesic:
+        return FisherRaoMultinomialGeodesic(self, source, dest)

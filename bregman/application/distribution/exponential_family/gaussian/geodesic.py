@@ -1,10 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import jax.numpy as jnp
 from jax import Array
 from scipy.linalg import expm, fractional_matrix_power
 
-from bregman.application.distribution.exponential_family.gaussian.gaussian import (
-    GaussianManifold,
-)
+if TYPE_CHECKING:
+    from bregman.application.distribution.exponential_family.gaussian.gaussian import (
+        GaussianManifold,
+    )
 from bregman.base import LAMBDA_COORDS, Point
 from bregman.manifold.geodesic import Geodesic
 
@@ -156,7 +161,6 @@ class FisherRaoKobayashiGeodesic(Geodesic[GaussianManifold]):
         self._Gmix = self._G0_neg_sqrt @ self._G1 @ self._G0_neg_sqrt
 
     def _get_Gi(self, mu: Array, Sigma: Array) -> Array:
-
         Di = jnp.block(
             [
                 [

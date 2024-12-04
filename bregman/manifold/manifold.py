@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from abc import ABC
+from typing import TYPE_CHECKING
 
 from jax import Array
 
@@ -6,6 +9,9 @@ from bregman.base import ETA_COORDS, THETA_COORDS, Coords, DualCoords, Point
 from bregman.manifold.connection import FlatConnection
 from bregman.manifold.coordinate import Atlas
 from bregman.manifold.generator import Generator
+
+if TYPE_CHECKING:
+    from bregman.manifold.geodesic import Geodesic
 
 
 class EtaGeneratorNotAssigned(Exception):
@@ -59,8 +65,12 @@ class BregmanManifold(ABC):
         self.atlas.add_coords(THETA_COORDS)
         if eta_generator is not None:
             self.atlas.add_coords(ETA_COORDS)
-            self.atlas.add_transition(THETA_COORDS, ETA_COORDS, self._theta_to_eta)
-            self.atlas.add_transition(ETA_COORDS, THETA_COORDS, self._eta_to_theta)
+            self.atlas.add_transition(
+                THETA_COORDS, ETA_COORDS, self._theta_to_eta
+            )
+            self.atlas.add_transition(
+                ETA_COORDS, THETA_COORDS, self._eta_to_theta
+            )
 
     def convert_coord(self, target_coords: Coords, point: Point) -> Point:
         r"""Converts coordinates of Point objects.
@@ -88,7 +98,9 @@ class BregmanManifold(ABC):
             Generator corresponding to specified dual coordinates.
         """
         generator = (
-            self.theta_generator if dcoords == DualCoords.THETA else self.eta_generator
+            self.theta_generator
+            if dcoords == DualCoords.THETA
+            else self.eta_generator
         )
 
         if generator is None:
@@ -147,3 +159,8 @@ class BregmanManifold(ABC):
             raise EtaGeneratorNotAssigned()
 
         return self.eta_generator.grad(eta)
+
+    def fisher_rao_geodesic(
+        self, source: Point, dest: Point
+    ) -> Geodesic[BregmanManifold]:
+        raise NotImplementedError

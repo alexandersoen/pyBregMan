@@ -5,8 +5,12 @@ from bregman.application.distribution.exponential_family.exp_family import (
     ExponentialFamilyDistribution,
     ExponentialFamilyManifold,
 )
+from bregman.application.distribution.exponential_family.gaussian.geodesic import (
+    FisherRaoKobayashiGeodesic,
+)
 from bregman.base import THETA_COORDS, DisplayPoint, Point
 from bregman.manifold.generator import AutoDiffGenerator
+from bregman.manifold.geodesic import Geodesic
 
 
 class GaussianPoint(DisplayPoint):
@@ -37,7 +41,9 @@ class GaussianPoint(DisplayPoint):
         Returns:
             Covariance of Gaussian distribution corresponding to the point.
         """
-        return self.data[self.dimension :].reshape(self.dimension, self.dimension)
+        return self.data[self.dimension :].reshape(
+            self.dimension, self.dimension
+        )
 
     def display(self) -> str:
         """Generated pretty printed string on display.
@@ -177,7 +183,6 @@ class GaussianPrimalGenerator(AutoDiffGenerator):
         """
 
         if self.dimension > 1:
-
             theta_mu, theta_sigma = _flatten_to_mu_Sigma(self.dimension, x)
 
             return 0.5 * (
@@ -186,7 +191,6 @@ class GaussianPrimalGenerator(AutoDiffGenerator):
                 + self.dimension * jnp.log(jnp.pi)
             )
         else:
-
             theta_mu, theta_sigma = x
 
             return (
@@ -213,7 +217,8 @@ class GaussianDualGenerator(AutoDiffGenerator):
             eta_mu, eta_sigma = _flatten_to_mu_Sigma(self.dimension, x)
 
             return (
-                -0.5 * jnp.log(1 + eta_mu.T @ jnp.linalg.inv(eta_sigma) @ eta_mu)
+                -0.5
+                * jnp.log(1 + eta_mu.T @ jnp.linalg.inv(eta_sigma) @ eta_mu)
                 - 0.5 * jnp.log(jnp.linalg.det(-eta_sigma))
                 - 0.5 * self.dimension * (1 + jnp.log(2 * jnp.pi))
             )
@@ -223,7 +228,9 @@ class GaussianDualGenerator(AutoDiffGenerator):
             return -0.5 * jnp.log(jnp.abs(eta_mu * eta_mu - eta_sigma))
 
 
-class GaussianManifold(ExponentialFamilyManifold[GaussianPoint, GaussianDistribution]):
+class GaussianManifold(
+    ExponentialFamilyManifold[GaussianPoint, GaussianDistribution]
+):
     """Gaussian exponential family manifold.
 
     Attributes:
@@ -313,7 +320,9 @@ class GaussianManifold(ExponentialFamilyManifold[GaussianPoint, GaussianDistribu
 
     def _theta_to_lambda(self, theta: Array) -> Array:
         if self.input_dimension > 1:
-            theta_mu, theta_Sigma = _flatten_to_mu_Sigma(self.input_dimension, theta)
+            theta_mu, theta_Sigma = _flatten_to_mu_Sigma(
+                self.input_dimension, theta
+            )
             inv_theta_Sigma = jnp.linalg.inv(theta_Sigma)
 
             mu = 0.5 * inv_theta_Sigma @ theta_mu
@@ -323,7 +332,9 @@ class GaussianManifold(ExponentialFamilyManifold[GaussianPoint, GaussianDistribu
         else:
             theta_mu, theta_sigma = theta
 
-            return jnp.array([-0.5 * theta_mu / theta_sigma, -0.5 / theta_sigma])
+            return jnp.array(
+                [-0.5 * theta_mu / theta_sigma, -0.5 / theta_sigma]
+            )
 
     def _eta_to_lambda(self, eta: Array) -> Array:
         if self.input_dimension > 1:
@@ -338,8 +349,13 @@ class GaussianManifold(ExponentialFamilyManifold[GaussianPoint, GaussianDistribu
 
             return jnp.array([eta_mu, eta_sigma - eta_mu * eta_mu])
 
+    def fisher_rao_geodesic(self, source: Point, dest: Point) -> Geodesic:
+        return FisherRaoKobayashiGeodesic(self, source, dest)
 
-def _flatten_to_mu_Sigma(input_dimension: int, vec: Array) -> tuple[Array, Array]:
+
+def _flatten_to_mu_Sigma(
+    input_dimension: int, vec: Array
+) -> tuple[Array, Array]:
     mu = vec[:input_dimension]
     sigma = vec[input_dimension:].reshape(input_dimension, input_dimension)
 

@@ -1,13 +1,17 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import jax.numpy as jnp
 
 from bregman.base import LAMBDA_COORDS, Point
 from bregman.manifold.geodesic import Geodesic
 
-from .dissimilarity import FisherRaoMultinomialDistance
-from .multinomial import MultinomialManifold
+if TYPE_CHECKING:
+    from .multinomial import MultinomialManifold
 
 
-class FisherRaoMultinomialGeodesic(Geodesic[MultinomialManifold]):
+class FisherRaoMultinomialGeodesic(Geodesic["MultinomialManifold"]):
     """Fisher-Rao geodesic on the Multinomial manifold.
 
     Attributes:
@@ -26,6 +30,8 @@ class FisherRaoMultinomialGeodesic(Geodesic[MultinomialManifold]):
             dest: Destination point on the manifold which the geodesic ends.
         """
         super().__init__(manifold, source, dest)
+
+        from .dissimilarity import FisherRaoMultinomialDistance
 
         dist = FisherRaoMultinomialDistance(self.manifold)
 
