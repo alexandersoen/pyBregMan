@@ -14,7 +14,7 @@ from bregman.base import LAMBDA_COORDS, Point
 from bregman.manifold.geodesic import Geodesic
 
 
-class EriksenIVPGeodesic(Geodesic[GaussianManifold]):
+class EriksenIVPGeodesic(Geodesic["GaussianManifold"]):
     """Eriksen Initial value problem (IVP) geodesic from the identity Gaussian
     distribution (Isotropic centered Gaussian). Doesn't provide a geodesic
     between source and destination points. Instead the destination point acts
@@ -28,7 +28,7 @@ class EriksenIVPGeodesic(Geodesic[GaussianManifold]):
 
     def __init__(
         self,
-        manifold: GaussianManifold,
+        manifold: "GaussianManifold",
         dest: Point,
     ) -> None:
         """Initialize Eriksen IVP geodesic.
@@ -83,7 +83,7 @@ class EriksenIVPGeodesic(Geodesic[GaussianManifold]):
         return Point(LAMBDA_COORDS, jnp.concatenate([mu, Sigma.flatten()]))
 
 
-class FisherRaoKobayashiGeodesic(Geodesic[GaussianManifold]):
+class FisherRaoKobayashiGeodesic(Geodesic["GaussianManifold"]):
     """Fisher-Rao Geodesic on the Gaussian manifold using Kobayashi calculation.
 
     Attributes:
@@ -96,7 +96,7 @@ class FisherRaoKobayashiGeodesic(Geodesic[GaussianManifold]):
 
     def __init__(
         self,
-        manifold: GaussianManifold,
+        manifold: "GaussianManifold",
         source: Point,
         dest: Point,
     ) -> None:

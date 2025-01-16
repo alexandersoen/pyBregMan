@@ -1,19 +1,25 @@
 # Ad-hoc implementation of Bregman soft clustering.
 
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 
-from bregman.application.distribution.exponential_family.gaussian import \
-    GaussianManifold
-from bregman.application.distribution.mixture.ef_mixture import \
-    EFMixtureManifold
+from bregman.application.distribution.exponential_family.gaussian import (
+    GaussianManifold,
+)
+from bregman.application.distribution.mixture.ef_mixture import (
+    EFMixtureManifold,
+)
 from bregman.barycenter.bregman import BregmanBarycenter
-from bregman.base import (ETA_COORDS, LAMBDA_COORDS, THETA_COORDS, DualCoords,
-                          Point)
+from bregman.base import (
+    ETA_COORDS,
+    LAMBDA_COORDS,
+    DualCoords,
+    Point,
+)
 from bregman.dissimilarity.bregman import BregmanDivergence
 
 if __name__ == "__main__":
-
     DISPLAY_TYPE = LAMBDA_COORDS
     # DISPLAY_TYPE = ETA_COORDS
     # DISPLAY_TYPE = THETA_COORDS
@@ -31,13 +37,15 @@ if __name__ == "__main__":
     def make_random_point():
         return Point(
             LAMBDA_COORDS,
-            np.concatenate(
-                [np.random.randn(DIM), np.eye(DIM).flatten()]
-            ).flatten(),
+            jnp.array(
+                jnp.concatenate(
+                    [np.random.randn(DIM), np.eye(DIM).flatten()]
+                ).flatten()
+            ),
         )
 
     init_dist_points = [make_random_point(), make_random_point()]
-    init_mixing_point = Point(LAMBDA_COORDS, np.array([0.5, 0.5]))
+    init_mixing_point = Point(LAMBDA_COORDS, jnp.array([0.5, 0.5]))
 
     gaussian_manifold = GaussianManifold(DIM)
     ef_mixture_manifold = EFMixtureManifold(
@@ -82,14 +90,14 @@ if __name__ == "__main__":
     # Shift data point into expected parameters
     def embed(x):
         p = Point(
-            LAMBDA_COORDS, np.concatenate([x, np.eye(DIM).flatten()]).flatten()
+            LAMBDA_COORDS,
+            jnp.concatenate([x, np.eye(DIM).flatten()]).flatten(),
         )
         eta_p = ef_mixture_manifold.ef_manifold.convert_coord(ETA_COORDS, p)
         return eta_p
 
     embedded_data = [embed(x) for x in data]
     while t < max_T and abs(cur_ll - old_ll) > thresh_ll:
-
         # Step E
         div_weights = np.zeros(
             (data.shape[0], ef_mixture_manifold.dimension + 1)
@@ -99,7 +107,6 @@ if __name__ == "__main__":
             LAMBDA_COORDS, cur_mixing_point
         ).data
         for i, (w, d) in enumerate(zip(cur_weights, cur_dist_points)):
-
             div_values = np.stack(
                 [np.asarray(eta_gaussian_div(x, d)) for x in embedded_data]
             )

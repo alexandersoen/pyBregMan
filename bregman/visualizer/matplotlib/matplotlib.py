@@ -2,7 +2,7 @@ import copy
 import itertools
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
@@ -369,13 +369,14 @@ class MultiMatplotlibVisualizer(MultiBregmanVisualizer[MatplotlibVisualizer]):
         super().__init__(nrows, ncols)
 
         plt.style.use("bmh")
-        self.fig, axes = plt.subplots(nrows=nrows, ncols=ncols, **kwargs)
+        fig, axes = plt.subplots(nrows=nrows, ncols=ncols, **kwargs)
+        self.fig = cast(plt.Figure, fig)
 
-        self.axes = [[None] * ncols] * nrows
+        self.axes: list[list[Axes]] = []
         for i in range(nrows):
+            self.axes.append([])
             for j in range(ncols):
-                self.axes[i][j] = axes.flatten()[j * nrows + i]
-        self.axes: list[list[Axes]]
+                self.axes[i].append(axes.flatten()[j * nrows + i])
 
         self.resolution = resolution
         self.frames = frames
@@ -475,3 +476,25 @@ class MultiMatplotlibVisualizer(MultiBregmanVisualizer[MatplotlibVisualizer]):
             )
 
         plt.show()
+
+    def save(self, path: Path | str) -> None:
+        """Visualize all registered plots and then save the visualization for
+        the designated path.
+
+        Args:
+            path: Save path for visualization.
+        """
+        for maybe_vis in itertools.chain.from_iterable(self.visualizations):
+            if maybe_vis is None:
+                continue
+
+            coord, vis, name = maybe_vis
+
+            vis._plot(coord)
+            vis.ax.set_title(name)
+
+        if type(path) is str:
+            path = Path(path)
+
+        plt.tight_layout()
+        plt.savefig(path)

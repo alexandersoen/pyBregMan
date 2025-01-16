@@ -13,9 +13,9 @@ from bregman.base import (
     ETA_COORDS,
     LAMBDA_COORDS,
     THETA_COORDS,
+    Coords,
     DualCoords,
     Point,
-    Coords,
 )
 from bregman.manifold.geodesic import BregmanGeodesic
 from bregman.visualizer.matplotlib import MultiMatplotlibVisualizer
@@ -26,7 +26,6 @@ def coord_subtitle(coord: Coords) -> str:
 
 
 if __name__ == "__main__":
-
     DISPLAY_TYPE = LAMBDA_COORDS
     VISUALIZE_INDEX = (2, 3)
 
@@ -40,15 +39,23 @@ if __name__ == "__main__":
     coord1 = Point(LAMBDA_COORDS, jnp.array([0, 0, 1, 0.5, 0.5, 2]))
     coord2 = Point(LAMBDA_COORDS, jnp.array([0, 0, 1, 0, 0, 0.5]))
 
-    primal_geo = BregmanGeodesic(manifold, coord1, coord2, dcoords=DualCoords.THETA)
-    dual_geo = BregmanGeodesic(manifold, coord1, coord2, dcoords=DualCoords.ETA)
+    primal_geo = BregmanGeodesic(
+        manifold, coord1, coord2, dcoords=DualCoords.THETA
+    )
+    dual_geo = BregmanGeodesic(
+        manifold, coord1, coord2, dcoords=DualCoords.ETA
+    )
     kobayashi = FisherRaoKobayashiGeodesic(manifold, coord1, coord2)
 
     # manifold, VISUALIZE_INDEX, resolution=resolution, frames=num_frames
 
     # Define visualizer
     multivisualizer = MultiMatplotlibVisualizer(
-        nrows=1, ncols=3, resolution=resolution, frames=num_frames
+        nrows=1,
+        ncols=3,
+        resolution=resolution,
+        frames=num_frames,
+        figsize=(7 * 3, 7),
     )
     visualizer = multivisualizer.new_visualizer(
         0,
@@ -93,4 +100,5 @@ if __name__ == "__main__":
         0, 0, 0, 2, coords[2], name=coord_subtitle(coords[2])
     )
 
-    multivisualizer.visualize_all()
+    # multivisualizer.visualize_all()
+    multivisualizer.save("results/ahm.png")
