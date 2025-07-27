@@ -1,10 +1,15 @@
 import numpy as np
 from scipy.linalg import expm, fractional_matrix_power
 
-from bregman.application.distribution.exponential_family.gaussian.gaussian import \
-    GaussianManifold
+from bregman.application.distribution.exponential_family.gaussian.gaussian import (
+    GaussianManifold,
+)
 from bregman.base import LAMBDA_COORDS, Point
 from bregman.manifold.geodesic import Geodesic
+
+
+def real_fractional_matrix_power(matrix: np.ndarray, t: float) -> np.ndarray:
+    return np.real(fractional_matrix_power(matrix, t))
 
 
 class EriksenIVPGeodesic(Geodesic[GaussianManifold]):
@@ -132,7 +137,7 @@ class FisherRaoKobayashiGeodesic(Geodesic[GaussianManifold]):
         """
         Gt = (
             self._G0_pos_sqrt
-            @ fractional_matrix_power(self._Gmix, t)
+            @ real_fractional_matrix_power(self._Gmix, t)
             @ self._G0_pos_sqrt
         )
 
@@ -148,8 +153,8 @@ class FisherRaoKobayashiGeodesic(Geodesic[GaussianManifold]):
         self._G0 = self._get_Gi(self.source_mu, self.source_Sigma)
         self._G1 = self._get_Gi(self.dest_mu, self.dest_Sigma)
 
-        self._G0_pos_sqrt = fractional_matrix_power(self._G0, 0.5)
-        self._G0_neg_sqrt = fractional_matrix_power(self._G0, -0.5)
+        self._G0_pos_sqrt = real_fractional_matrix_power(self._G0, 0.5)
+        self._G0_neg_sqrt = real_fractional_matrix_power(self._G0, -0.5)
 
         self._Gmix = self._G0_neg_sqrt @ self._G1 @ self._G0_neg_sqrt
 

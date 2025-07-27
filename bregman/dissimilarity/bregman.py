@@ -92,12 +92,8 @@ class JeffreysDivergence(Dissimilarity[BregmanManifold]):
         """
         super().__init__(manifold)
 
-        self.theta_divergence = BregmanDivergence(
-            manifold, dcoords=DualCoords.THETA
-        )
-        self.eta_divergence = BregmanDivergence(
-            manifold, dcoords=DualCoords.ETA
-        )
+        self.theta_divergence = BregmanDivergence(manifold, dcoords=DualCoords.THETA)
+        self.eta_divergence = BregmanDivergence(manifold, dcoords=DualCoords.ETA)
 
     def dissimilarity(self, point_1: Point, point_2: Point) -> np.ndarray:
         r"""Jeffreys divergence between two points.
@@ -181,15 +177,11 @@ class SkewJensenBregmanDivergence(DualDissimilarity):
         ]
         alpha_mid = Point(
             self.coord.value,
-            (1 - self.alpha_mid) * coord_1.data
-            + self.alpha_mid * coord_2.data,
+            (1 - self.alpha_mid) * coord_1.data + self.alpha_mid * coord_2.data,
         )
 
         breg_terms = np.stack(
-            [
-                w * breg(mix, alpha_mid)
-                for w, mix in zip(self.weight_skews, alpha_mixes)
-            ]
+            [w * breg(mix, alpha_mid) for w, mix in zip(self.weight_skews, alpha_mixes)]
         )
 
         return np.sum(breg_terms, axis=0)

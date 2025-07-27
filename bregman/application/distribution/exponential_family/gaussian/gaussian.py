@@ -2,7 +2,9 @@ import autograd.numpy as anp
 import numpy as np
 
 from bregman.application.distribution.exponential_family.exp_family import (
-    ExponentialFamilyDistribution, ExponentialFamilyManifold)
+    ExponentialFamilyDistribution,
+    ExponentialFamilyManifold,
+)
 from bregman.base import THETA_COORDS, DisplayPoint, Point, Shape
 from bregman.manifold.generator import AutoDiffGenerator
 
@@ -35,9 +37,7 @@ class GaussianPoint(DisplayPoint):
         Returns:
             Covariance of Gaussian distribution corresponding to the point.
         """
-        return self.data[self.dimension :].reshape(
-            self.dimension, self.dimension
-        )
+        return self.data[self.dimension :].reshape(self.dimension, self.dimension)
 
     def display(self) -> str:
         """Generated pretty printed string on display.
@@ -211,8 +211,7 @@ class GaussianDualGenerator(AutoDiffGenerator):
             eta_mu, eta_sigma = _flatten_to_mu_Sigma(self.dimension, x)
 
             return (
-                -0.5
-                * anp.log(1 + eta_mu.T @ anp.linalg.inv(eta_sigma) @ eta_mu)
+                -0.5 * anp.log(1 + eta_mu.T @ anp.linalg.inv(eta_sigma) @ eta_mu)
                 - 0.5 * anp.log(anp.linalg.det(-eta_sigma))
                 - 0.5 * self.dimension * (1 + anp.log(2 * np.pi))
             )
@@ -222,9 +221,7 @@ class GaussianDualGenerator(AutoDiffGenerator):
             return -0.5 * anp.log(anp.abs(eta_mu * eta_mu - eta_sigma))
 
 
-class GaussianManifold(
-    ExponentialFamilyManifold[GaussianPoint, GaussianDistribution]
-):
+class GaussianManifold(ExponentialFamilyManifold[GaussianPoint, GaussianDistribution]):
     """Gaussian exponential family manifold.
 
     Attributes:
@@ -314,9 +311,7 @@ class GaussianManifold(
 
     def _theta_to_lambda(self, theta: np.ndarray) -> np.ndarray:
         if self.input_dimension > 1:
-            theta_mu, theta_Sigma = _flatten_to_mu_Sigma(
-                self.input_dimension, theta
-            )
+            theta_mu, theta_Sigma = _flatten_to_mu_Sigma(self.input_dimension, theta)
             inv_theta_Sigma = np.linalg.inv(theta_Sigma)
 
             mu = 0.5 * inv_theta_Sigma @ theta_mu
@@ -326,9 +321,7 @@ class GaussianManifold(
         else:
             theta_mu, theta_sigma = theta
 
-            return np.array(
-                [-0.5 * theta_mu / theta_sigma, -0.5 / theta_sigma]
-            )
+            return np.array([-0.5 * theta_mu / theta_sigma, -0.5 / theta_sigma])
 
     def _eta_to_lambda(self, eta: np.ndarray) -> np.ndarray:
         if self.input_dimension > 1:
